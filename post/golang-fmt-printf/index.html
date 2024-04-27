@@ -1,0 +1,314 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>GoLang 之 fmt.Printf 格式参数占位符 | 吕滔博客</title>
+<meta name="description" content="">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://www.lvtao.net/favicon.ico?v=1714210602511">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://www.lvtao.net/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://www.lvtao.net">
+        <img class="avatar" src="https://www.lvtao.net/images/avatar.png?v=1714210602511" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://www.lvtao.net">
+        <h1 class="site-title">吕滔博客</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+        
+          <a href="https://medoo.lvtao.net" class="menu purple-link">
+            MeDoo中文手册
+          </a>
+        
+      
+        
+          <a href="https://tool.lvtao.net" class="menu purple-link">
+            工具箱
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">GoLang 之 fmt.Printf 格式参数占位符</h2>
+          <div class="post-info post-detail-info">
+            
+              <span>
+                <i class="icon-pricetags-outline"></i>
+                
+                  <a href="https://www.lvtao.net/tag/go/">
+                    go
+                    
+                  </a>
+                
+              </span>
+            
+             <div style="margin-top:5px;"><a href="https://app.cloudcone.com/?ref=9519" target="_blank">海外无需备案主机推荐，支持25端口邮件发送，无端口限制，支持支付宝、Paypal、信用卡等支付...</a></div>
+          </div>
+          <div class="post-content" v-pre>
+            <p>关于print、printf、println的区别不做介绍<br>
+只关注 printf的参数格式</p>
+<h3 id="整数格式化符d">整数格式化符<code>%d</code></h3>
+<pre><code class="language-go">package main
+
+import (
+	&quot;fmt&quot;
+)
+
+func main() {
+	fmt.Printf(&quot;1,2,4,5,6,7,8,9,10\n&quot;)
+	fmt.Printf(&quot;%9d\n&quot;, 18)
+	fmt.Printf(&quot;%09d\n&quot;, 18)
+	fmt.Printf(&quot;%-9d\n&quot;, 18)
+	fmt.Printf(&quot;%-09d&quot;, 18)
+}
+</code></pre>
+<figure data-type="image" tabindex="1"><img src="https://www.lvtao.net/post-images/1668742821226.png" alt="" loading="lazy"></figure>
+<ul>
+<li>第一行1到10做为参照....</li>
+<li>第 2 行中格式化符<code>%9d</code>表示要保证输出的整数有 9 位，如果不到 9 位则在左侧补上空格字符，直至一共有 9 个字符为止，左侧的确是空了 7 个字符的位置。</li>
+<li>如果想要左对齐，可以在宽度标志符前增加一个减号字符 &quot;-&quot;。</li>
+<li>左侧可以用数字 &quot;0&quot; 来补齐空位，只需要在宽度标识符前加一个数字 &quot;0&quot; 即可。</li>
+<li>右侧补数字 &quot;0&quot;，是无效的。因为从数学意义上来说，在整数右侧补0会使数值发生变化。</li>
+</ul>
+<h3 id="十六进制格式化符x和x">十六进制格式化符<code>%x</code>和<code>%X</code></h3>
+<p>如果需要用十六进制表示整数，可以使用<code>%x</code>或<code>%X</code>格式化符。这两者都是将整数按十六进制形式输出，唯一区别的是<code>%x</code>输出的是<code>小写</code>字符而<code>%X</code>输出的是<code>大写</code>字符。<code>%x</code> 和 <code>%X</code> 也支持宽度标识符和左右对齐</p>
+<pre><code class="language-go">func main() {
+	fmt.Printf(&quot;%9x\n&quot;, 65535)
+	fmt.Printf(&quot;%09x\n&quot;, 65535)
+	fmt.Printf(&quot;%-9x\n&quot;, 65535)
+	fmt.Printf(&quot;%-09x&quot;, 65535)
+}
+</code></pre>
+<figure data-type="image" tabindex="2"><img src="https://www.lvtao.net/post-images/1668743075335.png" alt="" loading="lazy"></figure>
+<h3 id="二进制格式化符b">二进制格式化符<code>%b</code></h3>
+<p>类似于十六进制格式化符<code>%x</code>和<code>%X</code>，<code>%b</code>可以以二进制的形式将整数表达出来</p>
+<pre><code class="language-go">func main() {
+	fmt.Printf(&quot;%9b\n&quot;, 10)
+	fmt.Printf(&quot;%09b\n&quot;, 10)
+	fmt.Printf(&quot;%-9b\n&quot;, 10)
+	fmt.Printf(&quot;%-0b&quot;, 10)
+}
+</code></pre>
+<figure data-type="image" tabindex="3"><img src="https://www.lvtao.net/post-images/1668743711436.png" alt="" loading="lazy"></figure>
+<h3 id="浮点数格式化符f">浮点数格式化符<code>%f</code></h3>
+<pre><code class="language-go">func main() {
+	a := 1.23456789
+	fmt.Printf(&quot;%f\n&quot;, a)     // 显示浮点数，不做精细控制
+	fmt.Printf(&quot;%9.2f\n&quot;, a)  // %9.2f，要求整体输出9个字符，其中，小数点后输出2个字符
+	fmt.Printf(&quot;%9.6f\n&quot;, a)  // %9.6f，要求整体输出9个字符，其中，小数点后输出6个字符
+	fmt.Printf(&quot;%09.2f\n&quot;, a) // %09.2f，要求整体输出9个字符，不足补0，其中，小数点后输出2个字符，超过的部分四舍五入处理后输出
+	b := 8.888888888
+	fmt.Printf(&quot;%09.2f\n&quot;, b) // %09.2f，要求整体输出9个字符，不足补0，其中，小数点后输出2个字符，超过的部分四舍五入处理后输出
+	fmt.Printf(&quot;%-9.2f\n&quot;, a) // %-9.2f，要求整体输出9个字符，左对齐，其中，小数点后输出2个字符
+	fmt.Printf(&quot;%9.9f\n&quot;, a)  // %9.9f，要求整体输出9个字符，其中，小数点后输出9个字符
+	fmt.Printf(&quot;%9.09f&quot;, a)   // %9.9f，要求整体输出9个字符，其中，小数点后输出9个字符
+}
+</code></pre>
+<figure data-type="image" tabindex="4"><img src="https://www.lvtao.net/post-images/1668743857779.png" alt="" loading="lazy"></figure>
+<ul>
+<li>与整数的宽度标识符是一个整数数字不同，浮点数的宽度标识符一般是一个小数，小数点前的部分表示要求输出的整体宽度是几个字符，小数点后的部分表示要求输出的小数点后面的位数。</li>
+<li>整体字符位数可以省略，比如格式化符 &quot;0.2f&quot;，可以输出小数点后 2 位，总数根据需要而定的浮点数</li>
+</ul>
+<h3 id="其他浮点数格式化符">其他浮点数格式化符</h3>
+<p>还有一些并不常用的浮点数格式化符，以及一些用于表示复数的格式化符。</p>
+<ul>
+<li><code>%b</code>也可以用于表示任意数字（包括小数）的二进制形式，实际上表示的是该数字对应 2 的多少次方乘以一个数字，类似科学计数法中将 e 的值从 10 转换成 2</li>
+<li><code>%e</code>和<code>%E</code>则代表用科学计数法表示一个浮点数，两者的区别在于结果中的字母 e 是大写还是小写</li>
+<li><code>%g</code>和 <code>%G</code>则是根据浮点数后小数点的位数自动决定是否用科学计数法表示，如果位数少就用<code>%f</code>的方式表示，否则根据字母 g 的大小写分别对应<code>%e</code>和<code>%E</code>的方式显示，整体原则是尽量减少数字中无用的 0 来简洁输出的位数</li>
+</ul>
+<pre><code class="language-go">func main() {
+	fmt.Printf(&quot;%b\n&quot;, 2.0)
+	fmt.Printf(&quot;%b\n&quot;, 1.0)
+	fmt.Printf(&quot;%b\n&quot;, 0.1)
+
+	fmt.Printf(&quot;%e\n&quot;, 2.0/3)
+	fmt.Printf(&quot;%E\n&quot;, 2.0/3)
+	fmt.Printf(&quot;%e\n&quot;, 8.0)
+
+	fmt.Printf(&quot;%g\n&quot;, 3.0/700000)
+	fmt.Printf(&quot;%G\n&quot;, 2.0/3)
+	fmt.Printf(&quot;%G&quot;, 8.0)
+}
+</code></pre>
+<figure data-type="image" tabindex="5"><img src="https://www.lvtao.net/post-images/1668744074591.png" alt="" loading="lazy"></figure>
+<h3 id="布尔类型的格式符t">布尔类型的格式符<code>%t</code></h3>
+<p>布尔类型的数据或变量可以用格式化符<code>%t</code>来控制输出，输出信息是<code>true</code>或<code>false</code>两个字符串</p>
+<pre><code class="language-go">func main() {
+	a := true
+	b := false
+	fmt.Printf(&quot;a: %t，b: %t，a==b: %t&quot;, a, b, a == b)
+}
+</code></pre>
+<p>输出结果：</p>
+<pre><code>a: true，b: false，a==b: false
+</code></pre>
+<h3 id="unicode-码相关格式化符c-q和u">Unicode 码相关格式化符<code>%c</code>、<code>%q</code>和<code>%U</code></h3>
+<p>格式化符<code>%c</code>和<code>%q</code>的作用是将后面的整数参数作为一个字符的编码来看待并输出该编码对应的 Unicode 字符，两者的区别在于<code>%q</code>会将输出的字符用单引号括起来。而格式化符<code>%U</code>与这两者正好想相反，是将后面作为参数的字符（注意需用英文单引号 <code>'</code> 括起来）的 Unicode 编码（确切地说是 UTF-8 编码）输出</p>
+<pre><code class="language-go">func main() {
+	fmt.Printf(&quot;%c\n&quot;, 0x61)
+	fmt.Printf(&quot;%q\n&quot;, 0x61)
+	fmt.Printf(&quot;%U\n&quot;, 'a')
+	fmt.Printf(&quot;%U&quot;, &quot;a&quot;)
+}
+</code></pre>
+<p><img src="https://www.lvtao.net/post-images/1668744304474.png" alt="" loading="lazy"><br>
+可以看出，第四行是有报警告的<code>%!U(string=a)</code></p>
+<h3 id="字符串格式化符s">字符串格式化符<code>%s</code></h3>
+<p>简单，不解释</p>
+<pre><code class="language-go">func main() {
+	fmt.Printf(&quot;%s is aaa&quot;, &quot;我是&quot;)
+}
+</code></pre>
+<p>输出</p>
+<pre><code>我是 is aaa
+</code></pre>
+<h3 id="指针格式化符p">指针格式化符<code>%p</code></h3>
+<p>格式化符<code>%p</code>用于输出指针的值，由于 Go 语言中为了代码安全尽量弱化了指针的存在，因此这个格式化符并不常用</p>
+<pre><code class="language-go">func main() {
+	a := &quot;abc&quot;
+	b := []int{1, 2, 3}
+	p := &amp;b
+	fmt.Printf(&quot;a的地址: %p，b的地址: %p&quot;, &amp;a, p)
+}
+</code></pre>
+<p>输出：</p>
+<pre><code>a的地址: 0xc000014250，b的地址: 0xc000010030
+</code></pre>
+<h3 id="万能格式化符v">万能格式化符<code>%v</code></h3>
+<p><code>%v</code>这个是格式化符是 Go 语言中的一个比较有用的改进。使用<code>%v</code>格式化符，可以对包括符合类型在内的绝大多数数据类型按照默认格式输出。这样可以避免我们编程时再去关注输出数据的具体类型并按其类型确定格式化符。<br>
+<code>%v</code>可以理解：对整数而言等同于<code>%d</code>，对浮点数而言等同于<code>%g</code>，对布尔类型数据而言等同于<code>%t</code>，对字符串而言等同于<code>%s</code>，对指针而言等同于<code>%p</code>。<br>
+<code>%#v</code>字符可以输出数据在 Go 语言中的表达形式，主要用于编程中调试程序。</p>
+<h3 id="输出参数类型t">输出参数类型<code>%T</code></h3>
+<pre><code class="language-go">func main() {
+	a := 1
+	b := &quot;hello&quot;
+
+	fmt.Printf(&quot;a : %T \n&quot;, a)
+	fmt.Printf(&quot;b : %T \n&quot;, b)
+}
+</code></pre>
+<p>输出</p>
+<pre><code>a : int 
+b : string 
+</code></pre>
+<table><thead><tr><th>动词</th> <th>功能</th></tr></thead> <tbody><tr><td><code>%v</code></td> <td>按值的本来值输出</td></tr> <tr><td>%+v</td> <td>在 %v 的基础上，对结构体字段名和值进行展开</td></tr> <tr><td><code>%#v</code></td> <td>输出 Go 语言语法格式的值</td></tr> <tr><td><code>%T</code></td> <td>输出 Go 语言语法格式的类型和值</td></tr> <tr><td>%%</td> <td>输出 %% 本体</td></tr> <tr><td>%b</td> <td>整型以二进制方式显示</td></tr> <tr><td>%o</td> <td>整型以八进制方式显示</td></tr> <tr><td><code>%d</code></td> <td>整型以十进制方式显示</td></tr> <tr><td>%x</td> <td>整型以 十六进制显示</td></tr> <tr><td>%X</td> <td>整型以十六进制、字母大写方式显示</td></tr> <tr><td>%U</td> <td>Unicode 字符</td></tr> <tr><td>%f</td> <td>浮点数</td></tr> <tr><td>%p</td> <td>指针，十六进制方式显示</td></tr></tbody></table>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://www.lvtao.net/post/Irregular-photo-album/">
+              <h3 class="post-title">
+                下一篇：纯CSS自动排版 相册效果
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <table>
+    <tr><td><a href="https://www.ioncube.com/?xp=TQLLZT"><img src="/media/ioncube.jpg" width="100%"/></a></td></tr>
+    <tr><td><a href="https://app.cloudcone.com/?ref=9519"><img src="/media/cloudcone.gif" width="100%"/></a></td></tr>
+  </table>
+  <div class="slogan"></div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  Powered by <a href="https://lvtao.net" target="_blank">LVTAO</a> | <a class="rss" href="https://www.lvtao.net/atom.xml" target="_blank">RSS</a>
+</div>
+<script 
+async
+defer
+src="https://ask.lvtao.net/api/application/embed?protocol=https&host=ask.lvtao.net&token=e193b47f92f1b41e">
+</script>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

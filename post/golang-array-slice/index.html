@@ -1,0 +1,445 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>GoLang数组与切片 | 吕滔博客</title>
+<meta name="description" content="">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://www.lvtao.net/favicon.ico?v=1714210602511">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://www.lvtao.net/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://www.lvtao.net">
+        <img class="avatar" src="https://www.lvtao.net/images/avatar.png?v=1714210602511" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://www.lvtao.net">
+        <h1 class="site-title">吕滔博客</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+        
+          <a href="https://medoo.lvtao.net" class="menu purple-link">
+            MeDoo中文手册
+          </a>
+        
+      
+        
+          <a href="https://tool.lvtao.net" class="menu purple-link">
+            工具箱
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">GoLang数组与切片</h2>
+          <div class="post-info post-detail-info">
+            
+              <span>
+                <i class="icon-pricetags-outline"></i>
+                
+                  <a href="https://www.lvtao.net/tag/go/">
+                    go
+                    
+                  </a>
+                
+              </span>
+            
+             <div style="margin-top:5px;"><a href="https://app.cloudcone.com/?ref=9519" target="_blank">海外无需备案主机推荐，支持25端口邮件发送，无端口限制，支持支付宝、Paypal、信用卡等支付...</a></div>
+          </div>
+          <div class="post-content" v-pre>
+            <p>基于不讲，介绍一种让编译器自动识别的写法<code>[...]</code></p>
+<pre><code class="language-go">func main() {
+	var numArray = [...]int{1, 2}
+	fmt.Println(numArray)   //[1 2]
+	fmt.Printf(&quot;type of numArray:%T\n&quot;, numArray)  //type of numArray:[2]int
+
+	var cityArray = [...]string{&quot;北京&quot;, &quot;上海&quot;, &quot;深圳&quot;}
+	fmt.Println(cityArray)   //[北京 上海 深圳]
+	fmt.Printf(&quot;type of cityArray:%T\n&quot;, cityArray)  //type of cityArray:[3]string
+}
+</code></pre>
+<h3 id="普通遍历">普通遍历</h3>
+<pre><code class="language-go">func main() {
+	var a = [...]string{&quot;北京&quot;, &quot;上海&quot;, &quot;深圳&quot;}
+	for i := 0; i &lt; len(a); i++ {
+		fmt.Println(a[i])
+	}
+}
+/*
+北京
+上海
+深圳
+ */
+</code></pre>
+<h3 id="kv遍历">kv遍历</h3>
+<pre><code class="language-go">func main() {
+	var a = [...]string{&quot;北京&quot;, &quot;上海&quot;, &quot;深圳&quot;}
+	for index, value := range a {
+		fmt.Println(index, value)
+	}
+}
+/*
+0 北京
+1 上海
+2 深圳
+ */
+</code></pre>
+<h3 id="多维数组">多维数组</h3>
+<pre><code class="language-go">func main() {
+	a := [3][2]string{
+		{&quot;北京&quot;, &quot;上海&quot;},
+		{&quot;广州&quot;, &quot;深圳&quot;},
+		{&quot;成都&quot;, &quot;重庆&quot;},
+	}
+	fmt.Println(a)         //[[北京 上海] [广州 深圳] [成都 重庆]]
+	fmt.Println(a[2][1])     //支持索引取值:重庆
+}
+</code></pre>
+<h3 id="遍历多维数组">遍历多维数组</h3>
+<pre><code class="language-go">func main() {
+	a := [3][2]string{
+		{&quot;北京&quot;, &quot;上海&quot;},
+		{&quot;广州&quot;, &quot;深圳&quot;},
+		{&quot;成都&quot;, &quot;重庆&quot;},
+	}
+	for _, v1 := range a {   // v1 = [北京 上海]
+		for _, v2 := range v1 {
+			fmt.Println(v2)
+		}
+	}
+}
+/*
+北京
+上海
+广州
+深圳
+成都
+重庆
+*/
+</code></pre>
+<h3 id="练习求和">练习：求和</h3>
+<pre><code class="language-go">func main() {
+	var intArr2 [5]int = [...]int {1, -1, 9, 90, 12}
+	sum := 0
+	for _, val := range intArr2 {
+		//累计求和
+		sum += val
+	}
+    
+	//如何让平均值保留到小数.
+	fmt.Printf(&quot;sum=%v 平均值=%v \n\n&quot;, sum, float64(sum) / float64(len(intArr2)))
+	// sum=111 平均值=22.2 
+}
+</code></pre>
+<h3 id="练习找最大值">练习：找最大值</h3>
+<p>1、声明一个数组<code>var intArr[5] = [...]int {1, -1, 12, 65, 11}</code><br>
+2、假定第一个元素就是最大值，下标就 0<br>
+3、然后从第二个元素开始循环比较，如果发现有更大，则交换</p>
+<pre><code class="language-go">func main() {
+	var intArr = [...]int{1, -1, 112, 65, 11}
+	maxValue := intArr[0]
+	maxIndex := 0
+	for i := 0; i &lt; len(intArr); i++ {
+		if maxValue &lt; intArr[i] {
+			maxValue = intArr[i]
+			maxIndex = i
+		}
+	}
+	fmt.Println(&quot;最大值&quot;, maxValue, &quot;最大值索引值&quot;, maxIndex)
+	// 最大值 112 最大值索引值 2
+}
+</code></pre>
+<h3 id="切片的基础语法">切片的基础语法：</h3>
+<pre><code>// var name []T
+// 1、name:表示变量名
+// 2、T:表示切片中的元素类型
+</code></pre>
+<h3 id="使用make构造切片-格式maket-size-cap">使用<code>make</code>构造切片 格式：<code>make([]T, size, cap)</code></h3>
+<ul>
+<li>T:切片的元素类型</li>
+<li>size:切片中元素的数量</li>
+<li>cap:切片的容量</li>
+</ul>
+<pre><code class="language-go">func main() {
+	a := make([]int, 2, 10)
+	fmt.Println(a)         //[0 0]
+	fmt.Println(len(a))     //2
+	fmt.Println(cap(a))     //10
+}
+</code></pre>
+<p>切片可理解为可变数组，是数组的升级封装.支持扩容<br>
+切片的本质就是对底层数组的封装，它包含了三个信息：底层数组的指针、切片的长度（len）和切片的容量（cap）。<br>
+举个例子，现在有一个数组<code> a := [8]int{0, 1, 2, 3, 4, 5, 6, 7}</code>，切片<code> s1 := a[:5]</code>，相应示意图如下。<br>
+<img src="https://www.lvtao.net/post-images/1668777415358.png" alt="" loading="lazy"><br>
+切片<code>s2 := a[3:6]</code>，相应示意图如下<br>
+<img src="https://www.lvtao.net/post-images/1668777425971.png" alt="" loading="lazy"></p>
+<h3 id="切片的长度和容量">切片的长度和容量</h3>
+<ul>
+<li>切片拥有自己的长度和容量，我们可以通过使用内置的 **len()**函数求长度，使用内置的 **cap()**函数求切片的容量。</li>
+<li>切片的长度就是它所包含的元素个数。</li>
+<li>切片的容量是从它的第一个元素开始数，到其底层数组元素末尾的个数。</li>
+<li>切片 s 的长度和容量可通过表达式 len(s) 和 cap(s) 来获取。</li>
+</ul>
+<pre><code class="language-go">func main() {
+	s := []int{2, 3, 5, 7, 11, 13}
+	fmt.Printf(&quot;长度:%v 容量 %v\n&quot;, len(s), cap(s))  // 长度:6 容量 6
+
+	c := s[:2]
+	fmt.Println(c)          // [2 3]
+	fmt.Printf(&quot;长度:%v 容量 %v\n&quot;, len(c), cap(c))   // 长度:2 容量 6
+
+	d := s[1:3]
+	fmt.Println(d)         // [3 5]
+	fmt.Printf(&quot;长度:%v 容量 %v&quot;, len(d), cap(d))    // 长度:2 容量 5
+}
+</code></pre>
+<h3 id="基本遍历">基本遍历</h3>
+<pre><code class="language-go">func main() {
+	var a = []string{&quot;北京&quot;, &quot;上海&quot;, &quot;深圳&quot;}
+	for i := 0; i &lt; len(a); i++ {
+		fmt.Println(a[i])
+	}
+}
+/*
+北京
+上海
+深圳
+ */
+</code></pre>
+<h3 id="kv遍历-2">kv遍历</h3>
+<pre><code class="language-go">func main() {
+	var a = []string{&quot;北京&quot;, &quot;上海&quot;, &quot;深圳&quot;}
+	for index, value := range a {
+		fmt.Println(index, value)
+	}
+}
+/*
+0 北京
+1 上海
+2 深圳
+ */
+</code></pre>
+<h3 id="切片追加append">切片追加<code>append()</code></h3>
+<ul>
+<li>Go 语言的内建函数 append()可以为切片动态添加元素，每个切片会指向一个底层数组</li>
+<li>这个数组的容量够用就添加新增元素。</li>
+<li>当底层数组不能容纳新增的元素时，切片就会自动按照一定的策略进行“扩容”，此时该切片指向的底层数组就会更换。</li>
+<li>“扩容”操作往往发生在append()函数调用时，所以我们通常都需要用原变量接收 append 函数的返回值。</li>
+</ul>
+<pre><code class="language-go">func main() {
+	// append()添加元素和切片扩容
+	var numSlice []int
+	for i := 0; i &lt; 10; i++ {
+		numSlice = append(numSlice, i)
+		fmt.Printf(&quot;%v len:%d cap:%d ptr:%p\n&quot;, numSlice, len(numSlice), cap(numSlice), numSlice)
+	}
+}
+</code></pre>
+<p>追加多个</p>
+<pre><code class="language-go">func main() {
+	var citySlice []string
+	citySlice = append(citySlice, &quot;北京&quot;)	// 追加一个元素
+	citySlice = append(citySlice, &quot;上海&quot;, &quot;广州&quot;, &quot;深圳&quot;)	// 追加多个元素
+
+	a := []string{&quot;成都&quot;, &quot;重庆&quot;}
+	citySlice = append(citySlice, a...)    // 追加切片
+
+	fmt.Println(citySlice) //[北京 上海 广州 深圳 成都 重庆]
+}
+</code></pre>
+<h3 id="删除元素">删除元素</h3>
+<pre><code class="language-go">func main() {
+	a := []int{30, 31, 32, 33, 34, 35, 36, 37}
+	a = append(a[:2], a[3:]...)	      // 要删除索引为 2 的元素
+	fmt.Println(a)                //[30 31 33 34 35 36 37]
+}
+</code></pre>
+<h3 id="切片合并">切片合并</h3>
+<pre><code class="language-go">func main() {
+	arr1 := []int{2,7,1}
+	arr2 := []int{5,9,3}
+	fmt.Println(arr2,arr1)
+	arr1 = append(arr1, arr2...)
+	fmt.Println(arr1)  // [2 7 1 5 9 3]
+}
+</code></pre>
+<h3 id="切片copy">切片<code>copy()</code></h3>
+<p>问题：</p>
+<pre><code class="language-go">func main() {
+	a := []int{1, 2, 3, 4, 5}
+	b := a
+	fmt.Println(a)   //[1 2 3 4 5]
+	fmt.Println(b)   //[1 2 3 4 5]
+	b[0] = 1000
+	fmt.Println(a)   //[1000 2 3 4 5]
+	fmt.Println(b)   //[1000 2 3 4 5]
+}
+</code></pre>
+<p><code>copy()</code>函数</p>
+<ul>
+<li>Go 语言内建的 copy()函数可以迅速地将一个切片的数据复制到另外一个切片空间中</li>
+<li>copy()函数的使用格式如下： copy(destSlice, srcSlice []T)</li>
+</ul>
+<p>其中：<br>
+srcSlice: 数据来源切片<br>
+destSlice: 目标切片</p>
+<pre><code class="language-go">func main() {
+	a := []int{1, 2, 3, 4, 5}
+	c := make([]int, 5, 5)    // [0 0 0 0 0]
+	copy(c, a)         //使用 copy()函数将切片 a 中的元素复制到切片 c
+	fmt.Println(a)     //[1 2 3 4 5]
+	fmt.Println(c)     //[1 2 3 4 5]
+
+	c[0] = 1000
+	fmt.Println(a)   //[1 2 3 4 5]
+	fmt.Println(c)   //[1000 2 3 4 5]
+}
+</code></pre>
+<h3 id="正序排序">正序排序</h3>
+<ul>
+<li>对于 int 、 float64 和 string 数组或是切片的排序</li>
+<li>go 分别提供了 sort.Ints() 、sort.Float64s() 和 sort.Strings() 函数， 默认都是从小到大排序</li>
+</ul>
+<pre><code class="language-go">func main() {
+	intList := []int{2, 4, 3, 5, 7, 6, 9, 8, 1, 0}
+	sort.Ints(intList)
+	fmt.Println(intList)   // [0 1 2 3 4 5 6 7 8 9]
+
+	stringList := []string{&quot;a&quot;, &quot;c&quot;, &quot;b&quot;, &quot;z&quot;, &quot;x&quot;, &quot;w&quot;, &quot;y&quot;, &quot;d&quot;, &quot;f&quot;, &quot;i&quot;}
+	sort.Strings(stringList)
+	fmt.Println(stringList)   // [a b c d f i w x y z]
+}
+</code></pre>
+<h3 id="sort-降序排序">sort 降序排序</h3>
+<ul>
+<li>Golang的sort 包 可 以 使 用 sort.Reverse(slice) 来 调 换slice.Interface.Less</li>
+<li>也就是比较函数，所以， int 、 float64 和 string的逆序排序函数可以这么写</li>
+</ul>
+<pre><code class="language-go">func main() {
+	intList := []int{2, 4, 3, 5, 7, 6, 9, 8, 1, 0}
+	sort.Sort(sort.Reverse(sort.IntSlice(intList)))
+	fmt.Println(intList)   // [9 8 7 6 5 4 3 2 1 0]
+
+	stringList := []string{&quot;a&quot;, &quot;c&quot;, &quot;b&quot;, &quot;z&quot;, &quot;x&quot;, &quot;w&quot;, &quot;y&quot;, &quot;d&quot;, &quot;f&quot;, &quot;i&quot;}
+	sort.Sort(sort.Reverse(sort.StringSlice(stringList)))
+	fmt.Println(stringList)   // [z y x w i f d c b a]
+}
+</code></pre>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://www.lvtao.net/post/golang-operators/">
+              <h3 class="post-title">
+                下一篇：GoLang位运算
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <table>
+    <tr><td><a href="https://www.ioncube.com/?xp=TQLLZT"><img src="/media/ioncube.jpg" width="100%"/></a></td></tr>
+    <tr><td><a href="https://app.cloudcone.com/?ref=9519"><img src="/media/cloudcone.gif" width="100%"/></a></td></tr>
+  </table>
+  <div class="slogan"></div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  Powered by <a href="https://lvtao.net" target="_blank">LVTAO</a> | <a class="rss" href="https://www.lvtao.net/atom.xml" target="_blank">RSS</a>
+</div>
+<script 
+async
+defer
+src="https://ask.lvtao.net/api/application/embed?protocol=https&host=ask.lvtao.net&token=e193b47f92f1b41e">
+</script>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

@@ -1,0 +1,205 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>MySQL查询附近的人 | 吕滔博客</title>
+<meta name="description" content="">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://www.lvtao.net/favicon.ico?v=1714210602511">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://www.lvtao.net/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://www.lvtao.net">
+        <img class="avatar" src="https://www.lvtao.net/images/avatar.png?v=1714210602511" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://www.lvtao.net">
+        <h1 class="site-title">吕滔博客</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+        
+          <a href="https://medoo.lvtao.net" class="menu purple-link">
+            MeDoo中文手册
+          </a>
+        
+      
+        
+          <a href="https://tool.lvtao.net" class="menu purple-link">
+            工具箱
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">MySQL查询附近的人</h2>
+          <div class="post-info post-detail-info">
+            
+              <span>
+                <i class="icon-pricetags-outline"></i>
+                
+                  <a href="https://www.lvtao.net/tag/mysql/">
+                    mysql
+                    
+                  </a>
+                
+              </span>
+            
+             <div style="margin-top:5px;"><a href="https://app.cloudcone.com/?ref=9519" target="_blank">海外无需备案主机推荐，支持25端口邮件发送，无端口限制，支持支付宝、Paypal、信用卡等支付...</a></div>
+          </div>
+          <div class="post-content" v-pre>
+            <p>数据库结构</p>
+<pre><code>-- ----------------------------
+-- Table structure for lt
+-- ----------------------------
+DROP TABLE IF EXISTS `lt`;
+CREATE TABLE `lt` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `name` varchar(255) DEFAULT NULL COMMENT '名称',
+  `lng` double(10,3) DEFAULT NULL,
+  `lat` double(10,3) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+ 
+-- ----------------------------
+-- Records of lt
+-- ----------------------------
+INSERT INTO `lt` VALUES ('2', '宝安区美丽365花园        ', '114.039', '22.669');
+INSERT INTO `lt` VALUES ('3', '龙岗区佳兆业上品雅园', '114.089', '22.639');
+INSERT INTO `lt` VALUES ('4', '龙岗区万科金色半山', '114.095', '22.634');
+INSERT INTO `lt` VALUES ('5', '宝安区金港华庭', '113.868', '22.588');
+</code></pre>
+<p>查询语句</p>
+<pre><code>SELECT  
+s.id,s.name,s.lng,s.lat,   
+(st_distance (point (lng, lat),point(113.858202,22.583819) ) / 0.0111) AS distance  
+FROM  
+wlsq_base.lt s  
+HAVING distance&lt;10 
+ORDER BY distance
+</code></pre>
+<p>例子<br>
+按我的坐标计算周边坐标的距离并由近到远排序</p>
+<pre><code>select name,st_distance(point(113.327955,23.129717),point)*111195 as distance,address from table1 where st_distance(point(113.327955,23.129717),point)*111195 &lt; 100 order by distance asc limit 100
+</code></pre>
+<p>注意：其中point字段类型是 point，其值可以通过以下方法写入：</p>
+<pre><code>update table1 set point = point(113.123232,24.1324234)
+</code></pre>
+<p>st_distance计算的结果单位是度，需要乘111195（地球半径6371000*PI/180） 是将值转化为米</p>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://www.lvtao.net/post/systemd-java-jar/">
+              <h3 class="post-title">
+                下一篇：使用Systemd开机启动管理jar包
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <table>
+    <tr><td><a href="https://www.ioncube.com/?xp=TQLLZT"><img src="/media/ioncube.jpg" width="100%"/></a></td></tr>
+    <tr><td><a href="https://app.cloudcone.com/?ref=9519"><img src="/media/cloudcone.gif" width="100%"/></a></td></tr>
+  </table>
+  <div class="slogan"></div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  Powered by <a href="https://lvtao.net" target="_blank">LVTAO</a> | <a class="rss" href="https://www.lvtao.net/atom.xml" target="_blank">RSS</a>
+</div>
+<script 
+async
+defer
+src="https://ask.lvtao.net/api/application/embed?protocol=https&host=ask.lvtao.net&token=e193b47f92f1b41e">
+</script>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

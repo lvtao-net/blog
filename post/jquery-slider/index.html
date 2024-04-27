@@ -1,0 +1,216 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>jQuery Slider 是一个基于 jQuery 的图片轮播插件 | 吕滔博客</title>
+<meta name="description" content="">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://www.lvtao.net/favicon.ico?v=1714210602511">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://www.lvtao.net/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://www.lvtao.net">
+        <img class="avatar" src="https://www.lvtao.net/images/avatar.png?v=1714210602511" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://www.lvtao.net">
+        <h1 class="site-title">吕滔博客</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+        
+          <a href="https://medoo.lvtao.net" class="menu purple-link">
+            MeDoo中文手册
+          </a>
+        
+      
+        
+          <a href="https://tool.lvtao.net" class="menu purple-link">
+            工具箱
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">jQuery Slider 是一个基于 jQuery 的图片轮播插件</h2>
+          <div class="post-info post-detail-info">
+            
+              <span>
+                <i class="icon-pricetags-outline"></i>
+                
+                  <a href="https://www.lvtao.net/tag/jquery/">
+                    jquery
+                    
+                  </a>
+                
+              </span>
+            
+             <div style="margin-top:5px;"><a href="https://app.cloudcone.com/?ref=9519" target="_blank">海外无需备案主机推荐，支持25端口邮件发送，无端口限制，支持支付宝、Paypal、信用卡等支付...</a></div>
+          </div>
+          <div class="post-content" v-pre>
+            <h1 id="jquery-slider">jQuery Slider</h1>
+<p>jQuery Slider 是一个基于 jQuery 的图片轮播插件，可以方便地实现网站的幻灯片效果。</p>
+<h2 id="特性">特性</h2>
+<ul>
+<li>支持响应式设计，在不同设备上自适应布局。</li>
+<li>可以设置自动播放、循环播放等功能。</li>
+<li>支持多种切换效果，如淡入淡出、滑动、旋转等。</li>
+<li>可以自定义导航按钮、分页器等样式。</li>
+<li>支持触摸滑动，适用于移动端设备。</li>
+</ul>
+<h2 id="使用方法">使用方法</h2>
+<ol>
+<li>引入 jQuery 和 jQuery Slider 插件的 JS 文件：</li>
+</ol>
+<pre><code class="language-html">&lt;script src=&quot;https://code.jquery.com/jquery-3.5.1.min.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;jquery.slider.min.js&quot;&gt;&lt;/script&gt;
+</code></pre>
+<ol start="2">
+<li>在 HTML 中添加图片轮播的容器及内容：</li>
+</ol>
+<pre><code class="language-html">&lt;div class=&quot;slider&quot;&gt;
+  &lt;img src=&quot;image1.jpg&quot; alt=&quot;Image 1&quot;&gt;
+  &lt;img src=&quot;image2.jpg&quot; alt=&quot;Image 2&quot;&gt;
+  &lt;img src=&quot;image3.jpg&quot; alt=&quot;Image 3&quot;&gt;
+&lt;/div&gt;
+</code></pre>
+<ol start="3">
+<li>初始化 jQuery Slider：</li>
+</ol>
+<pre><code class="language-javascript">$(document).ready(function() {
+  $('.slider').slider();
+});
+</code></pre>
+<ol start="4">
+<li>可以根据需要设置各种参数，如自动播放、切换效果、导航按钮等：</li>
+</ol>
+<pre><code class="language-javascript">$(document).ready(function() {
+  $('.slider').slider({
+    autoplay: true,
+    effect: 'fade',
+    nav: true
+  });
+});
+</code></pre>
+<h2 id="参考链接">参考链接</h2>
+<ul>
+<li><a href="https://jqueryslider.com/">jQuery Slider 官方网站</a></li>
+<li><a href="https://github.com/jqueryslider/slider">jQuery Slider GitHub 仓库</a></li>
+</ul>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://www.lvtao.net/post/macos-nodejs-n-versions/">
+              <h3 class="post-title">
+                下一篇：macos 中管理多个nodejs版本
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <table>
+    <tr><td><a href="https://www.ioncube.com/?xp=TQLLZT"><img src="/media/ioncube.jpg" width="100%"/></a></td></tr>
+    <tr><td><a href="https://app.cloudcone.com/?ref=9519"><img src="/media/cloudcone.gif" width="100%"/></a></td></tr>
+  </table>
+  <div class="slogan"></div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  Powered by <a href="https://lvtao.net" target="_blank">LVTAO</a> | <a class="rss" href="https://www.lvtao.net/atom.xml" target="_blank">RSS</a>
+</div>
+<script 
+async
+defer
+src="https://ask.lvtao.net/api/application/embed?protocol=https&host=ask.lvtao.net&token=e193b47f92f1b41e">
+</script>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

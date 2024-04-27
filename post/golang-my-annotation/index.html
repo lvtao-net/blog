@@ -1,0 +1,477 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>GoLang 获取方法注释 | 吕滔博客</title>
+<meta name="description" content="">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://www.lvtao.net/favicon.ico?v=1714210602511">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://www.lvtao.net/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://www.lvtao.net">
+        <img class="avatar" src="https://www.lvtao.net/images/avatar.png?v=1714210602511" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://www.lvtao.net">
+        <h1 class="site-title">吕滔博客</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+        
+          <a href="https://medoo.lvtao.net" class="menu purple-link">
+            MeDoo中文手册
+          </a>
+        
+      
+        
+          <a href="https://tool.lvtao.net" class="menu purple-link">
+            工具箱
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">GoLang 获取方法注释</h2>
+          <div class="post-info post-detail-info">
+            
+              <span>
+                <i class="icon-pricetags-outline"></i>
+                
+                  <a href="https://www.lvtao.net/tag/go/">
+                    go
+                    
+                  </a>
+                
+              </span>
+            
+             <div style="margin-top:5px;"><a href="https://app.cloudcone.com/?ref=9519" target="_blank">海外无需备案主机推荐，支持25端口邮件发送，无端口限制，支持支付宝、Paypal、信用卡等支付...</a></div>
+          </div>
+          <div class="post-content" v-pre>
+            <p>funciton.go</p>
+<pre><code class="language-go">
+// Doc2Map
+// @path 1111111
+// @path 2222222
+// --&gt; {&quot;path&quot;:[1111111,2222222]}
+func Doc2Map(doc string) map[string][]string {
+	m := make(map[string][]string)
+	for _, line := range strings.Split(doc, &quot;\n&quot;) {
+		if i := strings.Index(line, &quot;@&quot;); i &gt;= 0 {
+			line = line[i+1:]
+			i = strings.IndexAny(line, &quot; \t&quot;)
+			var key, value string
+			if i &gt;= 0 {
+				key = line[:i]
+				value = line[i+1:]
+			} else {
+				key = line
+			}
+			if sa, ok := m[key]; ok {
+				m[key] = append(sa, value)
+			} else {
+				m[key] = []string{value}
+			}
+		}
+	}
+	return m
+}
+
+// Text get func retirement text
+func Text(funcDecl *ast.FuncDecl) string {
+	if funcDecl == nil {
+		return &quot;&quot;
+	}
+	return funcDecl.Doc.Text()
+}
+
+// Params get func param list
+func Params(funcDecl *ast.FuncDecl) []string {
+	if funcDecl == nil {
+		return make([]string, 0)
+	}
+	params := make([]string, 0, len(funcDecl.Type.Params.List))
+	for _, param := range funcDecl.Type.Params.List {
+		for _, item := range param.Names {
+			params = append(params, item.Name)
+		}
+	}
+	return params
+}
+
+// Outs get func return list
+func Outs(funcDecl *ast.FuncDecl) []string {
+	if funcDecl.Type.Results == nil {
+		return make([]string, 0)
+	}
+	params := make([]string, 0, len(funcDecl.Type.Results.List))
+	for _, param := range funcDecl.Type.Results.List {
+		for _, item := range param.Names {
+			params = append(params, item.Name)
+		}
+	}
+	return params
+}
+
+// GetFunc get func or struct method
+func GetFunc(f interface{}) (funcDecl *ast.FuncDecl) {
+	switch v := f.(type) {
+	case reflect.Method:
+		return getFuncByMethod(v)
+	default:
+		return FindFunc(GetFuncInfo(f))
+	}
+}
+
+func GetFuncInfo(f interface{}) (string, string, string) {
+	switch v := f.(type) {
+	case reflect.Method:
+		typ := isStruct(v.Type.In(0))
+		methodName, structPkg, structName := v.Name, typ.PkgPath(), typ.Name()
+		return methodName, structPkg, structName
+	default:
+		pc := reflect.ValueOf(f).Pointer()
+		fn := runtime.FuncForPC(pc)
+		// github.com/inu1255/annotation.Abc
+		// github.com/inu1255/annotation.(*A).Show-fm
+		methodName := fn.Name()
+		dir, file := path.Split(methodName)
+		ss := strings.Split(file, &quot;.&quot;)
+		// github.com/inu1255/annotation
+		structPkg := path.Join(dir, ss[0])
+		n := len(ss) - 1
+		methodName = ss[n]
+		structName := &quot;&quot;
+		if n &gt; 1 {
+			structName = strings.Trim(ss[1], &quot;(*)&quot;)
+			methodName = ss[n][:strings.LastIndex(ss[n], &quot;-&quot;)]
+		}
+		return methodName, structPkg, structName
+	}
+}
+
+func getFuncByMethod(m reflect.Method) (funcDecl *ast.FuncDecl) {
+	typ := isStruct(m.Type.In(0))
+	methodName := m.Name
+	return getFunc(methodName, &quot;&quot;, typ)
+}
+
+// find func or struct method
+// find func by methodName,structPkg
+// find struct method by methodName,typ
+func getFunc(methodName, structPkg string, typ reflect.Type) (funcDecl *ast.FuncDecl) {
+	structName := &quot;&quot;
+	typ = isStruct(typ)
+	if typ != nil {
+		structName = typ.Name()
+		structPkg = typ.PkgPath()
+	}
+	if fn := FindFunc(methodName, structPkg, structName); fn != nil {
+		return fn
+	}
+	if structName != &quot;&quot; {
+		// find parent's func
+		walkFields(typ, func(field reflect.StructField) bool {
+			if field.Anonymous {
+				walkMethods(field.Type, func(method reflect.Method) bool {
+					if method.Name == methodName {
+						funcDecl = getFuncByMethod(method)
+						return true
+					}
+					return false
+				})
+			}
+			return false
+		})
+	}
+	return
+}
+
+func FindFunc(methodName, structPkg, structName string) (funcDecl *ast.FuncDecl) {
+	var mpkg map[string]*ast.Package
+	var err error
+	fset := token.NewFileSet()
+	if structPkg == &quot;&quot; || structPkg == &quot;main&quot; {
+		mpkg, err = parser.ParseDir(fset, &quot;.&quot;, nil, parser.ParseComments)
+	} else {
+		gopath, goroot := getGopathGoroot()
+		dir := path.Join(&quot;vendor&quot;, structPkg)
+		if _, err := os.Stat(dir); err != nil {
+			dir = path.Join(gopath, &quot;src&quot;, structPkg)
+			if _, err := os.Stat(dir); err != nil {
+				dir = path.Join(goroot, &quot;src&quot;, structPkg)
+			}
+		}
+		mpkg, err = parser.ParseDir(fset, dir, nil, parser.ParseComments)
+	}
+	if err != nil {
+		return nil
+	}
+	for _, pkg := range mpkg {
+		for _, f := range pkg.Files {
+			for _, decl := range f.Decls {
+				if fun, ok := decl.(*ast.FuncDecl); ok {
+					if fun.Name.Name == methodName {
+						if structName == &quot;&quot; { // func Foo()
+							return fun
+						} else if fun.Recv != nil &amp;&amp; len(fun.Recv.List) &gt; 0 { // func (*Bar)Foo()
+							if starExpr, ok := fun.Recv.List[0].Type.(*ast.StarExpr); ok {
+								if ident, ok := starExpr.X.(*ast.Ident); ok {
+									if ident.Name == structName {
+										return fun
+									}
+								}
+							} else if ident, ok := fun.Recv.List[0].Type.(*ast.Ident); ok {
+								if ident.Name == structName {
+									return fun
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return
+}
+
+func getGopathGoroot() (gopath, goroot string) {
+	output, _ := exec.Command(&quot;go&quot;, &quot;env&quot;).Output()
+	s := string(output)
+	lines := strings.Split(s, &quot;\n&quot;)
+	for _, s := range lines {
+		ss := strings.Split(s, &quot;=&quot;)
+		if len(ss) &gt; 1 {
+			if ss[0] == &quot;GOPATH&quot; {
+				gopath = strings.Trim(ss[1], &quot;\&quot;&quot;)
+			} else if ss[0] == &quot;GOROOT&quot; {
+				goroot = strings.Trim(ss[1], &quot;\&quot;&quot;)
+			}
+		}
+	}
+	return
+}
+
+func isStruct(typ reflect.Type) reflect.Type {
+	if typ == nil {
+		return nil
+	}
+	switch typ.Kind() {
+	case reflect.Interface, reflect.Ptr:
+		return isStruct(typ.Elem())
+	case reflect.Struct:
+		return typ
+	}
+	return nil
+}
+
+func walkFields(typ reflect.Type, call func(reflect.StructField) bool) {
+	switch typ.Kind() {
+	case reflect.Interface, reflect.Ptr:
+		walkFields(typ.Elem(), call)
+	case reflect.Struct:
+		numField := typ.NumField()
+		for i := 0; i &lt; numField; i++ {
+			field := typ.Field(i)
+			// Log.Println(&quot;field&quot;, field.Name, field.PkgPath, field.Anonymous, field.Type)
+			if call(field) {
+				break
+			}
+		}
+	}
+}
+
+func walkMethods(typ reflect.Type, call func(reflect.Method) bool) {
+	switch typ.Kind() {
+	case reflect.Interface, reflect.Ptr:
+		numMethod := typ.NumMethod()
+		for i := 0; i &lt; numMethod; i++ {
+			method := typ.Method(i)
+			// typ := method.Type.In(0).Elem()
+			// Log.Println(&quot;method&quot;, typ.PkgPath(), typ.Name(), method.Name)
+			if call(method) {
+				break
+			}
+		}
+	case reflect.Struct:
+		walkMethods(reflect.PtrTo(typ), call)
+	}
+}
+</code></pre>
+<p>demo.go</p>
+<pre><code class="language-go">
+// show abc
+func Abc() {
+
+}
+
+type A struct {
+	Name string
+}
+
+// show A
+func (this *A) Show() {
+	fmt.Println(this.Name)
+}
+
+type B struct {
+	A
+}
+
+// show B
+func (this *B) Show() {
+}
+
+func ExampleParse() {
+	a := &amp;A{}
+	b := &amp;B{}
+
+	funcDecl := GetFunc(Abc)
+	if funcDecl != nil {
+		fmt.Println(funcDecl.Doc.Text())
+	}
+
+	funcDecl = GetFunc(a.Show)
+	if funcDecl != nil {
+		fmt.Println(funcDecl.Doc.Text())
+	}
+
+	funcDecl = GetFunc(b.Show)
+	if funcDecl != nil {
+		fmt.Println(funcDecl.Doc.Text())
+	}
+
+	m := reflect.TypeOf(b).Method(0)
+	funcDecl = GetFunc(m)
+	if funcDecl != nil {
+		fmt.Println(funcDecl.Doc.Text())
+	}
+
+	// output:
+	// show abc
+	//
+	// show A
+	//
+	// show B
+	//
+	// show B
+}
+</code></pre>
+<p>other https://github.com/MarcGrol/golangAnnotations.git</p>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://www.lvtao.net/post/golang-gin-get-input-data/">
+              <h3 class="post-title">
+                下一篇：GoLang Gin 获取Input数据
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <table>
+    <tr><td><a href="https://www.ioncube.com/?xp=TQLLZT"><img src="/media/ioncube.jpg" width="100%"/></a></td></tr>
+    <tr><td><a href="https://app.cloudcone.com/?ref=9519"><img src="/media/cloudcone.gif" width="100%"/></a></td></tr>
+  </table>
+  <div class="slogan"></div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  Powered by <a href="https://lvtao.net" target="_blank">LVTAO</a> | <a class="rss" href="https://www.lvtao.net/atom.xml" target="_blank">RSS</a>
+</div>
+<script 
+async
+defer
+src="https://ask.lvtao.net/api/application/embed?protocol=https&host=ask.lvtao.net&token=e193b47f92f1b41e">
+</script>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

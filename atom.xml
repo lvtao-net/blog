@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://www.lvtao.net</id>
+    <title>吕滔博客</title>
+    <updated>2024-04-27T09:39:42.940Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
+    <link rel="alternate" href="https://www.lvtao.net"/>
+    <link rel="self" href="https://www.lvtao.net/atom.xml"/>
+    <logo>https://www.lvtao.net/images/avatar.png</logo>
+    <icon>https://www.lvtao.net/favicon.ico</icon>
+    <rights>All rights reserved 2024, 吕滔博客</rights>
+    <entry>
+        <title type="html"><![CDATA[`幂等`、`限流`、`降级`、`断路器`、`事务`、`缓存`、`分库分表` 等总结]]></title>
+        <id>https://www.lvtao.net/post/solution/</id>
+        <link href="https://www.lvtao.net/post/solution/">
+        </link>
+        <updated>2024-04-27T09:16:22.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[一些好玩的工具推荐]]></title>
+        <id>https://www.lvtao.net/post/other-tool/</id>
+        <link href="https://www.lvtao.net/post/other-tool/">
+        </link>
+        <updated>2024-04-27T09:15:42.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[开放性设计问题相关的知识总结]]></title>
+        <id>https://www.lvtao.net/post/open/</id>
+        <link href="https://www.lvtao.net/post/open/">
+        </link>
+        <updated>2024-04-27T09:14:10.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[`JDK Tools`、`Linux Tools`、`Git` 等总结]]></title>
+        <id>https://www.lvtao.net/post/os/</id>
+        <link href="https://www.lvtao.net/post/os/">
+        </link>
+        <updated>2024-04-27T09:12:58.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[日志监控分析告警相关的知识]]></title>
+        <id>https://www.lvtao.net/post/monitor/</id>
+        <link href="https://www.lvtao.net/post/monitor/">
+        </link>
+        <updated>2024-04-27T09:11:32.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[`Redis`、`RocketMQ`、`Zookeeper`、`Netty`、`Tomcat` 等相关基础知识]]></title>
+        <id>https://www.lvtao.net/post/middleware/</id>
+        <link href="https://www.lvtao.net/post/middleware/">
+        </link>
+        <updated>2024-04-27T09:10:15.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[JVM中相关数据结构` + `算法` + `操作系统` + `计网` + `底层`]]></title>
+        <id>https://www.lvtao.net/post/jvm/</id>
+        <link href="https://www.lvtao.net/post/jvm/">
+        </link>
+        <updated>2024-04-27T09:09:03.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[JAVA知识 `JUC`、`Thread`、`Lock`、`I/O` 等相关知识]]></title>
+        <id>https://www.lvtao.net/post/java/</id>
+        <link href="https://www.lvtao.net/post/java/">
+        </link>
+        <updated>2024-04-27T09:04:19.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[ `JDK Tools`、`Linux Tools`、`Git` ]]></title>
+        <id>https://www.lvtao.net/post/devOps/</id>
+        <link href="https://www.lvtao.net/post/devOps/">
+        </link>
+        <updated>2024-04-27T08:13:32.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[数据库知识 `事务`、`索引`、`锁`、`SQL优化` 等总结]]></title>
+        <id>https://www.lvtao.net/post/database/</id>
+        <link href="https://www.lvtao.net/post/database/">
+        </link>
+        <updated>2024-04-27T08:09:34.000Z</updated>
+    </entry>
+</feed>

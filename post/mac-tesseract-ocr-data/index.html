@@ -1,0 +1,755 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>MAC平台下tesseract-ocr视觉识别的相关库下载及配置 | 吕滔博客</title>
+<meta name="description" content="">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://www.lvtao.net/favicon.ico?v=1714210602511">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://www.lvtao.net/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://www.lvtao.net">
+        <img class="avatar" src="https://www.lvtao.net/images/avatar.png?v=1714210602511" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://www.lvtao.net">
+        <h1 class="site-title">吕滔博客</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+        
+          <a href="https://medoo.lvtao.net" class="menu purple-link">
+            MeDoo中文手册
+          </a>
+        
+      
+        
+          <a href="https://tool.lvtao.net" class="menu purple-link">
+            工具箱
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">MAC平台下tesseract-ocr视觉识别的相关库下载及配置</h2>
+          <div class="post-info post-detail-info">
+            
+             <div style="margin-top:5px;"><a href="https://app.cloudcone.com/?ref=9519" target="_blank">海外无需备案主机推荐，支持25端口邮件发送，无端口限制，支持支付宝、Paypal、信用卡等支付...</a></div>
+          </div>
+          <div class="post-content" v-pre>
+            <h2 id="安装相关依赖">安装相关依赖</h2>
+<pre><code># Packages which are always needed.
+brew install automake autoconf libtool
+brew install pkgconfig
+brew install icu4c
+brew install leptonica
+
+# Packages required for training tools.
+brew install pango
+
+# Optional packages for extra features.
+brew install libarchive
+
+# Optional package for builds using g++.
+brew install gcc
+</code></pre>
+<h2 id="下载tesseract">下载Tesseract</h2>
+<pre><code>brew install --all-languages --with-training-tools tesseract 
+ 
+brew install  tesserac
+</code></pre>
+<p>或直接下载并解压：<code>https://github.com/tesseract-ocr/tesseract/releases</code><br>
+编译安装</p>
+<pre><code>cd tesseract-4.1.1
+./autogen.sh
+mkdir build
+cd build
+
+# Optionally add CXX=g++-8 to the configure command if you really want to use a different compiler.
+../configure PKG_CONFIG_PATH=/usr/local/opt/icu4c/lib/pkgconfig:/usr/local/opt/libarchive/lib/pkgconfig:/usr/local/opt/libffi/lib/pkgconfig
+make -j
+
+# Optionally install Tesseract.
+sudo make install
+
+# Optionally build and install training tools.
+make training
+</code></pre>
+<h2 id="下载语言库">下载语言库</h2>
+<p>下载地址:<code>https://github.com/tesseract-ocr/tessdata</code><br>
+文件很大，可以根据需要语言自己选择<br>
+将文件拷贝到到：/tesseract/tessdata目录下</p>
+<table>
+<thead>
+<tr>
+<th>缩写</th>
+<th>库名</th>
+<th>语言</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>afr</td>
+<td>Afrikaans</td>
+<td>南非荷兰语</td>
+</tr>
+<tr>
+<td>amh</td>
+<td>Amharic</td>
+<td>阿姆哈拉语</td>
+</tr>
+<tr>
+<td>ara</td>
+<td>Arabic</td>
+<td>阿拉伯语</td>
+</tr>
+<tr>
+<td>asm</td>
+<td>Assamese</td>
+<td>阿萨姆</td>
+</tr>
+<tr>
+<td>aze</td>
+<td>Azerbaijani</td>
+<td>阿塞拜疆</td>
+</tr>
+<tr>
+<td>aze_cyrl</td>
+<td>Azerbaijani - Cyrilic</td>
+<td>阿塞拜疆-Cyrilic</td>
+</tr>
+<tr>
+<td>bel</td>
+<td>Belarusian</td>
+<td>白俄罗斯</td>
+</tr>
+<tr>
+<td>ben</td>
+<td>Bengali</td>
+<td>孟加拉</td>
+</tr>
+<tr>
+<td>bod</td>
+<td>Tibetan</td>
+<td>西藏</td>
+</tr>
+<tr>
+<td>bos</td>
+<td>Bosnian</td>
+<td>波斯尼亚</td>
+</tr>
+<tr>
+<td>bul</td>
+<td>Bulgarian</td>
+<td>保加利亚语</td>
+</tr>
+<tr>
+<td>cat</td>
+<td>Catalan; Valencian</td>
+<td>加泰罗尼亚语; 巴伦西亚</td>
+</tr>
+<tr>
+<td>ceb</td>
+<td>Cebuano</td>
+<td>宿务</td>
+</tr>
+<tr>
+<td>ces</td>
+<td>Czech</td>
+<td>捷克</td>
+</tr>
+<tr>
+<td>chi_sim</td>
+<td>Chinese - Simplified</td>
+<td>中国-简体</td>
+</tr>
+<tr>
+<td>chi_tra</td>
+<td>Chinese - Traditional</td>
+<td>中国-繁体</td>
+</tr>
+<tr>
+<td>chr</td>
+<td>Cherokee</td>
+<td>切诺基</td>
+</tr>
+<tr>
+<td>cym</td>
+<td>Welsh</td>
+<td>威尔士</td>
+</tr>
+<tr>
+<td>dan</td>
+<td>Danish</td>
+<td>丹麦</td>
+</tr>
+<tr>
+<td>dan_frak</td>
+<td>Danish - Fraktur</td>
+<td>丹麦-Fraktur</td>
+</tr>
+<tr>
+<td>deu</td>
+<td>German</td>
+<td>德国</td>
+</tr>
+<tr>
+<td>deu_frak</td>
+<td>German - Fraktur</td>
+<td>德国-Fraktur</td>
+</tr>
+<tr>
+<td>dzo</td>
+<td>Dzongkha</td>
+<td>不丹文</td>
+</tr>
+<tr>
+<td>ell</td>
+<td>Greek, Modern （1453-）</td>
+<td>希腊，现代（1453-）</td>
+</tr>
+<tr>
+<td>eng</td>
+<td>English</td>
+<td>英语</td>
+</tr>
+<tr>
+<td>enm</td>
+<td>English, Middle (1100-1500)</td>
+<td>英语，中东（1100-1500）</td>
+</tr>
+<tr>
+<td>epo</td>
+<td>Esperanto</td>
+<td>世界语</td>
+</tr>
+<tr>
+<td>equ</td>
+<td>Math / equation detection module</td>
+<td>数学/方程式检测模块</td>
+</tr>
+<tr>
+<td>est</td>
+<td>Estonian</td>
+<td>爱沙尼亚</td>
+</tr>
+<tr>
+<td>eus</td>
+<td>Basque</td>
+<td>巴斯克</td>
+</tr>
+<tr>
+<td>fas</td>
+<td>Persian</td>
+<td>波斯</td>
+</tr>
+<tr>
+<td>fin</td>
+<td>Finnish</td>
+<td>芬兰</td>
+</tr>
+<tr>
+<td>fra</td>
+<td>French</td>
+<td>法语</td>
+</tr>
+<tr>
+<td>frk</td>
+<td>Frankish</td>
+<td>法兰克</td>
+</tr>
+<tr>
+<td>frm</td>
+<td>French, Middle (ca.1400-1600)</td>
+<td>法国，中东（ca.1400-1600）</td>
+</tr>
+<tr>
+<td>gle</td>
+<td>Irish</td>
+<td>爱尔兰</td>
+</tr>
+<tr>
+<td>glg</td>
+<td>Galician</td>
+<td>加利西亚</td>
+</tr>
+<tr>
+<td>grc</td>
+<td>Greek, Ancient (to 1453)</td>
+<td>希腊语，古（到1453年）</td>
+</tr>
+<tr>
+<td>guj</td>
+<td>Gujarati</td>
+<td>古吉拉特语</td>
+</tr>
+<tr>
+<td>hat</td>
+<td>Haitian; Haitian Creole</td>
+<td>海天; 海地克里奥尔语</td>
+</tr>
+<tr>
+<td>heb</td>
+<td>Hebrew</td>
+<td>希伯来语</td>
+</tr>
+<tr>
+<td>hin</td>
+<td>Hindi</td>
+<td>印地文</td>
+</tr>
+<tr>
+<td>hrv</td>
+<td>Croatian</td>
+<td>克罗地亚</td>
+</tr>
+<tr>
+<td>hun</td>
+<td>Hungarian</td>
+<td>匈牙利</td>
+</tr>
+<tr>
+<td>iku</td>
+<td>Inuktitut</td>
+<td>因纽特语</td>
+</tr>
+<tr>
+<td>ind</td>
+<td>Indonesian</td>
+<td>印尼</td>
+</tr>
+<tr>
+<td>isl</td>
+<td>Icelandic</td>
+<td>冰岛</td>
+</tr>
+<tr>
+<td>ita</td>
+<td>Italian</td>
+<td>意大利语</td>
+</tr>
+<tr>
+<td>ita_old</td>
+<td>Italian - Old</td>
+<td>意大利语-旧</td>
+</tr>
+<tr>
+<td>jav</td>
+<td>Javanese</td>
+<td>爪哇</td>
+</tr>
+<tr>
+<td>jpn</td>
+<td>Japanese</td>
+<td>日本</td>
+</tr>
+<tr>
+<td>kan</td>
+<td>Kannada</td>
+<td>卡纳达语</td>
+</tr>
+<tr>
+<td>kat</td>
+<td>Georgian</td>
+<td>格鲁吉亚</td>
+</tr>
+<tr>
+<td>kat_old</td>
+<td>Georgian - Old</td>
+<td>格鲁吉亚-旧</td>
+</tr>
+<tr>
+<td>kaz</td>
+<td>Kazakh</td>
+<td>哈萨克斯坦</td>
+</tr>
+<tr>
+<td>khm</td>
+<td>Central Khmer</td>
+<td>中央高棉</td>
+</tr>
+<tr>
+<td>kir</td>
+<td>Kirghiz; Kyrgyz</td>
+<td>柯尔克孜; 吉尔吉斯</td>
+</tr>
+<tr>
+<td>kor</td>
+<td>Korean</td>
+<td>韩国</td>
+</tr>
+<tr>
+<td>kur</td>
+<td>Kurdish</td>
+<td>库尔德人</td>
+</tr>
+<tr>
+<td>lao</td>
+<td>Lao</td>
+<td>老挝</td>
+</tr>
+<tr>
+<td>lat</td>
+<td>Latin</td>
+<td>拉丁</td>
+</tr>
+<tr>
+<td>lav</td>
+<td>Latvian</td>
+<td>拉脱维亚</td>
+</tr>
+<tr>
+<td>lit</td>
+<td>Lithuanian</td>
+<td>立陶宛</td>
+</tr>
+<tr>
+<td>mal</td>
+<td>Malayalam</td>
+<td>马拉雅拉姆语</td>
+</tr>
+<tr>
+<td>mar</td>
+<td>Marathi</td>
+<td>马拉</td>
+</tr>
+<tr>
+<td>mkd</td>
+<td>Macedonian</td>
+<td>马其顿</td>
+</tr>
+<tr>
+<td>mlt</td>
+<td>Maltese</td>
+<td>马耳他</td>
+</tr>
+<tr>
+<td>msa</td>
+<td>Malay</td>
+<td>马来文</td>
+</tr>
+<tr>
+<td>mya</td>
+<td>Burmese</td>
+<td>缅甸</td>
+</tr>
+<tr>
+<td>nep</td>
+<td>Nepali</td>
+<td>尼泊尔</td>
+</tr>
+<tr>
+<td>nld</td>
+<td>Dutch; Flemish</td>
+<td>荷兰; 佛兰芒语</td>
+</tr>
+<tr>
+<td>nor</td>
+<td>Norwegian</td>
+<td>挪威</td>
+</tr>
+<tr>
+<td>ori</td>
+<td>Oriya</td>
+<td>奥里亚语</td>
+</tr>
+<tr>
+<td>osd</td>
+<td>Orientation and script detection module</td>
+<td>定位及脚本检测模块</td>
+</tr>
+<tr>
+<td>pan</td>
+<td>Panjabi; Punjabi</td>
+<td>旁遮普语; 旁遮普语</td>
+</tr>
+<tr>
+<td>pol</td>
+<td>Polish</td>
+<td>波兰</td>
+</tr>
+<tr>
+<td>por</td>
+<td>Portuguese</td>
+<td>葡萄牙语</td>
+</tr>
+<tr>
+<td>pus</td>
+<td>Pushto; Pashto</td>
+<td>普什图语; 普什图语</td>
+</tr>
+<tr>
+<td>ron</td>
+<td>Romanian; Moldavian; Moldovan</td>
+<td>罗马尼亚; 摩尔多瓦; 摩尔多瓦</td>
+</tr>
+<tr>
+<td>rus</td>
+<td>Russian</td>
+<td>俄罗斯</td>
+</tr>
+<tr>
+<td>san</td>
+<td>Sanskrit</td>
+<td>梵文</td>
+</tr>
+<tr>
+<td>sin</td>
+<td>Sinhala; Sinhalese</td>
+<td>僧伽罗语; 僧伽罗语</td>
+</tr>
+<tr>
+<td>slk</td>
+<td>Slovak</td>
+<td>斯洛伐克</td>
+</tr>
+<tr>
+<td>slk_frak</td>
+<td>Slovak - Fraktur</td>
+<td>斯洛伐克- Fraktur</td>
+</tr>
+<tr>
+<td>slv</td>
+<td>Slovenian</td>
+<td>斯洛文尼亚</td>
+</tr>
+<tr>
+<td>spa</td>
+<td>Spanish; Castilian</td>
+<td>西班牙语; 卡斯蒂利亚</td>
+</tr>
+<tr>
+<td>spa_old</td>
+<td>Spanish; Castilian - Old</td>
+<td>西班牙语; 卡斯蒂利亚-老</td>
+</tr>
+<tr>
+<td>sqi</td>
+<td>Albanian</td>
+<td>阿尔巴尼亚</td>
+</tr>
+<tr>
+<td>srp</td>
+<td>Serbian</td>
+<td>塞尔维亚</td>
+</tr>
+<tr>
+<td>srp_latn</td>
+<td>Serbian - Latin</td>
+<td>塞尔维亚语-拉丁语</td>
+</tr>
+<tr>
+<td>swa</td>
+<td>Swahili</td>
+<td>斯瓦希里语</td>
+</tr>
+<tr>
+<td>swe</td>
+<td>Swedish</td>
+<td>瑞典</td>
+</tr>
+<tr>
+<td>syr</td>
+<td>Syriac</td>
+<td>叙利亚</td>
+</tr>
+<tr>
+<td>tam</td>
+<td>Tamil</td>
+<td>泰米尔</td>
+</tr>
+<tr>
+<td>tel</td>
+<td>Telugu</td>
+<td>泰卢固语</td>
+</tr>
+<tr>
+<td>tgk</td>
+<td>Tajik</td>
+<td>塔吉克斯坦</td>
+</tr>
+<tr>
+<td>tgl</td>
+<td>Tagalog</td>
+<td>菲律宾语</td>
+</tr>
+<tr>
+<td>tha</td>
+<td>Thai</td>
+<td>泰国</td>
+</tr>
+<tr>
+<td>tir</td>
+<td>Tigrinya</td>
+<td>提格雷语</td>
+</tr>
+<tr>
+<td>tur</td>
+<td>Turkish</td>
+<td>土耳其</td>
+</tr>
+<tr>
+<td>uig</td>
+<td>Uighur; Uyghur</td>
+<td>维吾尔族; 维吾尔</td>
+</tr>
+<tr>
+<td>ukr</td>
+<td>Ukrainian</td>
+<td>乌克兰</td>
+</tr>
+<tr>
+<td>urd</td>
+<td>Urdu</td>
+<td>乌尔都语</td>
+</tr>
+<tr>
+<td>uzb</td>
+<td>Uzbek</td>
+<td>乌兹别克斯坦</td>
+</tr>
+<tr>
+<td>uzb_cyrl</td>
+<td>Uzbek - Cyrilic</td>
+<td>乌兹别克斯坦- Cyrilic</td>
+</tr>
+<tr>
+<td>vie</td>
+<td>Vietnamese</td>
+<td>越南语</td>
+</tr>
+<tr>
+<td>yid</td>
+<td>Yiddish</td>
+<td>意第绪语</td>
+</tr>
+</tbody>
+</table>
+<h2 id="识别测试">识别测试</h2>
+<p>终端输入命令</p>
+<pre><code>tesseract 00.png result/00
+</code></pre>
+<p>指定语言:</p>
+<pre><code>tesseract -l chi_sim imgName result
+</code></pre>
+<p>指定多语言，用+号相连</p>
+<pre><code>tesseract -l chi_sim+eng imgName result
+</code></pre>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://www.lvtao.net/post/go-ldflags-x-version/">
+              <h3 class="post-title">
+                下一篇：Go 项目版本号管理方案之ldflags  -X 变量传递
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <table>
+    <tr><td><a href="https://www.ioncube.com/?xp=TQLLZT"><img src="/media/ioncube.jpg" width="100%"/></a></td></tr>
+    <tr><td><a href="https://app.cloudcone.com/?ref=9519"><img src="/media/cloudcone.gif" width="100%"/></a></td></tr>
+  </table>
+  <div class="slogan"></div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  Powered by <a href="https://lvtao.net" target="_blank">LVTAO</a> | <a class="rss" href="https://www.lvtao.net/atom.xml" target="_blank">RSS</a>
+</div>
+<script 
+async
+defer
+src="https://ask.lvtao.net/api/application/embed?protocol=https&host=ask.lvtao.net&token=e193b47f92f1b41e">
+</script>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

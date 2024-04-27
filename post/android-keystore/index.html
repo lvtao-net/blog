@@ -1,0 +1,201 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>Android平台签名证书(.keystore)生成指南 | 吕滔博客</title>
+<meta name="description" content="">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://www.lvtao.net/favicon.ico?v=1714210602511">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://www.lvtao.net/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://www.lvtao.net">
+        <img class="avatar" src="https://www.lvtao.net/images/avatar.png?v=1714210602511" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://www.lvtao.net">
+        <h1 class="site-title">吕滔博客</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+        
+          <a href="https://medoo.lvtao.net" class="menu purple-link">
+            MeDoo中文手册
+          </a>
+        
+      
+        
+          <a href="https://tool.lvtao.net" class="menu purple-link">
+            工具箱
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">Android平台签名证书(.keystore)生成指南</h2>
+          <div class="post-info post-detail-info">
+            
+              <span>
+                <i class="icon-pricetags-outline"></i>
+                
+                  <a href="https://www.lvtao.net/tag/android/">
+                    android
+                    
+                  </a>
+                
+              </span>
+            
+             <div style="margin-top:5px;"><a href="https://app.cloudcone.com/?ref=9519" target="_blank">海外无需备案主机推荐，支持25端口邮件发送，无端口限制，支持支付宝、Paypal、信用卡等支付...</a></div>
+          </div>
+          <div class="post-content" v-pre>
+            <h3 id="生成证书">生成证书</h3>
+<p>使用keytool -genkey命令生成证书：</p>
+<pre><code>keytool -genkey -alias 证书别名 -keyalg RSA -keysize 2048 -validity 36500 -keystore 证书文件名称.keystore
+</code></pre>
+<p>回车后会提示：</p>
+<pre><code>Enter keystore password:  //输入证书文件密码，输入完成回车  
+Re-enter new password:   //再次输入证书文件密码，输入完成回车  
+What is your first and last name?  
+  [Unknown]:  //输入名字和姓氏，输入完成回车  
+What is the name of your organizational unit?  
+  [Unknown]:  //输入组织单位名称，输入完成回车  
+What is the name of your organization?  
+  [Unknown]:  //输入组织名称，输入完成回车  
+What is the name of your City or Locality?  
+  [Unknown]:  //输入城市或区域名称，输入完成回车  
+What is the name of your State or Province?  
+  [Unknown]:  //输入省/市/自治区名称，输入完成回车  
+What is the two-letter country code for this unit?  
+  [Unknown]:  //输入国家/地区代号（两个字母），中国为CN，输入完成回车  
+Is CN=XX, OU=XX, O=XX, L=XX, ST=XX, C=XX correct?  
+  [no]:  //确认上面输入的内容是否正确，输入y，回车  
+
+Enter key password for &lt;testalias&gt;  
+        (RETURN if same as keystore password):  //确认证书密码与证书文件密码一样 直接回车就可以
+</code></pre>
+<p>注意：上述信息填写要规范，乱填有可能会影响应用上架应用市场。</p>
+<h3 id="查看证书信息">查看证书信息:</h3>
+<pre><code>keytool -list -v -keystore 证书文件名称.keystore  
+Enter keystore password: //输入密码，回车
+</code></pre>
+<h3 id="查看证书算法的方法">查看证书算法的方法</h3>
+<p>使用<code>keytool -list -v</code>查看证书信息，看<code>Subject Public Key Algorithm: </code>项的信息，如下表示使用DSA算法：</p>
+<pre><code>Subject Public Key Algorithm: 2048-bit DSA key
+</code></pre>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://www.lvtao.net/post/php-btc-eth-ltc-key/">
+              <h3 class="post-title">
+                下一篇：使用PHP生成以太坊、比特币、莱特币的地址带私钥
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <table>
+    <tr><td><a href="https://www.ioncube.com/?xp=TQLLZT"><img src="/media/ioncube.jpg" width="100%"/></a></td></tr>
+    <tr><td><a href="https://app.cloudcone.com/?ref=9519"><img src="/media/cloudcone.gif" width="100%"/></a></td></tr>
+  </table>
+  <div class="slogan"></div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  Powered by <a href="https://lvtao.net" target="_blank">LVTAO</a> | <a class="rss" href="https://www.lvtao.net/atom.xml" target="_blank">RSS</a>
+</div>
+<script 
+async
+defer
+src="https://ask.lvtao.net/api/application/embed?protocol=https&host=ask.lvtao.net&token=e193b47f92f1b41e">
+</script>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

@@ -1,0 +1,182 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>otpauth格式详解 | 吕滔博客</title>
+<meta name="description" content="">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://www.lvtao.net/favicon.ico?v=1714210602511">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://www.lvtao.net/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://www.lvtao.net">
+        <img class="avatar" src="https://www.lvtao.net/images/avatar.png?v=1714210602511" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://www.lvtao.net">
+        <h1 class="site-title">吕滔博客</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+        
+          <a href="https://medoo.lvtao.net" class="menu purple-link">
+            MeDoo中文手册
+          </a>
+        
+      
+        
+          <a href="https://tool.lvtao.net" class="menu purple-link">
+            工具箱
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">otpauth格式详解</h2>
+          <div class="post-info post-detail-info">
+            
+             <div style="margin-top:5px;"><a href="https://app.cloudcone.com/?ref=9519" target="_blank">海外无需备案主机推荐，支持25端口邮件发送，无端口限制，支持支付宝、Paypal、信用卡等支付...</a></div>
+          </div>
+          <div class="post-content" v-pre>
+            <p>OTP（One-Time Password，一次性密码）是一种用于身份验证的技术，其核心是生成一个只能使用一次的密码。OTPauth是一种将OTP信息编码成URI格式的标准，以便于在不同设备间进行传递和存储。</p>
+<p>OTPauth URI格式如下：</p>
+<pre><code>otpauth://TYPE/LABEL?PARAMETERS
+</code></pre>
+<p>其中，TYPE表示OTP的类型，可以是以下几种：</p>
+<ul>
+<li>totp：基于时间的OTP，如Google Authenticator</li>
+<li>hotp：基于计数的OTP，如YubiKey</li>
+<li>steam：用于Steam平台的OTP</li>
+</ul>
+<p>LABEL表示与OTP相关联的标签，可以是任何字符串，但最好是人类可读的。</p>
+<p>PARAMETERS是一个包含参数的查询字符串，参数可以是以下几种：</p>
+<ul>
+<li>secret：必需，OTP的密钥，可以是Base32编码的字符串或者HEX编码的字符串。</li>
+<li>issuer：可选，发行人的名称，一般用于标识OTP的来源，如Google、Facebook等。</li>
+<li>algorithm：可选，OTP的加密算法，可以是SHA1、SHA256、SHA512之一，默认为SHA1。</li>
+<li>digits：可选，OTP的位数，可以是6或8，默认为6。</li>
+<li>counter：可选，用于hotp类型的计数器。</li>
+<li>period：可选，用于totp类型的时间周期，单位为秒，默认为30秒。</li>
+<li>image：可选，与OTP相关联的图像，可以是任何URI格式的图片地址。</li>
+</ul>
+<p>例如，一个基于时间的OTPauth URI可以是这样的：</p>
+<pre><code>otpauth://totp/example.com?secret=JBSWY3DPEHPK3PXP&amp;issuer=Example&amp;algorithm=SHA256&amp;digits=8&amp;period=60
+</code></pre>
+<p>其中，LABEL为example.com，PARAMETERS包含了secret、issuer、algorithm、digits和period等参数。</p>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://www.lvtao.net/post/golang-gorm-tag/">
+              <h3 class="post-title">
+                下一篇：GoLang之gorm库中tag小解
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <table>
+    <tr><td><a href="https://www.ioncube.com/?xp=TQLLZT"><img src="/media/ioncube.jpg" width="100%"/></a></td></tr>
+    <tr><td><a href="https://app.cloudcone.com/?ref=9519"><img src="/media/cloudcone.gif" width="100%"/></a></td></tr>
+  </table>
+  <div class="slogan"></div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  Powered by <a href="https://lvtao.net" target="_blank">LVTAO</a> | <a class="rss" href="https://www.lvtao.net/atom.xml" target="_blank">RSS</a>
+</div>
+<script 
+async
+defer
+src="https://ask.lvtao.net/api/application/embed?protocol=https&host=ask.lvtao.net&token=e193b47f92f1b41e">
+</script>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

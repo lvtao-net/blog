@@ -1,0 +1,472 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>Percona XtraBackup 8.0数据库备份工具安装、备份、加密与还原 | 吕滔博客</title>
+<meta name="description" content="">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://www.lvtao.net/favicon.ico?v=1714210602511">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://www.lvtao.net/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://www.lvtao.net">
+        <img class="avatar" src="https://www.lvtao.net/images/avatar.png?v=1714210602511" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://www.lvtao.net">
+        <h1 class="site-title">吕滔博客</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+        
+          <a href="https://medoo.lvtao.net" class="menu purple-link">
+            MeDoo中文手册
+          </a>
+        
+      
+        
+          <a href="https://tool.lvtao.net" class="menu purple-link">
+            工具箱
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">Percona XtraBackup 8.0数据库备份工具安装、备份、加密与还原</h2>
+          <div class="post-info post-detail-info">
+            
+              <span>
+                <i class="icon-pricetags-outline"></i>
+                
+                  <a href="https://www.lvtao.net/tag/mysql/">
+                    mysql
+                    
+                  </a>
+                
+              </span>
+            
+             <div style="margin-top:5px;"><a href="https://app.cloudcone.com/?ref=9519" target="_blank">海外无需备案主机推荐，支持25端口邮件发送，无端口限制，支持支付宝、Paypal、信用卡等支付...</a></div>
+          </div>
+          <div class="post-content" v-pre>
+            <h3 id="介绍">介绍</h3>
+<p>Percona XtraBackup是由以下几个二进制文件组成的：</p>
+<ul>
+<li>xtrabackup：一个已编译的C语言二进制文件，提供了备份包括MyISAM、InnoDB和XtraDB表在内的整个MySQL数据库实例的功能。</li>
+<li>xbcrypt：用于加密和解密备份文件的实用工具。</li>
+<li>xbstream：一个实用工具，允许在xbstream格式与文件之间进行流式传输和提取。</li>
+<li>xbcloud：用于从云端下载和上传xbstream存档的部分或全部内容的实用工具。</li>
+</ul>
+<h4 id="xtrabackup">xtrabackup</h4>
+<p>xtrabackup二进制文件是一个已编译的C程序，它与InnoDB库和标准MySQL客户端库链接在一起。</p>
+<p>xtrabackup使得可以进行InnoDB/XtraDB表的按时间点备份，同时包括了模式定义、MyISAM表以及服务器的其他部分。</p>
+<p>InnoDB库提供了将日志应用到数据文件的功能。MySQL客户端库用于解析命令行选项和配置文件。</p>
+<p>该工具在<code>--backup</code>模式或<code>--prepare</code>模式下运行，对应于它执行的两个主要功能。有几种不同的变体来完成不同的任务，还有两种不常用的模式，<code>--stats</code>和<code>--print-param</code>。</p>
+<h4 id="xbcrypt">xbcrypt</h4>
+<p>为了支持备份的加密和解密，Percona XtraBackup引入了一个名为&quot;xbcrypt&quot;的新工具。</p>
+<p>Percona XtraBackup 8.0.28-20版本实现了&quot;XBCRYPT_ENCRYPTION_KEY&quot;环境变量。该变量仅在代替&quot;-encrypt_key=name&quot;选项的位置使用。您可以使用环境变量或命令行选项。如果两者都使用，则命令行选项优先于环境变量中指定的值。</p>
+<p>这个工具的设计灵感来自于&quot;xbstream&quot;二进制工具，用于在Percona XtraBackup之外执行加密和解密操作。“xbcrypt&quot;具有以下命令行选项：</p>
+<ul>
+<li>-d, --decrypt()：解密输入数据到输出。</li>
+<li>-i, --input(=name)：可选的输入文件。如果未指定，将从标准输入读取输入。</li>
+<li>-o, --output(=name)：可选的输出文件。如果未指定，输出将写入标准输出。</li>
+<li>-a, --encrypt-algo(=name)：加密算法。</li>
+<li>-k, --encrypt-key(=name)：加密密钥。</li>
+<li>-f, --encrypt-key-file(=name)：包含加密密钥的文件。</li>
+<li>-s, --encrypt-chunk-size(=#)：加密工作缓冲区的大小（以字节为单位）。默认值为64K。</li>
+<li>--encrypt-threads(=#)：该选项指定用于并行加密/解密的工作线程数。</li>
+<li>-v, --verbose()：显示详细状态输出。</li>
+</ul>
+<h4 id="xbstream">xbstream</h4>
+<p>为了支持同时压缩和流式传输，除了TAR格式外，Percona XtraBackup还引入了一个名为&quot;xbstream&quot;的新自定义流式传输格式。这是为了克服传统归档格式（如tar、cpio等）的一些限制，这些格式不允许流式传输动态生成的文件，例如动态压缩文件。与传统流式传输/归档格式相比，xbstream的其他优势包括能够同时流式传输多个文件（因此可以将xbstream格式的流式传输与”–parallel&quot;选项一起使用），以及更紧凑的数据存储。</p>
+<p>该工具具有类似于tar命令的接口：</p>
+<ul>
+<li>使用&quot;-x&quot;选项，它从从标准输入读取的流中提取文件到当前目录，除非通过&quot;-c&quot;选项另有指定。Percona XtraBackup 2.4.7中实现了支持使用&quot;–parallel&quot;选项进行并行提取。</li>
+<li>使用&quot;-c&quot;选项，它将命令行上指定的文件流式传输到标准输出。</li>
+<li>使用&quot;–decrypt=ALGO&quot;选项指定，当从输入流中提取文件时，xbstream将自动解密加密文件。此选项支持的值为：AES128、AES192和AES256。必须指定&quot;–encrypt-key&quot;或&quot;–encrypt-key-file&quot;选项之一以提供加密密钥，但不能同时使用两者。此选项在Percona XtraBackup 2.4.7中实现。</li>
+<li>使用&quot;–encrypt-threads&quot;选项，您可以指定用于并行数据加密的线程数。默认值为1。此选项在Percona XtraBackup 2.4.7中实现。</li>
+<li>使用&quot;–encrypt-key&quot;选项来指定将要使用的加密密钥。它不能与&quot;–encrypt-key-file&quot;选项一起使用，因为它们是互斥的。此选项在Percona XtraBackup 2.4.7中实现。</li>
+<li>使用&quot;–encrypt-key-file&quot;选项来指定包含加密密钥的文件。它不能与&quot;–encrypt-key&quot;选项一起使用，因为它们是互斥的。此选项在Percona XtraBackup 2.4.7中实现。</li>
+</ul>
+<p>该工具还尝试通过在可用时使用适当的posix_fadvise()调用来减少对操作系统页面缓存的影响。</p>
+<p>当使用xtrabackup启用压缩时，所有数据都会被压缩，包括事务日志文件和元数据文件，使用指定的压缩算法</p>
+<h4 id="xbcloud">xbcloud</h4>
+<p>xbcloud 的目的是从云端下载或上传完整或部分的xbstream归档。xbcloud不会用相同名称覆盖备份。xbcloud通过管道接受来自xbstream的输入，这样它就可以与xtrabackup一起作为流水线调用，直接将数据流式传输到云端，而无需本地存储。<br>
+例如需要将备份存储到s3时，可以使用xbcloud。</p>
+<h3 id="安装">安装</h3>
+<p>Percona官方建议使用适用于系统的适当的软件包管理器从官方的Percona软件仓库安装Percona XtraBackup 8.0:</p>
+<ul>
+<li><a href="https://docs.percona.com/percona-xtrabackup/8.0/apt-repo.html">使用APT仓库安装Percona XtraBackup</a></li>
+<li>[使用YUM仓库安装Percona XtraBackup] (https://docs.percona.com/percona-xtrabackup/8.0/yum-repo.html)</li>
+<li><a href="https://docs.percona.com/percona-xtrabackup/8.0/apt-download-deb.html">使用下载的DEB软件包安装Percona XtraBackup</a></li>
+<li><a href="https://docs.percona.com/percona-xtrabackup/8.0/yum-download-rpm.html">使用下载的RPM软件包安装Percona XtraBackup</a></li>
+<li><a href="https://docs.percona.com/percona-xtrabackup/8.0/binary-tarball.html">从包含所有所需文件和二进制文件的二进制tarball中安装Percona XtraBackup以进行手动安装</a></li>
+<li><a href="https://docs.percona.com/percona-xtrabackup/8.0/compile-xtrabackup.html">从源代码编译并安装Percona XtraBackup</a></li>
+<li><a href="https://docs.percona.com/percona-xtrabackup/8.0/docker.html">在Docker容器中运行Percona XtraBackup</a></li>
+</ul>
+<p>在离线环境下，可以使用下载软件包安装的方式，软件包下载地址位于<a href="https://www.percona.com/downloads">https://www.percona.com/downloads</a>，在页面上找到Percona XtraBackup，选择版本和具体平台的安装包下载。</p>
+<h3 id="命令行参数参考">命令行参数参考</h3>
+<p>可以在以下模式之一中调用xtrabackup：</p>
+<ul>
+<li>--backup模式，用于在目标目录中进行备份</li>
+<li>--prepare模式，用于从备份中恢复数据（在--backup模式下创建）</li>
+<li>--copy-back模式，用于从备份中复制数据到原始数据所在的位置；若要移动数据而不是复制，请使用替代的--move-back模式。</li>
+<li>--stats模式，用于扫描指定的数据文件并打印出索引统计信息。</li>
+</ul>
+<p>当你打算在这些模式中运行xtrabackup时，请使用以下语法：<br>
+<code>xtrabackup [--defaults-file=#] --backup|--prepare|--copy-back|--stats [OPTIONS]</code><br>
+例如，--prepare模式的应用如下：<br>
+<code>xtrabackup --prepare --target-dir=/data/backup/mysql/</code><br>
+对于所有模式，将从以下顺序中的给定文件读取xtrabackup和mysqld配置组的默认选项：</p>
+<pre><code>/etc/my.cnf
+/etc/mysql/my.cnf
+/usr/etc/my.cnf
+~/.my.cnf
+</code></pre>
+<p>作为xtrabackup的第一个参数（替代--defaults-file），你可以提供以下之一：</p>
+<ul>
+<li>--print-defaults，使xtrabackup打印参数列表并退出。</li>
+<li>--no-defaults，禁止从任何文件读取选项，仅从登录文件读取。</li>
+<li>--defaults-file，从给定文件中读取默认选项。</li>
+<li>--defaults-extra-file，在全局文件读取后，读取指定的附加文件。</li>
+<li>--defaults-group-suffix，读取具有给定后缀的配置组。有效的组名由连接默认配置组（xtrabackup和mysqld）与给定后缀构成。</li>
+<li>--login-path，从登录文件中读取给定路径。</li>
+</ul>
+<p>InnoDB参数选项<br>
+有一大组InnoDB选项通常从my.cnf配置文件中读取，以便xtrabackup以与当前服务器相同的配置启动其内嵌的InnoDB。通常情况下，你不需要显式指定它们。这些选项在InnoDB和XtraDB中具有相同的行为。</p>
+<p>参考 <a href="https://docs.percona.com/percona-xtrabackup/8.0/xtrabackup-option-reference.html#modes-of-operation">官方文档</a></p>
+<h3 id="备份恢复数据">备份恢复数据</h3>
+<h4 id="创建备份专用用户">创建备份专用用户</h4>
+<p>Percona XtraBackup需要能够连接到数据库服务器，并在创建备份时、在某些场景下准备备份以及在还原备份时执行操作。为了实现这一点，对其执行所需的Privilege和权限Permissions要求必须得到满足。</p>
+<ul>
+<li>Privilege:指的是系统用户在数据库服务器中被允许执行的操作。它们在数据库服务器上设置，仅适用于数据库服务器中的用户。</li>
+<li>Permissions: 允许用户在系统上执行操作，比如在某个目录上读取、写入或执行，或者启动/停止系统服务。它们在系统级别上设置，仅适用于系统用户。</li>
+</ul>
+<p>当使用xtrabackup时，涉及到两个用户：</p>
+<ul>
+<li>一个系统用户 - 调用程序的用户</li>
+<li>一个数据库用户 - 以及在数据库服务器中执行操作的用户</li>
+</ul>
+<p>需要注意，这些是不同的用户，虽然它们可能具有相同的用户名，但是在不同的位置上。</p>
+<ul>
+<li>对于数据库用户虽然可以使用root用户，但还是建议创建一个专门用于备份的数据库用户，此用户需要以下权限(Privilege)才能备份表或数据库:</li>
+<li>RELOAD和LOCK TABLES（除非指定了--no-lock选项）以便在开始复制文件之前运行FLUSH TABLES WITH READ LOCK和FLUSH ENGINE LOGS，当使用Backup Locks 时，需要此权限。</li>
+<li>需要BACKUP_ADMIN来查询performance_schema.log_status表，并运行LOCK INSTANCE FOR BACKUP、LOCK BINLOG FOR BACKUP或LOCK TABLES FOR BACKUP。</li>
+<li>需要REPLICATION CLIENT权限以获取二进制日志位置信息。</li>
+<li>需要CREATE TABLESPACE权限以导入表（还原单独的表时有用）。</li>
+<li>需要PROCESS权限以运行SHOW ENGINE INNODB STATUS（这是必需的），并且选择性地查看在服务器上运行的所有线程。</li>
+<li>需要SUPER权限以在复制环境中启动/停止复制线程，使用XtraDB Changed Page Tracking进行增量备份，并处理·FLUSH TABLES WITH READ LOCK·。</li>
+<li>需要CREATE权限以创建PERCONA_SCHEMA.xtrabackup_history数据库和表。</li>
+<li>需要ALTER权限以升级PERCONA_SCHEMA.xtrabackup_history数据库和表。</li>
+<li>需要INSERT权限以将历史记录添加到PERCONA_SCHEMA.xtrabackup_history表。</li>
+<li>需要SELECT权限以在使用--incremental-history-name或--incremental-history-uuid时，允许特性在PERCONA_SCHEMA.xtrabackup_history表中查找innodb_to_lsn值。</li>
+<li>在使用keyring时，需要在keyring_component_status表上具有SELECT权限，以查看已安keyring组件的属性和状态。</li>
+<li>需要在replication_group_members表上具有 SELECT 权限，以验证实例是否属于组复制集群。</li>
+</ul>
+<p>创建一个具备进行完整备份所需最小特权的数据库用户的 SQL 示例如下：</p>
+<pre><code class="language-sql">CREATE USER 'bkpuser'@'localhost' IDENTIFIED BY '123456';
+GRANT BACKUP_ADMIN, PROCESS, RELOAD, LOCK TABLES, REPLICATION CLIENT,CREATE TABLESPACE ON *.* TO 'bkpuser'@'localhost';
+GRANT SELECT ON performance_schema.log_status TO 'bkpuser'@'localhost';
+GRANT SELECT ON performance_schema.keyring_component_status TO bkpuser@'localhost';
+GRANT SELECT ON performance_schema.replication_group_members TO bkpuser@'localhost';
+FLUSH PRIVILEGES;
+</code></pre>
+<p>请确保将<code>123456</code>替换为要为<code>bkpuser</code>设置的实际密码，并根据需要调整主机地址。以上SQL语句将创建一个名为bkpuser的数据库用户，并授予所需的最小权限，以便执行备份操作。</p>
+<p>创建完成后可以使用下面的命令查询此用户的权限:</p>
+<pre><code class="language-sql"> SHOW GRANTS FOR 'bkpuser'@'localhost';
+
++------------------------------------------------------------------------------------------------------------------+
+| Grants for bkpuser@localhost                                                                              |
++------------------------------------------------------------------------------------------------------------------+
+| GRANT RELOAD, PROCESS, LOCK TABLES, REPLICATION CLIENT, CREATE TABLESPACE ON *.* TO `bkpuser`@`localhost` |
+| GRANT BACKUP_ADMIN ON *.* TO `bkpuser`@`localhost`                                                        |
+| GRANT SELECT, INSERT, CREATE, ALTER ON `PERCONA_SCHEMA`.`xtrabackup_history` TO `bkpuser`@`localhost`     |
+| GRANT SELECT ON `performance_schema`.`keyring_component_status` TO `bkpuser`@`localhost`                  |
+| GRANT SELECT ON `performance_schema`.`log_status` TO `bkpuser`@`localhost`                                |
+| GRANT SELECT ON `performance_schema`.`replication_group_members` TO `bkpuser`@`localhost`                 |
++------------------------------------------------------------------------------------------------------------------+
+6 rows in set (0.00 sec)
+</code></pre>
+<h4 id="全量备份">全量备份</h4>
+<h5 id="创建全量备份">创建全量备份</h5>
+<p>要启动备份过程，请运行以下命令：</p>
+<pre><code class="language-sh">xtrabackup --defaults-file=/etc/my.cnf --backup \
+        --user=bkpuser --password --host=localhost --port=3306 \
+        --use-memory=1GB --rsync \
+        --target-dir=/home/mysql/backups/2023-11-11
+</code></pre>
+<ul>
+<li>--backup表示以backup模式运行xtrabackup，在目标目录中创建备份</li>
+<li>--defaults-file 表示仅从给定文件中读取默认选项，配置为要备份的MySQL实例的配置文件</li>
+<li>--user 此选项指定连接到服务器时使用的 MySQL 用户名</li>
+<li>--password没有直接给定密码，这将提示用户手动输入密码</li>
+<li>--target-dir选项，该选项指定备份将存储的位置。如果InnoDB数据或日志文件不存储在同一目录中，可能还需要指定它们的位置。如果目标目录不存在，xtrabackup将创建它。如果目录已经存在且为空，xtrabackup将成功执行。xtrabackup不会覆盖现有文件，如果存在文件，它将失败并显示文件已经存在的错误。</li>
+</ul>
+<p>启动备份后，将在/home/mysql/backups/2023-11-11中存储备份。</p>
+<p>在备份过程中，会看到大量输出，显示数据文件正在被复制，以及日志文件线程重复扫描日志文件并从中复制数据。以下是一个示例，显示了后台中的日志线程扫描日志，以及一个正在处理ibdata1文件的文件复制线程：</p>
+<pre><code class="language-txt">Finished backing up non-InnoDB tables and files
+Executing FLUSH NO_WRITE_TO_BINLOG ENGINE LOGS...
+completed OK!
+</code></pre>
+<p>你最后应该会看到类似以下内容的输出，其中<LSN>的值将是一个依赖于你的系统的数字：<br>
+<code>xtrabackup: Transaction log of lsn (&lt;LSN&gt;) to (&lt;LSN&gt;) was copied.</code></p>
+<p>注意：日志复制线程每秒钟检查事务日志，以查看是否有新的日志记录需要复制，但有可能日志复制线程无法跟上写入事务日志的数量，从而在日志记录被覆盖之前无法读取时遇到错误。</p>
+<p>备份完成后，目标目录将包含诸如以下文件（假设你有一个名为test.tbl1的单个InnoDB表，并且正在使用MySQL的innodb_file_per_table选项）：<br>
+<code>ls -lh /data/backups/</code></p>
+<p>结果应该类似于这样：</p>
+<pre><code class="language-txt">total 182M
+.
+..
+backup-my.cnf
+ibdata1
+mysql
+performance_schema
+sbtest
+test
+world2
+xtrabackup_checkpoints
+xtrabackup_info
+xtrabackup_logfile
+</code></pre>
+<p>备份可能需要很长时间，具体取决于数据库的大小。你可以随时安全地取消备份，因为xtrabackup不会修改数据库。</p>
+<p>接下来的步骤是准备备份以便恢复数据。</p>
+<h5 id="准备prepare全量备份">准备(Prepare)全量备份</h5>
+<p>在使用--backup选项创建完备份之后，需要对其进行准备，以便进行恢复。数据文件在进行准备之前不是处于时间点一致状态，因为它们在程序运行时在不同的时间点被复制，并且在此期间可能已被更改。</p>
+<p>如果尝试使用这些数据文件启动InnoDB，它会检测到损坏并停止工作，以避免在损坏的数据上运行。--prepare步骤将文件在一个单一的时间点上使其完全一致，这样就可以在其上运行InnoDB。</p>
+<p>可以在任何机器上运行准备操作；它不需要在原始服务器上或打算恢复到的服务器上运行。可以将备份复制到一个实用程序服务器并在那里进行准备。</p>
+<p>请注意，Percona XtraBackup 8.0 只能准备 MySQL 8.0、Percona Server for MySQL 8.0 和 Percona XtraDB Cluster 8.0 数据库的备份。8.0 之前的版本不受支持。</p>
+<p>在准备操作期间，xtrabackup 启动了一种修改过的嵌入式 InnoDB（链接到 xtrabackup 的库）。这些修改是必要的，以禁用InnoDB的标准安全检查，例如对日志文件大小不正确的警报。这个警告不适用于备份操作。这些修改仅适用于xtrabackup二进制文件；无需修改InnoDB即可使用xtrabackup进行备份。</p>
+<p>准备步骤使用这个“嵌入式 InnoDB”在复制的数据文件上执行崩溃恢复，使用复制的日志文件。准备步骤非常简单：只需使用-prepare选项运行 xtrabackup，并告诉它要准备的目录，例如，要准备先前创建的备份，运行以下命令：</p>
+<pre><code class="language-sh">xtrabackup --prepare --target-dir=/home/mysql/backups/2023-11-11
+</code></pre>
+<p>当此操作完成时，你应该会看到一个 InnoDB 关闭的消息，消息类似下面的内容，其中 LSN 的值将取决于你的系统：</p>
+<pre><code class="language-txt">InnoDB: Shutdown completed;
+completed OK!
+</code></pre>
+<p>所有后续的准备操作都不会更改已准备好的数据文件，你会看到输出显示：</p>
+<pre><code class="language-txt">xtrabackup: This target seems to be already prepared.
+xtrabackup: notice: xtrabackup_logfile was already used to '--prepare'.
+</code></pre>
+<p>不建议在准备备份过程中中断xtrabackup进程，因为这可能会导致数据文件损坏，备份将变得不可用。如果准备过程被中断，备份的有效性将无法保证。</p>
+<p>如果你打算将备份用作进一步的增量备份的基础，你应该在准备备份时使用--apply-log-only选项，否则你将无法对其应用增量备份。</p>
+<p>在准备完备份后，就可以恢复备份数据。</p>
+<h5 id="还原全量备份">还原全量备份</h5>
+<p>注意: 备份在恢复之前需要进行准备。</p>
+<p>为了方便起见，xtrabackup提供了--copy-back选项，可以将备份复制到服务器的数据目录中：</p>
+<pre><code class="language-sh">xtrabackup --copy-back --target-dir=/home/mysql/backups/2023-11-11
+</code></pre>
+<p>如果你不想保留备份，可以使用--move-back选项，它将备份的数据移动到数据目录。</p>
+<p>在恢复备份之前，数据目录（datadir）必须为空。另外，需要注意的是，在执行恢复操作之前必须关闭MySQL服务器。你不能将备份恢复到正在运行的mysqld实例的数据目录中（除非在导入部分备份时）。</p>
+<p>你应该检查恢复后的文件是否具有正确的所有权和权限。</p>
+<p>由于文件的属性将被保留，大多数情况下，在启动数据库服务器之前，你需要将文件的所有权更改为mysql用户，因为这些文件的所有权将属于创建备份的用户：</p>
+<pre><code class="language-sh">chown -R mysql:mysql /var/lib/mysql
+</code></pre>
+<p>数据现在已经恢复，就可以启动mysqld服务了。</p>
+<h5 id="增量备份">增量备份</h5>
+<p>xtrabackup支持增量备份，这意味着它们可以复制自上次备份以来发生变化的所有数据。<br>
+注意: MyRocks存储引擎上的增量备份不会确定之前的完整备份或增量备份是否包含相同的文件。Percona XtraBackup每次进行备份时都会复制所有MyRocks文件。</p>
+<p>你可以在每个完整备份之间执行多次增量备份，因此你可以设置一个备份流程，例如每周进行一次完整备份，每天进行一次增量备份，或者每天进行一次完整备份，每小时进行一次增量备份。</p>
+<p>增量备份的原理是每个InnoDB页面都包含一个日志序列号（LSN）。LSN是整个数据库的系统版本号。每个页面的LSN显示了它的最近更改时间。</p>
+<p>增量备份会复制每个页面，其LSN较新于上一个增量备份或完整备份的LSN。算法会找到满足条件的页面，并读取数据页面并检查页面的LSN。</p>
+<h6 id="创建一个增量备份">创建一个增量备份</h6>
+<p>要创建增量备份，像往常一样从完整备份开始。xtrabackup会将一个名为xtrabackup_checkpoints的文件写入备份的目标目录中。该文件包含一行显示to_lsn，即备份结束时数据库的LSN。使用以下命令创建完整备份：</p>
+<pre><code class="language-sh">xtrabackup --defaults-file=/etc/my.cnf --backup \
+        --user=bkpuser --password --host=localhost --port=3306 \
+        --use-memory=1GB --rsync \
+        --target-dir=/home/mysql/backups/2023-11-11
+</code></pre>
+<p>如果你查看xtrabackup_checkpoints文件，你应该会看到类似的内容，具体内容会根据你的LSN 编号而变化：</p>
+<pre><code class="language-ini">backup_type = full-backuped
+from_lsn = 0
+to_lsn = 33431096
+last_lsn = 33431096
+flushed_lsn = 33431096
+redo_memory = 0
+redo_frames = 0
+</code></pre>
+<p>现在你已经拥有了一个完整的备份，你可以基于它创建一个增量备份。使用以下命令：</p>
+<pre><code class="language-sh">xtrabackup --defaults-file=/etc/my.cnf --backup \
+        --user=bkpuser --password --host=localhost --port=3306 \
+        --use-memory=1GB --rsync \
+        --target-dir=/home/mysql/backups/2023-11-11_inc1 \
+        --incremental-basedir=/home/mysql/backups/2023-11-11
+</code></pre>
+<p>现在，/home/mysql/backups/2023-11-11_inc1 目录应该包含增量文件，例如 ibdata1.delta 和 test/table1.ibd.delta。这些文件表示从LSN 33431096 开始的更改。如果你检查该目录中的 xtrabackup_checkpoints 文件，你应该会看到类似以下内容的信息：</p>
+<pre><code class="language-ini">backup_type = incremental
+from_lsn = 33431096
+to_lsn = 33431992
+last_lsn = 33431992
+flushed_lsn = 33431992
+redo_memory = 0
+redo_frames = 0
+</code></pre>
+<p>from_lsn 是备份的起始LSN，对于增量备份，它必须与前一个基本备份的 to_lsn（如果是上一个检查点的最后一个 LSN）相同。</p>
+<p>现在，你可以将此目录作为另一个增量备份的基础目录：</p>
+<pre><code class="language-sh">xtrabackup --defaults-file=/etc/my.cnf --backup \
+        --user=bkpuser --password --host=localhost --port=3306 \
+        --use-memory=1GB --rsync \
+        --target-dir=/home/mysql/backups/2023-11-11_inc2 \
+        --incremental-basedir=/home/mysql/backups/2023-11-11_inc1
+</code></pre>
+<p>备份后/home/mysql/backups/2023-11-11_inc2这个文件夹还包含了xtrabackup_checkpoints文件：</p>
+<pre><code class="language-ini">backup_type = incremental
+from_lsn = 33431992
+to_lsn = 33435246
+last_lsn = 33435246
+flushed_lsn = 33435246
+redo_memory = 0
+redo_frames = 0
+</code></pre>
+<p>下一步是准备备份，以便进行还原。</p>
+<h6 id="准备增量备份">准备增量备份</h6>
+<p>增量备份的--prepare步骤与完全备份不同。在完全备份中，为了使数据库一致，执行两种类型的操作：已提交的事务从日志文件中重新执行到数据文件，未提交的事务被回滚。在准备增量备份时，必须跳过未提交事务的回滚操作，因为在备份时未提交的事务可能正在进行中，并且很可能会在下一个增量备份中被提交。你应该使用--apply-log-only选项来防止回滚阶段的执行。</p>
+<p>如果你不使用--apply-log-only选项来防止回滚阶段的执行，那么你的增量备份将是无用的。在事务被回滚后，将无法应用进一步的增量备份。</p>
+<p>从你创建的完整备份开始，你可以准备它，然后将增量差异应用于它。查看一下各个备份目录:</p>
+<pre><code>du -sh /home/mysql/backups/*
+/home/mysql/backups/2023-11-11
+/home/mysql/backups/2023-11-11_inc1
+/home/mysql/backups/2023-11-11_inc2
+</code></pre>
+<p>要准备基本备份，你需要像往常一样运行--prepare命令，但是要通过--apply-log-only阻止回滚阶段：</p>
+<p>xtrabackup --prepare --apply-log-only --target-dir=/home/mysql/backups/2023-11-11<br>
+输出的末尾应该类似于以下内容：</p>
+<pre><code class="language-txt">InnoDB: Shutdown completed
+completed OK!
+</code></pre>
+<p>日志序列号应该与之前所看到的基本备份的to_lsn匹配。</p>
+<p>警告: 即使跳过了回滚阶段，此备份现在实际上是可以安全恢复的。如果你恢复它并启动MySQL，InnoDB将检测到回滚阶段未执行，它会在后台执行回滚阶段，就像在启动时进行崩溃恢复一样。它会通知你数据库未正常关闭。</p>
+<p>要将第一个增量备份应用到完整备份中，请运行以下命令：</p>
+<pre><code class="language-sh">xtrabackup --prepare --apply-log-only --target-dir=/home/mysql/backups/2023-11-11 \
+--incremental-dir=/home/mysql/backups/2023-11-11_inc1
+</code></pre>
+<p>这将增量文件应用于 /home/mysql/backups/2023-11-11 目录中的文件，将它们向前滚动到增量备份的时间。然后按通常的方式应用redo日志到结果中。最终的数据位于 /home/mysql/backups/2023-11-11 目录中，而不在增量目录中。</p>
+<p>Percona XtraBackup不支持使用同一个增量备份目录来准备两个备份副本。请勿多次使用相同的增量备份目录（即--incremental-dir的值）运行 –prepare。</p>
+<p>准备第二个增量备份的过程类似：将增量变更应用于（修改后的）基本备份，然后将其数据向前滚动到第二个增量备份的时间点：</p>
+<pre><code class="language-sh">xtrabackup --prepare --target-dir=/home/mysql/backups/2023-11-11 \
+--incremental-dir=/home/mysql/backups/2023-11-11_inc2
+</code></pre>
+<p>注: 2023-11-11_inc2是用于还原的最后一个增量备份，因此不加--apply-log-only。在合并增量备份时，除了最后一个备份外，都应使用--apply-log-only选项。。即使在最后一步使用--apply-log-only，备份仍然是一致的，但在这种情况下，服务器将执行回滚阶段。</p>
+<h6 id="还原增量备份">还原增量备份</h6>
+<p>准备好的增量备份与完整备份相同，可以使用和之前全量备份还原相同的方式进行恢复。</p>
+<pre><code class="language-sh">xtrabackup --copy-back --target-dir=/home/mysql/backups/2023-11-11
+</code></pre>
+<p>由于文件的属性将被保留，大多数情况下，在启动数据库服务器之前，你需要将文件的所有权更改为mysql用户，因为这些文件的所有权将属于创建备份的用户：</p>
+<pre><code class="language-sh">chown -R mysql:mysql /var/lib/mysql
+</code></pre>
+<p>数据现在已经恢复，就可以启动mysqld服务了。</p>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://www.lvtao.net/post/10m-sysctl-system/">
+              <h3 class="post-title">
+                下一篇：千万并发连接调整系统参数
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <table>
+    <tr><td><a href="https://www.ioncube.com/?xp=TQLLZT"><img src="/media/ioncube.jpg" width="100%"/></a></td></tr>
+    <tr><td><a href="https://app.cloudcone.com/?ref=9519"><img src="/media/cloudcone.gif" width="100%"/></a></td></tr>
+  </table>
+  <div class="slogan"></div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  Powered by <a href="https://lvtao.net" target="_blank">LVTAO</a> | <a class="rss" href="https://www.lvtao.net/atom.xml" target="_blank">RSS</a>
+</div>
+<script 
+async
+defer
+src="https://ask.lvtao.net/api/application/embed?protocol=https&host=ask.lvtao.net&token=e193b47f92f1b41e">
+</script>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

@@ -1,0 +1,280 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>chatgpt告诉我使用go语言实现webscoket多人聊天功能代码 | 吕滔博客</title>
+<meta name="description" content="">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://www.lvtao.net/favicon.ico?v=1714210602511">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://www.lvtao.net/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://www.lvtao.net">
+        <img class="avatar" src="https://www.lvtao.net/images/avatar.png?v=1714210602511" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://www.lvtao.net">
+        <h1 class="site-title">吕滔博客</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+        
+          <a href="https://medoo.lvtao.net" class="menu purple-link">
+            MeDoo中文手册
+          </a>
+        
+      
+        
+          <a href="https://tool.lvtao.net" class="menu purple-link">
+            工具箱
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">chatgpt告诉我使用go语言实现webscoket多人聊天功能代码</h2>
+          <div class="post-info post-detail-info">
+            
+              <span>
+                <i class="icon-pricetags-outline"></i>
+                
+                  <a href="https://www.lvtao.net/tag/go/">
+                    go
+                    
+                  </a>
+                
+              </span>
+            
+             <div style="margin-top:5px;"><a href="https://app.cloudcone.com/?ref=9519" target="_blank">海外无需备案主机推荐，支持25端口邮件发送，无端口限制，支持支付宝、Paypal、信用卡等支付...</a></div>
+          </div>
+          <div class="post-content" v-pre>
+            <ol>
+<li>安装必要的依赖包</li>
+</ol>
+<pre><code>go get github.com/gorilla/websocket
+</code></pre>
+<ol start="2">
+<li>创建一个websocket服务器</li>
+</ol>
+<pre><code>package main
+
+import (
+ &quot;fmt&quot;
+ &quot;net/http&quot;
+
+ &quot;github.com/gorilla/websocket&quot;
+)
+
+// 定义一个全局的websocket升级器
+var upgrader = websocket.Upgrader{
+ // 允许跨域
+ CheckOrigin: func(r *http.Request) bool {
+  return true
+ },
+}
+
+// 定义一个全局的map，用来存储在线用户
+var onlineUsers = make(map[*websocket.Conn]string)
+
+// 定义一个全局的channel，用来接收用户发送的消息
+var message = make(chan []byte)
+
+func main() {
+ // 创建一个http服务
+ http.HandleFunc(&quot;/ws&quot;, wsHandler)
+ http.ListenAndServe(&quot;0.0.0.0:7777&quot;, nil)
+}
+
+// 定义一个处理websocket请求的函数
+func wsHandler(w http.ResponseWriter, r *http.Request) {
+ // 将http协议升级为websocket协议
+ conn, err := upgrader.Upgrade(w, r, nil)
+ if err != nil {
+  fmt.Println(&quot;upgrade failed, err:&quot;, err)
+  return
+ }
+ // 将新接入的用户添加到onlineUsers中
+ onlineUsers[conn] = &quot;&quot;
+ // 处理用户发送的消息
+ go processMessage(conn)
+ // 处理用户断开连接
+ go processDisconnect(conn)
+}
+</code></pre>
+<ol start="3">
+<li>处理用户发送的消息</li>
+</ol>
+<pre><code>// 处理用户发送的消息
+func processMessage(conn *websocket.Conn) {
+ for {
+  // 读取用户发送的消息
+  _, data, err := conn.ReadMessage()
+  if err != nil {
+   fmt.Println(&quot;read message failed, err:&quot;, err)
+   return
+  }
+  // 将消息发送到message channel中
+  message &lt;- data
+ }
+}
+</code></pre>
+<ol start="4">
+<li>处理用户断开连接</li>
+</ol>
+<pre><code>// 处理用户断开连接
+func processDisconnect(conn *websocket.Conn) {
+ for {
+  // 读取用户发送的消息
+  _, _, err := conn.ReadMessage()
+  if err != nil {
+   // 将断开的用户从onlineUsers中删除
+   delete(onlineUsers, conn)
+   fmt.Println(&quot;disconnect success&quot;)
+   return
+  }
+ }
+}
+</code></pre>
+<ol start="5">
+<li>广播消息</li>
+</ol>
+<pre><code>// 广播消息
+func broadcastMessage() {
+ for {
+  // 从message channel中读取消息
+  data := &lt;-message
+  // 遍历onlineUsers，将消息发送给每一个在线用户
+  for conn, _ := range onlineUsers {
+   conn.WriteMessage(websocket.TextMessage, data)
+  }
+ }
+}
+</code></pre>
+<ol start="6">
+<li>运行</li>
+</ol>
+<pre><code>func main() {
+ // 创建一个http服务
+ http.HandleFunc(&quot;/ws&quot;, wsHandler)
+ http.ListenAndServe(&quot;0.0.0.0:7777&quot;, nil)
+ // 启动一个goroutine，用来广播消息
+ go broadcastMessage()
+}
+</code></pre>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://www.lvtao.net/post/golang-my-annotation/">
+              <h3 class="post-title">
+                下一篇：GoLang 获取方法注释
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <table>
+    <tr><td><a href="https://www.ioncube.com/?xp=TQLLZT"><img src="/media/ioncube.jpg" width="100%"/></a></td></tr>
+    <tr><td><a href="https://app.cloudcone.com/?ref=9519"><img src="/media/cloudcone.gif" width="100%"/></a></td></tr>
+  </table>
+  <div class="slogan"></div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  Powered by <a href="https://lvtao.net" target="_blank">LVTAO</a> | <a class="rss" href="https://www.lvtao.net/atom.xml" target="_blank">RSS</a>
+</div>
+<script 
+async
+defer
+src="https://ask.lvtao.net/api/application/embed?protocol=https&host=ask.lvtao.net&token=e193b47f92f1b41e">
+</script>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

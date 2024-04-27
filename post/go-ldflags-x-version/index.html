@@ -1,0 +1,249 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>Go 项目版本号管理方案之ldflags  -X 变量传递 | 吕滔博客</title>
+<meta name="description" content="">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://www.lvtao.net/favicon.ico?v=1714210602511">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://www.lvtao.net/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://www.lvtao.net">
+        <img class="avatar" src="https://www.lvtao.net/images/avatar.png?v=1714210602511" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://www.lvtao.net">
+        <h1 class="site-title">吕滔博客</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+        
+          <a href="https://medoo.lvtao.net" class="menu purple-link">
+            MeDoo中文手册
+          </a>
+        
+      
+        
+          <a href="https://tool.lvtao.net" class="menu purple-link">
+            工具箱
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">Go 项目版本号管理方案之ldflags  -X 变量传递</h2>
+          <div class="post-info post-detail-info">
+            
+              <span>
+                <i class="icon-pricetags-outline"></i>
+                
+                  <a href="https://www.lvtao.net/tag/go/">
+                    go
+                    
+                  </a>
+                
+              </span>
+            
+             <div style="margin-top:5px;"><a href="https://app.cloudcone.com/?ref=9519" target="_blank">海外无需备案主机推荐，支持25端口邮件发送，无端口限制，支持支付宝、Paypal、信用卡等支付...</a></div>
+          </div>
+          <div class="post-content" v-pre>
+            <p>go 链接器 Linker 是组装二进制文件的工具，我们在执行<code>go build</code>命令时，可以通过<code>--ldflags</code>标志设定链接器参数，使用以下语句可查看链接器可选参数。<br>
+<code>go build --ldflags=&quot;--help&quot;</code><br>
+参数很多，但我们感兴趣的是<code>-X</code></p>
+<pre><code>$ go build --ldflags=&quot;--help&quot;
+usage: link [options] main.o
+...
+  -X definition
+     add string value definition of the form importpath.name=value
+...
+</code></pre>
+<p><code>-X</code>参数，指定<code>importpath.name=value</code>，用于修改变量值。其中<code>importpath</code>表示包导入路径，<code>name</code>是程序中的变量名，<code>value</code>代表我们想要设定的变量值。<br>
+下面，我们通过示例项目来具体感受一下。</p>
+<pre><code>$ mkdir versionDemo 
+$ cd versionDemo/
+$ go mod init versiondemo
+go: creating new go.mod: module versiondemo
+$ touch main.go
+</code></pre>
+<p>在 main 函数中，我们打印 version 值。</p>
+<pre><code class="language-go">package main
+
+import (
+ &quot;fmt&quot;
+)
+
+var (
+ version = &quot;0.0.1&quot;
+)
+
+func main() {
+ fmt.Println(&quot;version: &quot;, version)
+}
+</code></pre>
+<p>如果正常编译执行程序，将得到以下结果</p>
+<pre><code class="language-sh">$ go build -o main &amp;&amp; ./main
+version:  0.0.1
+</code></pre>
+<p>此时，我们指定<code>--ldflags </code>的<code>-X</code>参数重新编译执行</p>
+<pre><code class="language-sh">$ go build -o main --ldflags=&quot;-X 'main.version=client-0.0.2'&quot; &amp;&amp; ./main
+version:  client-0.0.2
+</code></pre>
+<p>可以看到 version 参数值已经被改变。</p>
+<h3 id="添加-git-信息">添加 git 信息</h3>
+<p>开发中需要使用 git 工具，本文讨论的版本管理，也经常与 git tag 挂钩。那其实有更酷的操作：我们可以在构建期间，通过<code>git commit</code>信息自动填充版本号。<br>
+我们基于上文项目目录，添加<code>git commit</code>信息。</p>
+<pre><code class="language-sh">$ git init
+$ git add .
+$ git commit -m &quot;initial commit&quot;
+</code></pre>
+<p>通过以下命令，可拿到 git commit 的 hash 值</p>
+<pre><code class="language-sh"> $ git rev-parse HEAD
+154d0e19b63567fe85f713fd441f3f6a82a7aa7d
+</code></pre>
+<p>该值较长，我们可以添加<code>--short</code>选项获取短 hash 值。</p>
+<pre><code class="language-sh">$ git rev-parse --short HEAD
+154d0e1
+</code></pre>
+<p>此时，通过指定<code>--ldflags</code>的<code>-X</code>参数，将<code>version</code>值替换成<code>git commit</code>的哈希值。这样，我们成功地将项目版本与 git 信息绑定在了一起。</p>
+<pre><code class="language-sh">$ go build -o main --ldflags=&quot;-X 'main.version=$(git rev-parse --short HEAD)'&quot; &amp;&amp; ./main
+version:  154d0e1
+</code></pre>
+<h3 id="makefile学习">Makefile学习</h3>
+<pre><code class="language-sh">VERSION = $$(git describe --abbrev=0 --tags)
+COMMIT_TAG = $$(git tag --points-at HEAD)
+VERSION_DATE = $$(git log -1 --pretty='%ad' --date=format:'%Y-%m-%d' $(VERSION))
+COMMIT_REV = $$(git rev-list -n 1 $(VERSION))
+MAINTAINER = &quot;Memory&quot;
+
+all: build
+
+build:
+	go build -ldflags &quot;-X config/config.version=$(VERSION)&quot; -o bin/doGo main.go &amp;&amp; upx bin/doGo
+
+mac
+	env GOARCH=amd64 go build -ldflags &quot;-s -w -X config/config.version=$(VERSION)&quot; -o bin/macos/doGo &amp;&amp; upx bin/macos/doGo
+
+linux
+	env GOOS=linux GOARCH=amd64 go build -ldflags &quot;-s -w -X config/config.version=$(VERSION)&quot; -o bin/linux/doGo &amp;&amp; upx bin/linux/doGo
+
+docker-build:
+	docker build --build-arg VERSION=$(VERSION) --build-arg MAINTAINER=$(MAINTAINER) -t memory/doGo .
+</code></pre>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://www.lvtao.net/post/go-get-domain-github/">
+              <h3 class="post-title">
+                下一篇：Go语言中使用go get从自定义域名拉取包的配置方法
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <table>
+    <tr><td><a href="https://www.ioncube.com/?xp=TQLLZT"><img src="/media/ioncube.jpg" width="100%"/></a></td></tr>
+    <tr><td><a href="https://app.cloudcone.com/?ref=9519"><img src="/media/cloudcone.gif" width="100%"/></a></td></tr>
+  </table>
+  <div class="slogan"></div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  Powered by <a href="https://lvtao.net" target="_blank">LVTAO</a> | <a class="rss" href="https://www.lvtao.net/atom.xml" target="_blank">RSS</a>
+</div>
+<script 
+async
+defer
+src="https://ask.lvtao.net/api/application/embed?protocol=https&host=ask.lvtao.net&token=e193b47f92f1b41e">
+</script>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

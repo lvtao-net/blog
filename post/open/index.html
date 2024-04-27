@@ -1,0 +1,262 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>开放性设计问题相关的知识总结 | 吕滔博客</title>
+<meta name="description" content="">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://www.lvtao.net/favicon.ico?v=1714210602511">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://www.lvtao.net/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://www.lvtao.net">
+        <img class="avatar" src="https://www.lvtao.net/images/avatar.png?v=1714210602511" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://www.lvtao.net">
+        <h1 class="site-title">吕滔博客</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+        
+          <a href="https://medoo.lvtao.net" class="menu purple-link">
+            MeDoo中文手册
+          </a>
+        
+      
+        
+          <a href="https://tool.lvtao.net" class="menu purple-link">
+            工具箱
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">开放性设计问题相关的知识总结</h2>
+          <div class="post-info post-detail-info">
+            
+             <div style="margin-top:5px;"><a href="https://app.cloudcone.com/?ref=9519" target="_blank">海外无需备案主机推荐，支持25端口邮件发送，无端口限制，支持支付宝、Paypal、信用卡等支付...</a></div>
+          </div>
+          <div class="post-content" v-pre>
+            <h1 id="开放性设计">开放性设计</h1>
+<h2 id="求两个文件中的qq交集">求两个文件中的QQ交集</h2>
+<p><strong>问题</strong>：A文件有30亿个QQ号码，B文件有40亿个QQ号码，求A文件和B文件中QQ号码的交集，内存大小限制为1GB。</p>
+<h3 id="方案一直接暴力比较">方案一：直接暴力比较</h3>
+<p>最简单的方法是直接暴力比较：双重循环比较。显然，这种方法要比较的次数是：30亿×40亿，时间复杂度太大。</p>
+<h3 id="方案二利用hashmap">方案二：利用hashmap</h3>
+<p>将B文件中的40亿个QQ号码放入Hash表中，然后遍历B文件中的30亿个QQ号码，准一判断是否已在Hash表中存在。</p>
+<p>显然，应该用哈希表优化查找速度，使得时间复杂度大大降低，只需要遍历上面一层即可。然而，空间的占用还是太大了，1GB的内存根本无法容纳40亿个QQ号。</p>
+<h3 id="方案三分治切割文件">方案三：分治切割文件</h3>
+<p>既然内存容纳不下，那就想办法进行切割，比如：根据QQ号码的最后一位的值来切割A文件和B文件，使文件变小。显然，尾数为j的QQ号码只可能在Aj文件和Bj文件中，只需要比较Aj和Bj文件即可。</p>
+<table>
+<thead>
+<tr>
+<th>QQ号最后一位</th>
+<th>A文件的切割</th>
+<th>B文件的切割</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>A0</td>
+<td>B0</td>
+</tr>
+<tr>
+<td>1</td>
+<td>A1</td>
+<td>B1</td>
+</tr>
+<tr>
+<td>2</td>
+<td>A2</td>
+<td>B2</td>
+</tr>
+<tr>
+<td>3</td>
+<td>A3</td>
+<td>B3</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+</tbody>
+</table>
+<p>通过切割的方法，可以化大为小，让内存容纳得下。需要强调的是，仅仅以QQ号最后一位来划分，那么每个小文件的数据量大约是原来文件的1/10, 可能还是偏大。所以可以考虑以QQ号的最后3位来划分，那么每个小文件的数据量大约是原来大文件的1/1000，甚至还可以更细地来进行划分。通过一定的规则进行分割，把A文件和B文件中同类型数据划分到对应的小文件中，解决了内存问题。</p>
+<h3 id="方案四利用bitmap">方案四：利用bitmap</h3>
+<p>可以对hashmap进行优化，采用bitmap这种数据结构，可以顺利地同时解决时间问题和空间问题。</p>
+<table>
+<thead>
+<tr>
+<th>bit</th>
+<th>1</th>
+<th>1</th>
+<th>1</th>
+<th>1</th>
+<th>1</th>
+<th>1</th>
+<th>1</th>
+<th>0</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>index</td>
+<td>7</td>
+<td>6</td>
+<td>5</td>
+<td>4</td>
+<td>3</td>
+<td>2</td>
+<td>1</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<p>1个unsigned char类型的数据，可以标识0~7这8个整数的存在与否。以此类推：</p>
+<ul>
+<li>1个unsigned int类型数据可以标识0~31这32（2^5）个整数的存在与否</li>
+<li>2个unsigned int类型数据可以标识0~63这64（2^6）个整数的存在与否</li>
+<li>3个unsigned int类型数据可以标识0~127这128（2^7）个整数的存在与否</li>
+<li>4个unsigned int类型数据可以标识0~255这256（2^8）个整数的存在与否</li>
+<li>......</li>
+<li>28个unsigned int类型数据可以标识0~2<sup>32-1这43亿（2</sup>32）个整数的存在与否</li>
+</ul>
+<p>10位QQ号码的理论最大值为 2^32 - 1 ≈ 43 亿bit。</p>
+<p>占用内存：43亿bit≈5.37亿bytes≈52万KB≈512MB</p>
+<p>显然，可以推导出：512MB大小足够标识所有QQ号码的存在与否，请注意：QQ号码的理论最大值为2^32 - 1，大概是43亿左右。接下来的问题就很简单了：</p>
+<p>用512MB的unsigned int数组来记录B文件中QQ号码的存在与否，形成一个bitmap。然后遍历A文件中的QQ，看是否在bitmap中，如果在，那么该QQ号码就同时存在于A和B两个文件中。</p>
+<p>https://mp.weixin.qq.com/s/Q_EvlN9LvkdA5M5EharBBA</p>
+<h2 id="40亿个qq号码如何去重">40亿个QQ号码如何去重</h2>
+<p>文件中有40亿个QQ号码，请设计算法对QQ号码去重，相同的QQ号码仅保留一个，内存限制1G。</p>
+<p>https://mp.weixin.qq.com/s/YlLYDzncB6tqbffrg__13w</p>
+<h3 id="方法一排序">方法一：排序</h3>
+<h3 id="方法二hashmap">方法二：hashmap</h3>
+<h3 id="方法三文件切割">方法三：文件切割</h3>
+<h3 id="方法四bitmap">方法四：bitmap</h3>
+<h2 id="群聊消息已读未读功能设计">群聊消息已读未读功能设计</h2>
+<p>企业IM比如企业微信、钉钉里面的群消息的有个已读未读的功能，发送者刚发出消息时，当前群里其他群成员都是未读状态，陆陆续续有人看了这个消息，这时候消息的详情变成x人已读，y人未读。每条消息对应一个唯一的<code>messageid（uint64_t）</code>，每个用户对应一个唯一的<code>userid（uint64_t）</code>,应该如何保存这个消息对应的已读未读详情呢？</p>
+<h3 id="简单粗暴方案">简单粗暴方案</h3>
+<p>对于每一个messageid，存当前<code>read_ids + unread_ids</code>，当群成员A已读某一条消息时，把A的userid从unread_ids移除写到read_ids上就好了，客户端更新到messageid对应的详情列表，就可以展示m人已读，n人未读。</p>
+<p>按照目前的设计，每一条消息已读未读详情就要占用8B × 群成员数的内存，如果一个活跃的200人大群，每发一条消息，已读未读就要1600B，如果平均每天消息量是1k，那每个这样的群，每天就要1.6MB磁盘空间，对于客户端来说，特别是手机端，占用磁盘空间是用户不能接受的，又不能把工作消息删了，对于服务器端来说，用户群体如果特别大，那数据库存储这个成本也不小。</p>
+<h3 id="bitmap方案">bitmap方案</h3>
+<h2 id="未支付订单超时关闭">未支付订单超时关闭</h2>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://www.lvtao.net/post/os/">
+              <h3 class="post-title">
+                下一篇：`JDK Tools`、`Linux Tools`、`Git` 等总结
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <table>
+    <tr><td><a href="https://www.ioncube.com/?xp=TQLLZT"><img src="/media/ioncube.jpg" width="100%"/></a></td></tr>
+    <tr><td><a href="https://app.cloudcone.com/?ref=9519"><img src="/media/cloudcone.gif" width="100%"/></a></td></tr>
+  </table>
+  <div class="slogan"></div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  Powered by <a href="https://lvtao.net" target="_blank">LVTAO</a> | <a class="rss" href="https://www.lvtao.net/atom.xml" target="_blank">RSS</a>
+</div>
+<script 
+async
+defer
+src="https://ask.lvtao.net/api/application/embed?protocol=https&host=ask.lvtao.net&token=e193b47f92f1b41e">
+</script>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

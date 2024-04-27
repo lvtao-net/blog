@@ -1,0 +1,260 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>GoLang数据基础类型 | 吕滔博客</title>
+<meta name="description" content="">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://www.lvtao.net/favicon.ico?v=1714210602511">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://www.lvtao.net/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://www.lvtao.net">
+        <img class="avatar" src="https://www.lvtao.net/images/avatar.png?v=1714210602511" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://www.lvtao.net">
+        <h1 class="site-title">吕滔博客</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+        
+          <a href="https://medoo.lvtao.net" class="menu purple-link">
+            MeDoo中文手册
+          </a>
+        
+      
+        
+          <a href="https://tool.lvtao.net" class="menu purple-link">
+            工具箱
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">GoLang数据基础类型</h2>
+          <div class="post-info post-detail-info">
+            
+              <span>
+                <i class="icon-pricetags-outline"></i>
+                
+                  <a href="https://www.lvtao.net/tag/go/">
+                    go
+                    
+                  </a>
+                
+              </span>
+            
+             <div style="margin-top:5px;"><a href="https://app.cloudcone.com/?ref=9519" target="_blank">海外无需备案主机推荐，支持25端口邮件发送，无端口限制，支持支付宝、Paypal、信用卡等支付...</a></div>
+          </div>
+          <div class="post-content" v-pre>
+            <p><img src="https://www.lvtao.net/post-images/1668752053062.png" alt="" loading="lazy"><br>
+简单的略过不介绍....</p>
+<h3 id="int类型范围">int类型范围</h3>
+<figure data-type="image" tabindex="1"><img src="https://www.lvtao.net/post-images/1668752060635.png" alt="" loading="lazy"></figure>
+<pre><code class="language-go">func main() {
+	var a uint64 = 18446744073709551615
+
+	println(a)
+
+	println(unsafe.Sizeof(a)) //查看占用字节
+}
+</code></pre>
+<p>输出</p>
+<pre><code>18446744073709551615
+8
+</code></pre>
+<h3 id="浮点数">浮点数</h3>
+<p>Go语言支持两种浮点型数：float32和float64。这两种浮点型数据格式遵循IEEE754标准：</p>
+<p>float32的浮点数的最大范围约为3.4e38，可以使用常量定义：math.MaxFloat32。float64的浮点数的最大范围约为1.8e308，可以使用一个常量定义：math.MaxFloat64</p>
+<p>打印浮点数时，可以使用fmt包配合动词%f，代码如下：</p>
+<pre><code class="language-go">var pi = math.Pi
+// 打印浮点类型，默认小数点6位
+fmt.Printf(&quot;%f\n&quot;, pi)
+// 打印浮点类型，打印小数点后2位
+fmt.Printf(&quot;%.2f\n&quot;, pi)
+</code></pre>
+<p>Golang中精度丢失的问题</p>
+<pre><code class="language-go">d := 1129.6
+fmt.Println(d*100) //输出112959.99999999
+</code></pre>
+<p>解决方法，使用第三方包来解决精度损失的问题 http://github.com/shopspring/decimal</p>
+<h3 id="字符串类型常见操作">字符串类型常见操作</h3>
+<ul>
+<li>len(str)：求长度</li>
+<li>+或fmt.Sprintf：拼接字符串</li>
+<li>strings.Split：分割</li>
+<li>strings.contains：判断是否包含</li>
+<li>strings.HasPrefix，strings.HasSuffix：前缀/后缀判断</li>
+<li>strings.Index()，strings.LastIndex()：子串出现的位置</li>
+<li>strings.Join()：join操作</li>
+<li>strings.Index()：判断在字符串中的位置</li>
+<li>多行字符串用`符号 反引号</li>
+</ul>
+<p><strong>byte 和 rune类型</strong></p>
+<ul>
+<li>uint8类型：或者叫byte型，代表了ACII码的一个字符</li>
+<li>rune类型：代表一个UTF-8字符</li>
+</ul>
+<pre><code class="language-go">package main
+import &quot;fmt&quot;
+
+func main() {
+	var a byte = 'a'
+	// 输出的是ASCII码值，也就是说当我们直接输出byte（字符）的时候，输出的是这个字符对应的码值
+	fmt.Println(a)
+	// 输出的是字符
+	fmt.Printf(&quot;%c&quot;, a)
+
+	// for循环打印字符串里面的字符
+	// 通过len来循环的，相当于打印的是ASCII码
+	s := &quot;你好 golang&quot;
+	for i := 0; i &lt; len(s); i++ {
+		fmt.Printf(&quot;%v(%c)\t&quot;, s[i], s[i])
+	}
+
+	// 通过rune打印的是 utf-8字符
+	for index, v := range s {
+		fmt.Println(index, v)
+	}
+}
+</code></pre>
+<p><strong>修改字符串</strong><br>
+转换为 <code>[]byte</code> 类型</p>
+<pre><code class="language-go">// 字符串转换
+s1 := &quot;big&quot;
+byteS1 := []byte(s1)
+byteS1[0] = 'p'
+fmt.Println(string(byteS1))
+</code></pre>
+<p>转换为<code>rune</code>类型</p>
+<pre><code class="language-go">// rune类型
+s2 := &quot;你好golang&quot;
+byteS2 := []rune(s2)
+byteS2[0] = '我'
+fmt.Println(string(byteS2))
+</code></pre>
+<p>string转int64</p>
+<pre><code class="language-go">func main() {
+	a := &quot;123456&quot;
+	b, _ := strconv.ParseInt(a, 10, 64)
+	println(&quot;%T %v&quot;, b, b)
+}
+</code></pre>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://www.lvtao.net/post/golang-const-iota/">
+              <h3 class="post-title">
+                下一篇：GoLang常量之iota
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <table>
+    <tr><td><a href="https://www.ioncube.com/?xp=TQLLZT"><img src="/media/ioncube.jpg" width="100%"/></a></td></tr>
+    <tr><td><a href="https://app.cloudcone.com/?ref=9519"><img src="/media/cloudcone.gif" width="100%"/></a></td></tr>
+  </table>
+  <div class="slogan"></div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  Powered by <a href="https://lvtao.net" target="_blank">LVTAO</a> | <a class="rss" href="https://www.lvtao.net/atom.xml" target="_blank">RSS</a>
+</div>
+<script 
+async
+defer
+src="https://ask.lvtao.net/api/application/embed?protocol=https&host=ask.lvtao.net&token=e193b47f92f1b41e">
+</script>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

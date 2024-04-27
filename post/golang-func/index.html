@@ -1,0 +1,361 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>GoLang 函数 | 吕滔博客</title>
+<meta name="description" content="">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://www.lvtao.net/favicon.ico?v=1714210602511">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://www.lvtao.net/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://www.lvtao.net">
+        <img class="avatar" src="https://www.lvtao.net/images/avatar.png?v=1714210602511" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://www.lvtao.net">
+        <h1 class="site-title">吕滔博客</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+        
+          <a href="https://medoo.lvtao.net" class="menu purple-link">
+            MeDoo中文手册
+          </a>
+        
+      
+        
+          <a href="https://tool.lvtao.net" class="menu purple-link">
+            工具箱
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">GoLang 函数</h2>
+          <div class="post-info post-detail-info">
+            
+              <span>
+                <i class="icon-pricetags-outline"></i>
+                
+                  <a href="https://www.lvtao.net/tag/go/">
+                    go
+                    
+                  </a>
+                
+              </span>
+            
+             <div style="margin-top:5px;"><a href="https://app.cloudcone.com/?ref=9519" target="_blank">海外无需备案主机推荐，支持25端口邮件发送，无端口限制，支持支付宝、Paypal、信用卡等支付...</a></div>
+          </div>
+          <div class="post-content" v-pre>
+            <p>本文不介绍变量作用域、函数声明方法等基础使用</p>
+<h3 id="可变参数">可变参数</h3>
+<ul>
+<li>可变参数是指函数的参数数量不固定。</li>
+<li>Go 语言中的可变参数通过在参数名后加...来标识。</li>
+<li>注意：可变参数通常要作为函数的最后一个参数。</li>
+</ul>
+<pre><code class="language-go">func main() {
+	ret := intSum(&quot;张三&quot;,2,3,4,5)
+	fmt.Println(ret)      // 14
+}
+func intSum(y string,x ...int) int {
+	fmt.Println(y)       // 张三
+	fmt.Println(x)       //x 是一个切片 =&gt; [1 2 3 4 5]
+	sum := 0
+	for _, v := range x {
+		sum = sum + v
+	}
+	return sum
+}
+</code></pre>
+<h3 id="函数类型与变量">函数类型与变量</h3>
+<ul>
+<li>定义函数类型，我们可以使用 type 关键字来定义一个函数类型</li>
+<li>具体格式如下<code>type calculation func(int, int) int</code></li>
+<li>上面语句定义了一个 calculation 类型，它是一种函数类型，这种函数接收两个 int 类型的参数并且返回一个 int 类型的返回值。</li>
+<li>简单来说，凡是满足这个条件的函数都是 calc 类型的函数，例如下面的 add 和 sub 是calculation 类型。</li>
+</ul>
+<pre><code class="language-go">type calc func(int, int) int
+func main() {
+	var c calc     // 声明一个 calc类型的变量 c
+	c = add         // 把 add 赋值给 c
+	fmt.Println(c(1, 2))   // 3
+	//fmt.Printf(&quot;type of c:%T\n&quot;, c)  // type of c:main.calculation
+}
+func add(x, y int) int {
+	return x + y
+}
+</code></pre>
+<h3 id="高阶函数">高阶函数</h3>
+<ul>
+<li>高阶函数分为函数作为参数和函数作为返回值两部分。</li>
+<li>函数作为参数，函数也可以作为返回值</li>
+</ul>
+<pre><code class="language-go">
+func main() {
+	var a = do(&quot;+&quot;)
+	fmt.Println(a(10, 20))   // 30
+	var b = do(&quot;-&quot;)
+	fmt.Println(b(10,20))    // -10
+}
+
+func add(x, y int) int {
+	return x + y
+}
+func sub(x, y int) int {
+	return x - y
+}
+func do(s string) func(int, int) int {
+	switch s {
+	case &quot;+&quot;:
+		return add
+	case &quot;-&quot;:
+		return sub
+	default:
+		return nil
+	}
+}
+</code></pre>
+<h3 id="匿名函数">匿名函数</h3>
+<ul>
+<li>匿名函数由一个不带函数名的函数声明和函数体组成。</li>
+<li>匿名函数的优越性在于可以直接使用函数内的变量，不必申明。</li>
+<li>匿名函数因为没有函数名，所以没办法像普通函数那样调用，所以匿名函数需要保存到某个变量或者作为立即执行函数</li>
+<li>匿名函数多用于实现回调函数和闭包</li>
+</ul>
+<pre><code class="language-go">func main() {
+	//一：匿名函数  匿名自执行函数
+	func() {
+		fmt.Println(&quot;test..&quot;)    // test..
+	}()
+
+	//二：匿名函数
+	var fn = func(x, y int) int {
+		return x * y
+	}
+	fmt.Println(fn(2, 3))  // 6
+
+	//三：匿名自执行函数接收参数
+	func(x, y int) {
+		fmt.Println(x + y)  // 30
+	}(10, 20)
+}
+</code></pre>
+<h3 id="闭包">闭包</h3>
+<ul>
+<li>闭包可以理解成“定义在一个函数内部的函数“。</li>
+<li>在本质上，闭包是将函数内部和函数外部连接起来的桥梁。</li>
+</ul>
+<p>举例：</p>
+<ul>
+<li>变量 f 是一个函数并且它引用了其外部作用域中的 x 变量，此时 f 就是一个闭包。</li>
+<li>在 f 的生命周期内，变量 x 也一直有效。</li>
+</ul>
+<pre><code class="language-go">func main() {
+	var f = adder()
+	fmt.Println(f(10)) //10
+	fmt.Println(f(20)) //30
+	fmt.Println(f(30)) //60
+
+	f1 := adder()
+	fmt.Println(f1(40)) //40
+	fmt.Println(f1(50)) //90
+}
+func adder() func(int) int {
+	var x int
+	return func(y int) int {
+		x += y
+		return x
+	}
+}
+</code></pre>
+<p>全局变量特点：</p>
+<ul>
+<li>1、常驻内存</li>
+<li>2、污染全局<br>
+局部变量的特点：</li>
+<li>1、不常驻内存</li>
+<li>2、不污染全局</li>
+</ul>
+<p>闭包：</p>
+<ul>
+<li>1、可以让一个变量常驻内存</li>
+<li>2、可以让一个变量不污染全局</li>
+<li>1、闭包是指有权访问另一个函数作用域中的变量的函数。</li>
+<li>2、创建闭包的常见的方式就是在一个函数内部创建另一个函数，通过另一个函数访问这个函数的局部变量。<br>
+注意：</li>
+<li>由于闭包里作用域返回的局部变量资源不会被立刻销毁回收，所以可能会占用更多的内存。</li>
+<li>过度使用闭包会导致性能下降，建议在非常有必要的时候才使用闭包。</li>
+</ul>
+<h3 id="闭包的三种形式">闭包的三种形式</h3>
+<p>示例1</p>
+<pre><code class="language-go">func adder2(x int) func(int) int {
+	return func(y int) int {
+		x += y
+		return x
+	}
+}
+func main() {
+	var f = adder2(10)
+	fmt.Println(f(10)) //20
+	fmt.Println(f(20)) //40
+	fmt.Println(f(30)) //70
+	
+	f1 := adder2(20)
+	fmt.Println(f1(40)) //60
+	fmt.Println(f1(50)) //110
+}
+</code></pre>
+<p>示例 2</p>
+<pre><code class="language-go">func makeSuffixFunc(suffix string) func(string) string {
+	return func(name string) string {
+		if !strings.HasSuffix(name, suffix) {
+			return name + suffix
+		}
+		return name
+	}
+}
+func main() {
+	jpgFunc := makeSuffixFunc(&quot;.jpg&quot;)
+	txtFunc := makeSuffixFunc(&quot;.txt&quot;)
+	fmt.Println(jpgFunc(&quot;test&quot;)) //test.jpg
+	fmt.Println(txtFunc(&quot;test&quot;)) //test.txt
+}
+</code></pre>
+<p>示例 3</p>
+<pre><code class="language-go">func calc(base int) (func(int) int, func(int) int) {
+	add := func(i int) int {
+		base += i
+		return base
+	}
+	sub := func(i int) int {
+		base -= i
+		return base
+	}
+	return add, sub
+}
+func main() {
+	f1, f2 := calc(10)
+	fmt.Println(f1(1), f2(2)) //11 9
+	fmt.Println(f1(3), f2(4)) //12 8
+	fmt.Println(f1(5), f2(6)) //13 7
+}
+</code></pre>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://www.lvtao.net/post/golang-interface/">
+              <h3 class="post-title">
+                下一篇：GoLang 接口 interface
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <table>
+    <tr><td><a href="https://www.ioncube.com/?xp=TQLLZT"><img src="/media/ioncube.jpg" width="100%"/></a></td></tr>
+    <tr><td><a href="https://app.cloudcone.com/?ref=9519"><img src="/media/cloudcone.gif" width="100%"/></a></td></tr>
+  </table>
+  <div class="slogan"></div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  Powered by <a href="https://lvtao.net" target="_blank">LVTAO</a> | <a class="rss" href="https://www.lvtao.net/atom.xml" target="_blank">RSS</a>
+</div>
+<script 
+async
+defer
+src="https://ask.lvtao.net/api/application/embed?protocol=https&host=ask.lvtao.net&token=e193b47f92f1b41e">
+</script>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

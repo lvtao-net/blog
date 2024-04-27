@@ -1,0 +1,253 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>使用Java对大文本内容读取并分组统计最小值、最大值、平均值 | 吕滔博客</title>
+<meta name="description" content="">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://www.lvtao.net/favicon.ico?v=1714210602511">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://www.lvtao.net/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://www.lvtao.net">
+        <img class="avatar" src="https://www.lvtao.net/images/avatar.png?v=1714210602511" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://www.lvtao.net">
+        <h1 class="site-title">吕滔博客</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+        
+          <a href="https://medoo.lvtao.net" class="menu purple-link">
+            MeDoo中文手册
+          </a>
+        
+      
+        
+          <a href="https://tool.lvtao.net" class="menu purple-link">
+            工具箱
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">使用Java对大文本内容读取并分组统计最小值、最大值、平均值</h2>
+          <div class="post-info post-detail-info">
+            
+              <span>
+                <i class="icon-pricetags-outline"></i>
+                
+                  <a href="https://www.lvtao.net/tag/java/">
+                    java
+                    
+                  </a>
+                
+              </span>
+            
+             <div style="margin-top:5px;"><a href="https://app.cloudcone.com/?ref=9519" target="_blank">海外无需备案主机推荐，支持25端口邮件发送，无端口限制，支持支付宝、Paypal、信用卡等支付...</a></div>
+          </div>
+          <div class="post-content" v-pre>
+            <p>文本内容每行是<code>name;value</code>格式，先上代码</p>
+<pre><code class="language-java">public class ReadTxt {
+    public static void main(String[] args) throws Exception {
+        var start = System.currentTimeMillis();
+        calculate();
+        System.err.format(&quot;Took %,d ms\n&quot;, System.currentTimeMillis() - start);
+    }
+
+    private static void calculate() throws Exception {
+        var allStats = new BufferedReader(new FileReader(&quot;measurements.txt&quot;))
+                .lines()
+                .parallel()
+                .collect(
+                        groupingBy(line -&gt; line.substring(0, line.indexOf(';')),
+                                summarizingDouble(line -&gt;
+                                        parseDouble(line.substring(line.indexOf(';') + 1)))));
+        var result = allStats.entrySet().stream().collect(Collectors.toMap(
+                Entry::getKey,
+                e -&gt; {
+                    var stats = e.getValue();
+                    return String.format(&quot;%.1f/%.1f/%.1f&quot;,
+                            stats.getMin(), stats.getAverage(), stats.getMax());
+                },
+                (l, r) -&gt; r,
+                TreeMap::new));
+        System.out.println(result);
+    }
+}
+</code></pre>
+<p>解析<br>
+这段代码是一个Java方法，其主功能是从一个文本文件中读取数据，按照特定的规则进行分组和统计，然后输出每组数据的最小值、平均值和最大值。下面详细解析这个方法的每个步骤：</p>
+<ol>
+<li>
+<p><strong>文件读取与流处理</strong>:</p>
+<pre><code class="language-java">var allStats = new BufferedReader(new FileReader(&quot;measurements.txt&quot;))
+        .lines()
+        .parallel()
+        .collect(...
+</code></pre>
+<ul>
+<li>这段代码首先创建了一个<code>BufferedReader</code>对象来读取名为<code>measurements.txt</code>的文件。</li>
+<li><code>lines()</code>方法将这个文件转换为一个流（<code>Stream</code>），其中每个元素代表文件中的一行。</li>
+<li><code>parallel()</code>方法的调用使得接下来的流操作可以并行执行，这可能提高处理大文件时的性能。</li>
+</ul>
+</li>
+<li>
+<p><strong>数据分组与统计</strong>:</p>
+<pre><code class="language-java">collect(groupingBy(line -&gt; line.substring(0, line.indexOf(';')),
+        summarizingDouble(line -&gt;
+                Double.parseDouble(line.substring(line.indexOf(';') + 1)))));
+</code></pre>
+<ul>
+<li>这段代码使用<code>collect</code>方法对流中的元素进行收集。</li>
+<li><code>groupingBy</code>函数用于根据提供的分类函数对元素进行分组。在这里，分类函数是根据每行数据中<code>;</code>字符前的内容来分组，即假设每行数据的格式为<code>key;value</code>，则按<code>key</code>来分组。</li>
+<li><code>summarizingDouble</code>函数用于生成包含统计信息的<code>DoubleSummaryStatistics</code>对象，这里是针对每个分组的<code>value</code>部分（即<code>;</code>字符后的内容），并将其从字符串转换为双精度浮点数（<code>Double</code>）。</li>
+</ul>
+</li>
+<li>
+<p><strong>结果处理与格式化输出</strong>:</p>
+<pre><code class="language-java">var result = allStats.entrySet().stream().collect(Collectors.toMap(
+        Entry::getKey,
+        e -&gt; {
+            var stats = e.getValue();
+            return String.format(&quot;%.1f/%.1f/%.1f&quot;,
+                    stats.getMin(), stats.getAverage(), stats.getMax());
+        },
+        (l, r) -&gt; r,
+        TreeMap::new));
+System.out.println(result);
+</code></pre>
+<ul>
+<li>这段代码处理上一步得到的分组统计结果<code>allStats</code>。</li>
+<li>使用<code>entrySet().stream()</code>转换分组统计结果为流，然后通过<code>collect</code>方法收集处理后的数据。</li>
+<li><code>Collectors.toMap</code>方法用于生成一个映射，其键是分组的键（即每行数据中<code>;</code>前的内容），值是格式化后的字符串，包含每组数据的最小值、平均值和最大值，格式为<code>最小值/平均值/最大值</code>。</li>
+<li>在冲突的情况下（即两个键相同），选择右边的值（<code>(l, r) -&gt; r</code>），尽管在这个场景中不太可能出现键的冲突。</li>
+<li>使用<code>TreeMap::new</code>作为收集器的最后一个参数，确保结果是根据键（分组标识）排序的。</li>
+</ul>
+</li>
+<li>
+<p><strong>打印结果</strong>:</p>
+<ul>
+<li><code>System.out.println(result);</code>语句用于打印处理和格式化后的结果。</li>
+</ul>
+</li>
+</ol>
+<p>这个方法从名为<code>measurements.txt</code>的文件中读取数据，按行进行处理，根据每行中<code>;</code>前的内容进行分组，然后计算每个分组中数值（<code>;</code>后的内容）的最小值、平均值和最大值，并按分组键的自然顺序打印出这些统计结果。</p>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://www.lvtao.net/post/springboot-dev-prod-profile/">
+              <h3 class="post-title">
+                下一篇：Springboot项目中设置pom.xml实现不同的环境切换、打包
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <table>
+    <tr><td><a href="https://www.ioncube.com/?xp=TQLLZT"><img src="/media/ioncube.jpg" width="100%"/></a></td></tr>
+    <tr><td><a href="https://app.cloudcone.com/?ref=9519"><img src="/media/cloudcone.gif" width="100%"/></a></td></tr>
+  </table>
+  <div class="slogan"></div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  Powered by <a href="https://lvtao.net" target="_blank">LVTAO</a> | <a class="rss" href="https://www.lvtao.net/atom.xml" target="_blank">RSS</a>
+</div>
+<script 
+async
+defer
+src="https://ask.lvtao.net/api/application/embed?protocol=https&host=ask.lvtao.net&token=e193b47f92f1b41e">
+</script>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

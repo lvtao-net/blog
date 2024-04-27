@@ -1,0 +1,248 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>centos7 配置 snell-client | 吕滔博客</title>
+<meta name="description" content="">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://www.lvtao.net/favicon.ico?v=1714210602511">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://www.lvtao.net/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://www.lvtao.net">
+        <img class="avatar" src="https://www.lvtao.net/images/avatar.png?v=1714210602511" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://www.lvtao.net">
+        <h1 class="site-title">吕滔博客</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+        
+          <a href="https://medoo.lvtao.net" class="menu purple-link">
+            MeDoo中文手册
+          </a>
+        
+      
+        
+          <a href="https://tool.lvtao.net" class="menu purple-link">
+            工具箱
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">centos7 配置 snell-client</h2>
+          <div class="post-info post-detail-info">
+            
+              <span>
+                <i class="icon-pricetags-outline"></i>
+                
+                  <a href="https://www.lvtao.net/tag/centos/">
+                    centos
+                    
+                  </a>
+                
+              </span>
+            
+             <div style="margin-top:5px;"><a href="https://app.cloudcone.com/?ref=9519" target="_blank">海外无需备案主机推荐，支持25端口邮件发送，无端口限制，支持支付宝、Paypal、信用卡等支付...</a></div>
+          </div>
+          <div class="post-content" v-pre>
+            <h3 id="snell-server">snell-server</h3>
+<p>conf配置</p>
+<pre><code>[snell-server]
+listen = 0.0.0.0:9090
+psk = test2020
+obfs = tls
+</code></pre>
+<p>启动 <code>snell-server -c snell.server.conf</code></p>
+<h4 id="surge客户端配置">Surge客户端配置</h4>
+<p><code>Proxy = snell, [SERVER ADDRESS], [GENERATED PORT], psk=[GENERATED PSK], obfs=[http/tls]</code><br>
+填入：<code>Proxy =snell，8.8.8.8,9090,psk=test2020,obfs=tls</code></p>
+<h3 id="需求">需求</h3>
+<p>安装snell-server后，需要在centos中使用...<br>
+相当于... 某个地方整了一个snell-server，然后我要在另外一个地方整一个snell-client，并且配置指定范围的域名走client，其它的就不走...</p>
+<h3 id="第一步-测试snell的socks5是否有效">第一步. 测试snell的socks5是否有效</h3>
+<p><code>curl --socks5 127.0.0.1:1080 http://httpbin.org/ip</code><br>
+这时候返回的如果是snell-server的ip表示服务是正常的</p>
+<h3 id="第二步-安装-privoxy">第二步. 安装 privoxy</h3>
+<pre><code>sudo yum install -y privoxy
+</code></pre>
+<p>privoxy 的配置目录在文件夹<code>/etc/privoxy</code>下。<br>
+进入目录<code>/etc/privoxy</code>，可以看到目录结构大致为：</p>
+<ul>
+<li>config 配置文件，这个文件很长。。</li>
+<li>*.action 代理规则文件</li>
+<li>*.filter 过滤规则文件</li>
+</ul>
+<h3 id="第三步-gfwlist生成配置文件">第三步 gfwlist生成配置文件</h3>
+<pre><code>apt-get intall python-pip
+pip install gfwlist2privoxy
+
+wget https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt
+gfwlist2privoxy -i gfwlist.txt -f /etc/privoxy/gfwlist.action -p 127.0.0.1:1234 -t socks5
+</code></pre>
+<p>运行后便生成一个 gfwlist.action，在 privoxy 里将其配置进去即可。</p>
+<pre><code>sudo vi /etc/privoxy/config
+# 搜索 socks5t在下面添加一条转发代理ip ，存在则去掉注释即可
+forward-socks5t   /               127.0.0.1:1234 .
+# 搜索listen-address，取消注释的ip地址，或者直接新加下面的信息
+listen-address  127.0.0.1:8118
+
+actionsfile gfwlist.action
+</code></pre>
+<h3 id="配置pacaction">配置pac.action</h3>
+<p>pac.action内容</p>
+<pre><code>{{alias}}
+direct      = +forward-override{forward .}
+gae         = +forward-override{forward-socks5 127.0.0.1:1234 .}
+default     = direct
+
+{default}
+/
+
+{direct} 
+.cn
+
+{gae}
+.httpbin.org
+.github.com
+</code></pre>
+<p>增加配置进config</p>
+<pre><code>pac pac.action
+</code></pre>
+<h3 id="写入命令行proxy">写入命令行proxy</h3>
+<pre><code>vim ~/.bashrc
+# 加入以下内容，如想关闭全局代理，则注释掉
+export http_proxy=http://127.0.0.1:8118  
+export https_proxy=http://127.0.0.1:8118  
+# 更新配置
+source ~/.bashrc
+</code></pre>
+<h3 id="开启服务">开启服务</h3>
+<pre><code>systemctl enable privoxy
+systemctl start privoxy
+</code></pre>
+<h3 id="测试">测试</h3>
+<p>现在访问<code>curl http://httpbin.org/ip</code>应该显示是server，而<code>curl ipinfo.io</code> 应该显示的client的IP，如果是正常，表示配置OK</p>
+<h3 id="git配置proxy">git配置proxy</h3>
+<pre><code>git config --global http.proxy socks5://127.0.0.1:1234
+git config --global https.proxy socks5://127.0.0.1:1234
+</code></pre>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://www.lvtao.net/post/server-concurrency/">
+              <h3 class="post-title">
+                下一篇：高并发服务器优化
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <table>
+    <tr><td><a href="https://www.ioncube.com/?xp=TQLLZT"><img src="/media/ioncube.jpg" width="100%"/></a></td></tr>
+    <tr><td><a href="https://app.cloudcone.com/?ref=9519"><img src="/media/cloudcone.gif" width="100%"/></a></td></tr>
+  </table>
+  <div class="slogan"></div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  Powered by <a href="https://lvtao.net" target="_blank">LVTAO</a> | <a class="rss" href="https://www.lvtao.net/atom.xml" target="_blank">RSS</a>
+</div>
+<script 
+async
+defer
+src="https://ask.lvtao.net/api/application/embed?protocol=https&host=ask.lvtao.net&token=e193b47f92f1b41e">
+</script>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

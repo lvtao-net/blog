@@ -1,0 +1,216 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>Golang系列中常用包 | 吕滔博客</title>
+<meta name="description" content="">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://www.lvtao.net/favicon.ico?v=1714210602511">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://www.lvtao.net/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://www.lvtao.net">
+        <img class="avatar" src="https://www.lvtao.net/images/avatar.png?v=1714210602511" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://www.lvtao.net">
+        <h1 class="site-title">吕滔博客</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+        
+          <a href="https://medoo.lvtao.net" class="menu purple-link">
+            MeDoo中文手册
+          </a>
+        
+      
+        
+          <a href="https://tool.lvtao.net" class="menu purple-link">
+            工具箱
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">Golang系列中常用包</h2>
+          <div class="post-info post-detail-info">
+            
+              <span>
+                <i class="icon-pricetags-outline"></i>
+                
+                  <a href="https://www.lvtao.net/tag/go/">
+                    go
+                    
+                  </a>
+                
+              </span>
+            
+             <div style="margin-top:5px;"><a href="https://app.cloudcone.com/?ref=9519" target="_blank">海外无需备案主机推荐，支持25端口邮件发送，无端口限制，支持支付宝、Paypal、信用卡等支付...</a></div>
+          </div>
+          <div class="post-content" v-pre>
+            <p>一、常用包</p>
+<table>
+<thead>
+<tr>
+<th>常用包</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>fmt</td>
+<td>实现格式化的输入输出操作，其中的fmt.Printf()和fmt.Println()是开发者使用最为频繁的函数。</td>
+</tr>
+<tr>
+<td>io</td>
+<td>实现了一系列非平台相关的IO相关接口和实现，比如提供了对os中系统相关的IO功能的封装。我们在进行流式读写（比如读写文件）时，通常会用到该包。</td>
+</tr>
+<tr>
+<td>bufio</td>
+<td>它在io的基础上提供了缓存功能。在具备了缓存功能后， bufio可以比较方便地提供ReadLine之类的操作。</td>
+</tr>
+<tr>
+<td>strconv</td>
+<td>提供字符串与基本数据类型互转的能力。</td>
+</tr>
+<tr>
+<td>os</td>
+<td>本包提供了对操作系统功能的非平台相关访问接口。接口为Unix风格。提供的功能包括文件操作、进程管理、信号和用户账号等。</td>
+</tr>
+<tr>
+<td>sync</td>
+<td>它提供了基本的同步原语。在多个goroutine访问共享资源的时候，需要使用sync中提供的锁机制。</td>
+</tr>
+<tr>
+<td>flag</td>
+<td>它提供命令行参数的规则定义和传入参数解析的功能。绝大部分的命令行程序都需要用到这个包。</td>
+</tr>
+<tr>
+<td>encoding/json</td>
+<td>JSON目前广泛用做网络程序中的通信格式。本包提供了对JSON的基本支持，比如从一个对象序列化为JSON字符串，或者从JSON字符串反序列化出一个具体的对象等。</td>
+</tr>
+<tr>
+<td>http</td>
+<td>通过http包，只需要数行代码，即可实现一个爬虫或者一个Web服务器，这在传统语言中是无法想象的。</td>
+</tr>
+</tbody>
+</table>
+<p>二、完整包列表</p>
+<table>
+<tr><th>目录</th><th>包</th><th>说明</th></tr></thead><tbody><tr><td rowspan="28">&nbsp;</td><td>bufio</td><td>实现缓冲的I/O</td></tr><tr><td>bytes</td><td>提供了对字节切片操作的函数</td></tr><tr><td>crypto</td><td>收集了常见的加密常数</td></tr><tr><td>errors</td><td>实现了操作错误的函数</td></tr><tr><td>Expvar</td><td>为公共变量提供了一个标准的接口，如服务器中的运算计数器</td></tr><tr><td>flag</td><td>实现了命令行标记解析</td></tr><tr><td>fmt</td><td>实现了格式化输入输出</td></tr><tr><td>hash</td><td>提供了哈希函数接口</td></tr><tr><td>html</td><td>实现了一个HTML5兼容的分词器和解析器</td></tr><tr><td>image</td><td>实现了一个基本的二维图像库</td></tr><tr><td>io</td><td>提供了对I/O原语的基本接口</td></tr><tr><td>log</td><td>它是一个简单的记录包，提供最基本的日志功能</td></tr><tr><td>math</td><td>提供了一些基本的常量和数学函数</td></tr><tr><td>mine</td><td>实现了部分的MIME规范</td></tr><tr><td>net</td><td>提供了一个对UNIX网络套接字的可移植接口，包括TCP/IP、 UDP域名解析和UNIX域套接字</td></tr><tr><td>os</td><td>为操作系统功能实现了一个平台无关的接口</td></tr><tr><td>path</td><td>实现了对斜线分割的文件名路径的操作</td></tr><tr><td>reflect</td><td>实现了运行时反射，允许一个程序以任意类型操作对象</td></tr><tr><td>regexp</td><td>实现了一个简单的正则表达式库</td></tr><tr><td>runtime</td><td>包含与Go运行时系统交互的操作，如控制goroutine的函数</td></tr><tr><td>sort</td><td>提供对集合排序的基础函数集</td></tr><tr><td>strconv</td><td>实现了在基本数据类型和字符串之间的转换</td></tr><tr><td>strings</td><td>实现了操作字符串的简单函数</td></tr><tr><td>sync</td><td>提供了基本的同步机制，如互斥锁</td></tr><tr><td>syscall</td><td>包含一个低级的操作系统原语的接口</td></tr><tr><td>testing</td><td>提供对自动测试Go包的支持</td></tr><tr><td>time</td><td>提供测量和显示时间的功能</td></tr><tr><td>unicode</td><td>Unicode编码相关的基础函数</td></tr><tr><td rowspan="2">archive</td><td>tar</td><td>实现对tar压缩文档的访问</td></tr><tr><td>zip</td><td>提供对ZIP压缩文档的读和写支持</td></tr><tr><td rowspan="5">compress</td><td>bzip2</td><td>实现了bzip2解压缩</td></tr><tr><td>flate</td><td>实现了RFC 1951中所定义的DEFLATE压缩数据格式</td></tr><tr><td>gzip</td><td>实现了RFC 1951中所定义的gzip格式压缩文件的读和写</td></tr><tr><td>lzw</td><td>实现了 Lempel-Ziv-Welch编码格式的压缩的数据格式</td></tr><tr><td>zlib</td><td>实现了RFC 1950中所定义的zlib格式压缩数据的读和写</td></tr><tr><td rowspan="3">container</td><td>heap</td><td>提供了实现heap.Interface接口的任何类型的堆操作</td></tr><tr><td>lsit</td><td>实现了一个双链表</td></tr><tr><td>ring</td><td>实现了对循环链表的操作</td></tr><tr><td rowspan="18">crypto</td><td>aes</td><td>实现了AES加密（以前的Rijndael）</td></tr><tr><td>cipher</td><td>实现了标准的密码块模式，该模式可包装进低级的块加密实现中</td></tr><tr><td>des</td><td>实现了数据加密标准（ Data Encryption Standard，DES）和三重数据加密算法（ TripleData Encryption Algorithm， TDEA）</td></tr><tr><td>dsa</td><td>实现了FIPS 186-3所定义的数据签名算法（ Digital Signature Algorithm）</td></tr><tr><td>ecdsa</td><td>实现了FIPS 186-3所定义的椭圆曲线数据签名算法（ Elliptic Curve Digital Signature<br>Algorithm）</td></tr><tr><td>elliptic</td><td>实现了素数域上几个标准的椭圆曲线</td></tr><tr><td>hmac</td><td>实现了键控哈希消息身份验证码（ Keyed-Hash Message Authentication Code，<br>HMAC）</td></tr><tr><td>md5</td><td>实现了RFC 1321中所定义的MD5哈希算法</td></tr><tr><td>rand</td><td>实现了一个加密安全的伪随机数生成器</td></tr><tr><td>rc4</td><td>实现了RC4加密，其定义见Bruce Schneier的应用密码学（ Applied Cryptography）</td></tr><tr><td>rsa</td><td>实现了PKCS#1中所定义的RSA加密</td></tr><tr><td>sha1</td><td>实现了RFC 3174中所定义的SHA1哈希算法</td></tr><tr><td>sha256</td><td>实现了FIPS 180-2中所定义的SHA224和SHA256哈希算法</td></tr><tr><td>sha512</td><td>实现了FIPS 180-2中所定义的SHA384和SHA512哈希算法</td></tr><tr><td>subtle</td><td>实现了一些有用的加密函数，但需要仔细考虑以便正确应用它们</td></tr><tr><td>tls</td><td>部分实现了RFC 4346所定义的TLS 1.1协议</td></tr><tr><td>x509</td><td>可解析X.509编码的键值和证书</td></tr><tr><td>x509/pkix</td><td>包含用于对X.509证书、 CRL和OCSP的ASN.1解析和序列化的共享的、低级的结构</td></tr><tr><td rowspan="2">database</td><td>sql</td><td>围绕SQL提供了一个通用的接口</td></tr><tr><td>sql/driver</td><td>定义了数据库驱动所需实现的接口，同sql包的使用方式</td></tr><tr><td rowspan="5">debug</td><td>dwarf</td><td>提供了对从可执行文件加载的DWARF调试信息的访问，这个包对于实现Go语言<br>的调试器非常有价值</td></tr><tr><td>elf</td><td>实现了对ELF对象文件的访问。 ELF是一种常见的二进制可执行文件和共享库的<br>文件格式。 Linux采用了ELF格式</td></tr><tr><td>gosym</td><td>访问Go语言二进制程序中的调试信息。对于可视化调试很有价值</td></tr><tr><td>macho</td><td>实现了对http://developer.apple.com/mac/library/documentation/DeveloperTools/Conceptual/<br>MachORuntime/Reference/reference.html 所定义的Mach-O对象文件的访问</td></tr><tr><td>pe</td><td>实现了对PE（ Microsoft Windows Portable Executable）文件的访问</td></tr><tr><td rowspan="11">encoding</td><td>ascii85</td><td>实现了ascii85数据编码，用于btoa工具和Adobe’s PostScript以及PDF文档格式</td></tr><tr><td>asn1</td><td>实现了解析DER编码的ASN.1数据结构，其定义见ITU-T Rec X.690</td></tr><tr><td>base32</td><td>实现了RFC 4648中所定义的base32编码</td></tr><tr><td>base64</td><td>实现了RFC 4648中所定义的base64编码</td></tr><tr><td>binary</td><td>实现了在无符号整数值和字节串之间的转化，以及对固定尺寸值的读和写</td></tr><tr><td>csv</td><td>可读和写由逗号分割的数值（ csv）文件</td></tr><tr><td>gob</td><td>管理gob流——在编码器（发送者）和解码器（接收者）之间进行二进制值交换</td></tr><tr><td>hex</td><td>实现了十六进制的编码和解码</td></tr><tr><td>json</td><td>实现了定义于RFC 4627中的JSON对象的编码和解码</td></tr><tr><td>pem</td><td>实现了PEM（ Privacy Enhanced Mail）数据编码</td></tr><tr><td>xml</td><td>实现了一个简单的可理解XML名字空间的XML 1.0解析器</td></tr><tr><td rowspan="7">go</td><td>ast</td><td>声明了用于展示Go包中的语法树类型</td></tr><tr><td>build</td><td>提供了构建Go包的工具</td></tr><tr><td>doc</td><td>从一个Go AST（抽象语法树）中提取源代码文档</td></tr><tr><td>parser</td><td>实现了一个Go源文件解析器</td></tr><tr><td>printer</td><td>实现了对AST（抽象语法树）的打印</td></tr><tr><td>scanner</td><td>实现了一个Go源代码文本的扫描器</td></tr><tr><td>token</td><td>定义了代表Go编程语言中词法标记以及基本操作标记（ printing、 predicates）的常<br>量</td></tr><tr><td rowspan="4">hash</td><td>adler32</td><td>实现了Adler-32校验和</td></tr><tr><td>crc32</td><td>实现了32位的循环冗余校验或CRC-32校验和</td></tr><tr><td>crc64</td><td>实现了64位的循环冗余校验或CRC-64校验和</td></tr><tr><td>fnv</td><td>实现了Glenn Fowler、 Landon Curt Noll和Phong Vo所创建的FNV-1和FNV-1a未加<br>密哈希函数</td></tr><tr><td>html</td><td>template</td><td>它自动构建HTML输出，并可防止代码注入</td></tr><tr><td rowspan="5">image</td><td>color</td><td>实现了一个基本的颜色库</td></tr><tr><td>draw</td><td>提供一些做图函数</td></tr><tr><td>gif</td><td>实现了一个GIF图像解码器</td></tr><tr><td>jpeg</td><td>实现了一个JPEG图像解码器和编码器</td></tr><tr><td>png</td><td>实现了一个PNG图像解码器和编码器</td></tr><tr><td>index</td><td>suffixarray</td><td>通过构建内存索引实现的高速字符串匹配查找算法</td></tr><tr><td>io</td><td>ioutil</td><td>实现了一些实用的I/O函数</td></tr><tr><td>log</td><td>syslog</td><td>提供了对系统日志服务的简单接口</td></tr><tr><td rowspan="3">math</td><td>big</td><td>实现了多精度的算术运算（大数）</td></tr><tr><td>cmplx</td><td>为复数提供了基本的常量和数学函数</td></tr><tr><td>rand</td><td>实现了伪随机数生成器</td></tr><tr><td>mime</td><td>multipart</td><td>实现了在RFC 2046中定义的MIME多个部分的解析</td></tr><tr><td rowspan="12">net</td><td>http</td><td>提供了HTTP客户端和服务器的实现</td></tr><tr><td>mail</td><td>实现了对邮件消息的解析</td></tr><tr><td>rpc</td><td>提供了对一个来自网络或其他I/O连接的对象可导出的方法的访问</td></tr><tr><td>smtp</td><td>实现了定义于RFC 5321中的简单邮件传输协议（ Simple Mail Transfer Protocol)</td></tr><tr><td>textproto</td><td>实现了在HTTP、 NNTP和SMTP中基于文本的通用的请求/响应协议</td></tr><tr><td>url</td><td>解析URL并实现查询转义</td></tr><tr><td>http/cgi</td><td>实现了定义于RFC 3875中的CGI（通用网关接口）</td></tr><tr><td>http/fcgi</td><td>实现了FastCGI协议</td></tr><tr><td>http/httptest</td><td>提供了一些HTTP测试应用</td></tr><tr><td>http/httputil</td><td>提供了一些HTTP应用函数，这些是对net/http包中的东西的补充，只不过相对<br>不太常用</td></tr><tr><td>http/pprof</td><td>通过其HTTP服务器运行时提供性能测试数据，该数据的格式正是pprof可视化工<br>具需要的</td></tr><tr><td>rpc/jsonrpc</td><td>为rpc包实现了一个JSON-RPC ClientCodec和ServerCodec</td></tr><tr><td rowspan="2">os</td><td>exec</td><td>可运行外部命令</td></tr><tr><td>user</td><td>通过名称和id进行用户账户检查</td></tr><tr><td>path</td><td>filepath</td><td>实现了以与目标操作系统定义文件路径相兼容的方式处理文件名路径</td></tr><tr><td>regexp</td><td>syntax</td><td>将正则表达式解析为语法树</td></tr><tr><td rowspan="2">runtime</td><td>debug</td><td>包含当程序在运行时调试其自身的功能</td></tr><tr><td>pprof</td><td>以pprof可视化工具需要的格式写运行时性能测试数据</td></tr><tr><td>sync</td><td>atomic</td><td>提供了低级的用于实现同步算法的原子级的内存机制</td></tr><tr><td rowspan="3">testing</td><td>iotest</td><td>提供一系列测试目的的类型，实现了Reader和Writer标准接口</td></tr><tr><td>quick</td><td>实现了用于黑箱测试的实用函数</td></tr><tr><td>script</td><td>帮助测试使用通道的代码</td></tr><tr><td rowspan="6">text</td><td>scanner</td><td>为UTF-8文本提供了一个扫描器和分词器</td></tr><tr><td>tabwriter</td><td>实现了一个写筛选器（ tabwriter.Writer），它可将一个输入的tab分割的列<br>翻译为适当对齐的文本</td></tr><tr><td>template</td><td>数据驱动的模板引擎，用于生成类似HTML的文本输出格式</td></tr><tr><td>template/parse</td><td>为template构建解析树</td></tr><tr><td>unicode/utf16</td><td>实现了UTF-16序列的的编码和解码</td></tr><tr><td>unicode/utf8</td><td>实现了支持以UTF-8编码的文本的函数和常数</td></tr></tbody></table>
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://www.lvtao.net/post/golang-robfig-cron/">
+              <h3 class="post-title">
+                下一篇：GoLang 定时robfig/cron使用
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <table>
+    <tr><td><a href="https://www.ioncube.com/?xp=TQLLZT"><img src="/media/ioncube.jpg" width="100%"/></a></td></tr>
+    <tr><td><a href="https://app.cloudcone.com/?ref=9519"><img src="/media/cloudcone.gif" width="100%"/></a></td></tr>
+  </table>
+  <div class="slogan"></div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  Powered by <a href="https://lvtao.net" target="_blank">LVTAO</a> | <a class="rss" href="https://www.lvtao.net/atom.xml" target="_blank">RSS</a>
+</div>
+<script 
+async
+defer
+src="https://ask.lvtao.net/api/application/embed?protocol=https&host=ask.lvtao.net&token=e193b47f92f1b41e">
+</script>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

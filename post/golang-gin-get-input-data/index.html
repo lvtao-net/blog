@@ -1,0 +1,272 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>GoLang Gin 获取Input数据 | 吕滔博客</title>
+<meta name="description" content="">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://www.lvtao.net/favicon.ico?v=1714210602511">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://www.lvtao.net/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://www.lvtao.net">
+        <img class="avatar" src="https://www.lvtao.net/images/avatar.png?v=1714210602511" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://www.lvtao.net">
+        <h1 class="site-title">吕滔博客</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+        
+          <a href="https://medoo.lvtao.net" class="menu purple-link">
+            MeDoo中文手册
+          </a>
+        
+      
+        
+          <a href="https://tool.lvtao.net" class="menu purple-link">
+            工具箱
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">GoLang Gin 获取Input数据</h2>
+          <div class="post-info post-detail-info">
+            
+              <span>
+                <i class="icon-pricetags-outline"></i>
+                
+                  <a href="https://www.lvtao.net/tag/go/">
+                    go
+                    
+                  </a>
+                
+              </span>
+            
+             <div style="margin-top:5px;"><a href="https://app.cloudcone.com/?ref=9519" target="_blank">海外无需备案主机推荐，支持25端口邮件发送，无端口限制，支持支付宝、Paypal、信用卡等支付...</a></div>
+          </div>
+          <div class="post-content" v-pre>
+            <p>Gin获取输入数据还是挺复杂的，这里简单总结一下：</p>
+<ul>
+<li>Get的使用Query、Param系列</li>
+<li>Post的form-data和x-www-form-urlencoded使用PostForm系列</li>
+<li>Get和Post的数据都可以用Bind、ShouldBind系列，不过结构体的tag需要写正确</li>
+<li>文件上传使用form-data，通过函数FormFile或者MultipartForm</li>
+</ul>
+<p>详解：<br>
+Param</p>
+<pre><code class="language-go">// Param returns the value of the URL param.
+// It is a shortcut for c.Params.ByName(key)
+router.GET(&quot;/user/:id&quot;, func(c *gin.Context) {
+    // a GET request to /user/john
+    id := c.Param(&quot;id&quot;) // id == &quot;john&quot;
+})
+func (c *Context) Param(key string) string
+</code></pre>
+<p>AddParam</p>
+<pre><code class="language-go">// AddParam adds param to context and
+// replaces path param key with given value for e2e testing purposes
+// Example Route: &quot;/user/:id&quot;
+// AddParam(&quot;id&quot;, 1)
+// Result: &quot;/user/1&quot;
+func (c *Context) AddParam(key, value string) 
+</code></pre>
+<p>Query</p>
+<pre><code class="language-go">// Query returns the keyed url query value if it exists,
+// otherwise it returns an empty string `(&quot;&quot;)`.
+// It is shortcut for `c.Request.URL.Query().Get(key)`
+//     GET /path?id=1234&amp;name=Manu&amp;value=
+// 	   c.Query(&quot;id&quot;) == &quot;1234&quot;
+// 	   c.Query(&quot;name&quot;) == &quot;Manu&quot;
+// 	   c.Query(&quot;value&quot;) == &quot;&quot;
+// 	   c.Query(&quot;wtf&quot;) == &quot;&quot;
+func (c *Context) Query(key string) (value string)
+</code></pre>
+<p>DefaultQuery</p>
+<pre><code class="language-go">// DefaultQuery returns the keyed url query value if it exists,
+// otherwise it returns the specified defaultValue string.
+// See: Query() and GetQuery() for further information.
+//     GET /?name=Manu&amp;lastname=
+//     c.DefaultQuery(&quot;name&quot;, &quot;unknown&quot;) == &quot;Manu&quot;
+//     c.DefaultQuery(&quot;id&quot;, &quot;none&quot;) == &quot;none&quot;
+//     c.DefaultQuery(&quot;lastname&quot;, &quot;none&quot;) == &quot;&quot;
+func (c *Context) DefaultQuery(key, defaultValue string) string 
+</code></pre>
+<p>QueryArray</p>
+<pre><code class="language-go">// QueryArray returns a slice of strings for a given query key.
+// The length of the slice depends on the number of params with the given key.
+func (c *Context) QueryArray(key string) (values []string)
+</code></pre>
+<p>QueryMap</p>
+<pre><code class="language-go">// QueryMap returns a map for a given query key.
+func (c *Context) QueryMap(key string) (dicts map[string]string)
+</code></pre>
+<p>PostForm</p>
+<pre><code class="language-go">// PostForm returns the specified key from a POST urlencoded form or multipart form
+// when it exists, otherwise it returns an empty string `(&quot;&quot;)`.
+func (c *Context) PostForm(key string) (value string) 
+</code></pre>
+<p>DefaultPostForm</p>
+<pre><code class="language-go">// DefaultPostForm returns the specified key from a POST urlencoded form or multipart form
+// when it exists, otherwise it returns the specified defaultValue string.
+// See: PostForm() and GetPostForm() for further information.
+func (c *Context) DefaultPostForm(key, defaultValue string) string
+</code></pre>
+<p>PostFormArray</p>
+<pre><code class="language-go">// PostFormArray returns a slice of strings for a given form key.
+// The length of the slice depends on the number of params with the given key.
+func (c *Context) PostFormArray(key string) (values []string)
+</code></pre>
+<p>PostFormMap</p>
+<pre><code class="language-go">// PostFormMap returns a map for a given form key.
+func (c *Context) PostFormMap(key string) (dicts map[string]string)
+</code></pre>
+<p>FormFile</p>
+<pre><code class="language-go">// FormFile returns the first file for the provided form key.
+func (c *Context) FormFile(name string) (*multipart.FileHeader, error)
+</code></pre>
+<p>MultipartForm</p>
+<pre><code class="language-go">// MultipartForm is the parsed multipart form, including file uploads.
+func (c *Context) MultipartForm() (*multipart.Form, error)
+</code></pre>
+<p>SaveUploadedFile</p>
+<pre><code class="language-go">// SaveUploadedFile uploads the form file to specific dst.
+func (c *Context) SaveUploadedFile(file *multipart.FileHeader, dst string) 
+</code></pre>
+<p>Bind</p>
+<pre><code class="language-go">// Bind checks the Method and Content-Type to select a binding engine automatically,
+// Depending on the &quot;Content-Type&quot; header different bindings are used, for example:
+//     &quot;application/json&quot; --&gt; JSON binding
+//     &quot;application/xml&quot;  --&gt; XML binding
+// It parses the request's body as JSON if Content-Type == &quot;application/json&quot; using JSON or XML as a JSON input.
+// It decodes the json payload into the struct specified as a pointer.
+// It writes a 400 error and sets Content-Type header &quot;text/plain&quot; in the response if input is not valid.
+func (c *Context) Bind(obj any) error
+</code></pre>
+<p>BindJSON</p>
+<pre><code class="language-go">// BindJSON is a shortcut for c.MustBindWith(obj, binding.JSON).
+func (c *Context) BindJSON(obj any) error 
+</code></pre>
+<p>BindXML</p>
+<pre><code class="language-go">// BindXML is a shortcut for c.MustBindWith(obj, binding.BindXML).
+func (c *Context) BindXML(obj any) error 
+</code></pre>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://www.lvtao.net/post/go-swagger-docs/">
+              <h3 class="post-title">
+                下一篇：GoLang Swagger声明式注释格式
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <table>
+    <tr><td><a href="https://www.ioncube.com/?xp=TQLLZT"><img src="/media/ioncube.jpg" width="100%"/></a></td></tr>
+    <tr><td><a href="https://app.cloudcone.com/?ref=9519"><img src="/media/cloudcone.gif" width="100%"/></a></td></tr>
+  </table>
+  <div class="slogan"></div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  Powered by <a href="https://lvtao.net" target="_blank">LVTAO</a> | <a class="rss" href="https://www.lvtao.net/atom.xml" target="_blank">RSS</a>
+</div>
+<script 
+async
+defer
+src="https://ask.lvtao.net/api/application/embed?protocol=https&host=ask.lvtao.net&token=e193b47f92f1b41e">
+</script>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

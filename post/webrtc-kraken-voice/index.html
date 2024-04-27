@@ -1,0 +1,274 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>基于WebRTC的语音视频一对一通话系统搭建 | 吕滔博客</title>
+<meta name="description" content="">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://www.lvtao.net/favicon.ico?v=1714210602511">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://www.lvtao.net/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://www.lvtao.net">
+        <img class="avatar" src="https://www.lvtao.net/images/avatar.png?v=1714210602511" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://www.lvtao.net">
+        <h1 class="site-title">吕滔博客</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+        
+          <a href="https://medoo.lvtao.net" class="menu purple-link">
+            MeDoo中文手册
+          </a>
+        
+      
+        
+          <a href="https://tool.lvtao.net" class="menu purple-link">
+            工具箱
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">基于WebRTC的语音视频一对一通话系统搭建</h2>
+          <div class="post-info post-detail-info">
+            
+              <span>
+                <i class="icon-pricetags-outline"></i>
+                
+                  <a href="https://www.lvtao.net/tag/go/">
+                    go
+                    
+                  </a>
+                
+              </span>
+            
+             <div style="margin-top:5px;"><a href="https://app.cloudcone.com/?ref=9519" target="_blank">海外无需备案主机推荐，支持25端口邮件发送，无端口限制，支持支付宝、Paypal、信用卡等支付...</a></div>
+          </div>
+          <div class="post-content" v-pre>
+            <h3 id="服务器centos安装turnserver服务">服务器Centos安装turnserver服务</h3>
+<p>基础环境</p>
+<pre><code>sudo yum install -y make gcc cc gcc-c++ wget
+sudo yum install -y openssl-devel libevent libevent-devel
+</code></pre>
+<p>Turn安装，使用github上的coturn构建：https://github.com/coturn/coturn</p>
+<pre><code>wget http://turnserver.open-sys.org/downloads/v4.5.2/turnserver-4.5.2.tar.gz
+
+tar -xvzf turnserver-4.5.2.tar.gz
+
+cd turnserver-4.5.2 &amp;&amp; ./configure --prefix=/usr/local/turnserver
+
+make
+
+sudo make install
+</code></pre>
+<p>不要使用git clone拉取，不然你会发现报C的错误<br>
+测试是否安装成功，若有路径表示成功<br>
+<code>which turnserver</code></p>
+<p>-----下面的配置为普通应用，当前系统你可以配置也可以不配置，反正用不上-----<br>
+进入配置文件夹<br>
+<code>cd /usr/local/turnserver/etc/</code><br>
+复制出<code>turnserver.conf.default</code> 为 <code>turnserver.conf</code><br>
+vim编辑配置文件，shift+g跳到最后一行加上以下内容</p>
+<pre><code>listening-port=监听端口
+listening-ip=你的内网
+external-ip=你的外网
+user=你的账号:你的密码
+realm=域名
+cli-password=你的密码（这个要加上，不然一会启动服务会报cli-password啥的）
+min-port=49152
+max-port=65535
+</code></pre>
+<p>防火墙把tcp和udp全部1-65535全部放开（只放3478也行，默认3478）<br>
+然后启动服务<br>
+<code>turnserver -v -r 你的公网ip:3478 -a -o -c /usr/local/turnserver/etc/turnserver.conf</code><br>
+查看是否在运行了 <code>ps -ef|grep turnserver</code><br>
+未配置证书的报错<br>
+生成证书</p>
+<pre><code>openssl req -x509 -newkey rsa:2048 -keyout /usr/local/turnserver/etc/turn_server_pkey.pem -out /usr/local/turnserver/etc/turn_server_cert.pem -days 99999 -nodes
+</code></pre>
+<p>ifconfig查看网卡 修改配置文件</p>
+<pre><code>cert=/usr/local/etc/turn_server_cert.pem
+pkey=/usr/local/etc/turn_server_pkey.pem
+</code></pre>
+<p>-----无用配置结束-----</p>
+<h3 id="webrtc服务端搭建">WebRTC服务端搭建</h3>
+<p>开源仓库 https://github.com/MixinNetwork/kraken<br>
+Go环境配置此教程不讲<br>
+clone仓库，然后build对应平台kraken<br>
+然后配置config下的配置文件<br>
+config目录下<code>coturn.service</code>文件放置centos服务中，先修改一下</p>
+<pre><code>[Unit]
+Description=Coturn Daemon
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/turnserver -a -f --syslog --no-stun --listening-port 3478 --static-auth-secret=通信密码 -r kraken -v
+Restart=on-failure
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target
+</code></pre>
+<p>安装服务并启用，可参考教程 https://www.lvtao.net/post/systemd-java-jar/<br>
+<code>cp config/engine.example.toml config/engine.toml</code><br>
+<code>vim engine.toml</code></p>
+<pre><code>[engine]
+# the network interface to bind
+interface = &quot;eth0&quot;
+# the IP address to bind, empty allows the engine to get it from interface
+address = &quot;内网IP&quot;
+log-level = 10
+# the UDP port range, leave them to 0 for default strategy
+port-min = 49152
+port-max = 65535
+
+[turn]
+host = &quot;turn:公网IP:3478&quot;
+# must be identical to coturn static auth secret
+secret = &quot;通信密码&quot;
+
+[rpc]
+port = 7000
+</code></pre>
+<p>以上两处通信密码必须一致，不然没有turn服务，客户端可能会没法找到相同的房间用户<br>
+启用服务<code>./kraken -c config/engine.toml -s engine</code><br>
+如果不想暴露7000端口，可使用nginx配置ssl并反代7000端口即可</p>
+<h3 id="语音通讯客户端配置">语音通讯客户端配置</h3>
+<p>仓库地址：https://github.com/MixinNetwork/kraken.fm<br>
+下载源码，修改index.js中配置即可</p>
+<pre><code>  // 如果启用伪静态用下列配置
+  //const KRAKEN_API = 'https://ip:7000';
+  //const ROOM_PARAM = 'PATH';
+  //const ICE_POLICY = 'relay';
+
+  // 无伪静态的开发环境
+  const KRAKEN_API = 'http://ip:7000';
+  const ROOM_PARAM = 'QUERY';
+  const ICE_POLICY = 'all';
+</code></pre>
+<p>前端nginx伪静态参考</p>
+<pre><code>location / {
+	rewrite ^(.*)/([a-z0-9\_]+)$ $1/?room=$2 last;
+}
+</code></pre>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://www.lvtao.net/post/go-webscoket-chatgpt/">
+              <h3 class="post-title">
+                下一篇：chatgpt告诉我使用go语言实现webscoket多人聊天功能代码
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <table>
+    <tr><td><a href="https://www.ioncube.com/?xp=TQLLZT"><img src="/media/ioncube.jpg" width="100%"/></a></td></tr>
+    <tr><td><a href="https://app.cloudcone.com/?ref=9519"><img src="/media/cloudcone.gif" width="100%"/></a></td></tr>
+  </table>
+  <div class="slogan"></div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  Powered by <a href="https://lvtao.net" target="_blank">LVTAO</a> | <a class="rss" href="https://www.lvtao.net/atom.xml" target="_blank">RSS</a>
+</div>
+<script 
+async
+defer
+src="https://ask.lvtao.net/api/application/embed?protocol=https&host=ask.lvtao.net&token=e193b47f92f1b41e">
+</script>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

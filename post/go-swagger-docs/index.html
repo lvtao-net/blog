@@ -1,0 +1,828 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>GoLang Swagger声明式注释格式 | 吕滔博客</title>
+<meta name="description" content="">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://www.lvtao.net/favicon.ico?v=1714210602511">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://www.lvtao.net/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://www.lvtao.net">
+        <img class="avatar" src="https://www.lvtao.net/images/avatar.png?v=1714210602511" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://www.lvtao.net">
+        <h1 class="site-title">吕滔博客</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+        
+          <a href="https://medoo.lvtao.net" class="menu purple-link">
+            MeDoo中文手册
+          </a>
+        
+      
+        
+          <a href="https://tool.lvtao.net" class="menu purple-link">
+            工具箱
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">GoLang Swagger声明式注释格式</h2>
+          <div class="post-info post-detail-info">
+            
+              <span>
+                <i class="icon-pricetags-outline"></i>
+                
+                  <a href="https://www.lvtao.net/tag/go/">
+                    go
+                    
+                  </a>
+                
+              </span>
+            
+             <div style="margin-top:5px;"><a href="https://app.cloudcone.com/?ref=9519" target="_blank">海外无需备案主机推荐，支持25端口邮件发送，无端口限制，支持支付宝、Paypal、信用卡等支付...</a></div>
+          </div>
+          <div class="post-content" v-pre>
+            <h2 id="声明式注释格式">声明式注释格式</h2>
+<h2 id="通用api信息">通用API信息</h2>
+<p><strong>示例</strong> <a href="https://github.com/swaggo/swag/blob/master/example/celler/main.go"><code>celler/main.go</code></a></p>
+<table>
+<thead>
+<tr>
+<th>注释</th>
+<th>说明</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>title</td>
+<td><strong>必填</strong> 应用程序的名称。</td>
+<td>// @title Swagger Example API</td>
+</tr>
+<tr>
+<td>version</td>
+<td><strong>必填</strong> 提供应用程序API的版本。</td>
+<td>// @version 1.0</td>
+</tr>
+<tr>
+<td>description</td>
+<td>应用程序的简短描述。</td>
+<td>// @description This is a sample server celler server.</td>
+</tr>
+<tr>
+<td>tag.name</td>
+<td>标签的名称。</td>
+<td>// @tag.name This is the name of the tag</td>
+</tr>
+<tr>
+<td>tag.description</td>
+<td>标签的描述。</td>
+<td>// @tag.description Cool Description</td>
+</tr>
+<tr>
+<td>tag.docs.url</td>
+<td>标签的外部文档的URL。</td>
+<td>// @tag.docs.url https://example.com</td>
+</tr>
+<tr>
+<td>tag.docs.description</td>
+<td>标签的外部文档说明。</td>
+<td>// @tag.docs.description Best example documentation</td>
+</tr>
+<tr>
+<td>termsOfService</td>
+<td>API的服务条款。</td>
+<td>// @termsOfService http://swagger.io/terms/</td>
+</tr>
+<tr>
+<td>contact.name</td>
+<td>公开的API的联系信息。</td>
+<td>// @contact.name API Support</td>
+</tr>
+<tr>
+<td>contact.url</td>
+<td>联系信息的URL。 必须采用网址格式。</td>
+<td>// @contact.url http://www.swagger.io/support</td>
+</tr>
+<tr>
+<td>contact.email</td>
+<td>联系人/组织的电子邮件地址。 必须采用电子邮件地址的格式。</td>
+<td>// @contact.email support@swagger.io</td>
+</tr>
+<tr>
+<td>license.name</td>
+<td><strong>必填</strong> 用于API的许可证名称。</td>
+<td>// @license.name Apache 2.0</td>
+</tr>
+<tr>
+<td>license.url</td>
+<td>用于API的许可证的URL。 必须采用网址格式。</td>
+<td>// @license.url http://www.apache.org/licenses/LICENSE-2.0.html</td>
+</tr>
+<tr>
+<td>host</td>
+<td>运行API的主机（主机名或IP地址）。</td>
+<td>// @host localhost:8080</td>
+</tr>
+<tr>
+<td>BasePath</td>
+<td>运行API的基本路径。</td>
+<td>// @BasePath /api/v1</td>
+</tr>
+<tr>
+<td>accept</td>
+<td>API 可以使用的 MIME 类型列表。 请注意，Accept 仅影响具有请求正文的操作，例如 POST、PUT 和 PATCH。 值必须如“<a href="#mime%E7%B1%BB%E5%9E%8B">Mime类型</a>”中所述。</td>
+<td>// @accept json</td>
+</tr>
+<tr>
+<td>produce</td>
+<td>API可以生成的MIME类型的列表。值必须如“<a href="#mime%E7%B1%BB%E5%9E%8B">Mime类型</a>”中所述。</td>
+<td>// @produce json</td>
+</tr>
+<tr>
+<td>query.collection.format</td>
+<td>请求URI query里数组参数的默认格式：csv，multi，pipes，tsv，ssv。 如果未设置，则默认为csv。</td>
+<td>// @query.collection.format multi</td>
+</tr>
+<tr>
+<td>schemes</td>
+<td>用空格分隔的请求的传输协议。</td>
+<td>// @schemes http https</td>
+</tr>
+<tr>
+<td>x-name</td>
+<td>扩展的键必须以x-开头，并且只能使用json值</td>
+<td>// @x-example-key {&quot;key&quot;: &quot;value&quot;}</td>
+</tr>
+</tbody>
+</table>
+<h3 id="使用markdown描述">使用Markdown描述</h3>
+<p>如果文档中的短字符串不足以完整表达，或者需要展示图片，代码示例等类似的内容，则可能需要使用Markdown描述。要使用Markdown描述，请使用一下注释。</p>
+<table>
+<thead>
+<tr>
+<th>注释</th>
+<th>说明</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>title</td>
+<td><strong>必填</strong> 应用程序的名称。</td>
+<td>// @title Swagger Example API</td>
+</tr>
+<tr>
+<td>version</td>
+<td><strong>必填</strong> 提供应用程序API的版本。</td>
+<td>// @version 1.0</td>
+</tr>
+<tr>
+<td>description.markdown</td>
+<td>应用程序的简短描述。 从<code>api.md</code>文件中解析。 这是<code>@description</code>的替代用法。</td>
+<td>// @description.markdown No value needed, this parses the description from api.md</td>
+</tr>
+<tr>
+<td>tag.name</td>
+<td>标签的名称。</td>
+<td>// @tag.name This is the name of the tag</td>
+</tr>
+<tr>
+<td>tag.description.markdown</td>
+<td>标签说明，这是<code>tag.description</code>的替代用法。 该描述将从名为<code>tagname.md的</code>文件中读取。</td>
+<td>// @tag.description.markdown</td>
+</tr>
+</tbody>
+</table>
+<h2 id="api操作">API操作</h2>
+<p>Example <a href="https://github.com/swaggo/swag/tree/master/example/celler/controller">celler/controller</a></p>
+<table>
+<thead>
+<tr>
+<th>注释</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>description</td>
+<td>操作行为的详细说明。</td>
+</tr>
+<tr>
+<td>description.markdown</td>
+<td>应用程序的简短描述。该描述将从名为<code>endpointname.md</code>的文件中读取。</td>
+</tr>
+<tr>
+<td>id</td>
+<td>用于标识操作的唯一字符串。在所有API操作中必须唯一。</td>
+</tr>
+<tr>
+<td>tags</td>
+<td>每个API操作的标签列表，以逗号分隔。</td>
+</tr>
+<tr>
+<td>summary</td>
+<td>该操作的简短摘要。</td>
+</tr>
+<tr>
+<td>accept</td>
+<td>API 可以使用的 MIME 类型列表。 请注意，Accept 仅影响具有请求正文的操作，例如 POST、PUT 和 PATCH。 值必须如“<a href="#mime%E7%B1%BB%E5%9E%8B">Mime类型</a>”中所述。</td>
+</tr>
+<tr>
+<td>produce</td>
+<td>API可以生成的MIME类型的列表。值必须如“<a href="#mime%E7%B1%BB%E5%9E%8B">Mime类型</a>”中所述。</td>
+</tr>
+<tr>
+<td>param</td>
+<td>用空格分隔的参数。<code>param name</code>,<code>param type</code>,<code>data type</code>,<code>is mandatory?</code>,<code>comment</code> <code>attribute(optional)</code></td>
+</tr>
+<tr>
+<td>security</td>
+<td>每个API操作的<a href="#%E5%AE%89%E5%85%A8%E6%80%A7">安全性</a>。</td>
+</tr>
+<tr>
+<td>success</td>
+<td>以空格分隔的成功响应。<code>return code</code>,<code>{param type}</code>,<code>data type</code>,<code>comment</code></td>
+</tr>
+<tr>
+<td>failure</td>
+<td>以空格分隔的故障响应。<code>return code</code>,<code>{param type}</code>,<code>data type</code>,<code>comment</code></td>
+</tr>
+<tr>
+<td>response</td>
+<td>与success、failure作用相同</td>
+</tr>
+<tr>
+<td>header</td>
+<td>以空格分隔的头字段。 <code>return code</code>,<code>{param type}</code>,<code>data type</code>,<code>comment</code></td>
+</tr>
+<tr>
+<td>router</td>
+<td>以空格分隔的路径定义。 <code>path</code>,<code>[httpMethod]</code></td>
+</tr>
+<tr>
+<td>x-name</td>
+<td>扩展字段必须以<code>x-</code>开头，并且只能使用json值。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="mime类型">Mime类型</h2>
+<p><code>swag</code> 接受所有格式正确的MIME类型, 即使匹配 <code>*/*</code>。除此之外，<code>swag</code>还接受某些MIME类型的别名，如下所示：</p>
+<table>
+<thead>
+<tr>
+<th>Alias</th>
+<th>MIME Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>json</td>
+<td>application/json</td>
+</tr>
+<tr>
+<td>xml</td>
+<td>text/xml</td>
+</tr>
+<tr>
+<td>plain</td>
+<td>text/plain</td>
+</tr>
+<tr>
+<td>html</td>
+<td>text/html</td>
+</tr>
+<tr>
+<td>mpfd</td>
+<td>multipart/form-data</td>
+</tr>
+<tr>
+<td>x-www-form-urlencoded</td>
+<td>application/x-www-form-urlencoded</td>
+</tr>
+<tr>
+<td>json-api</td>
+<td>application/vnd.api+json</td>
+</tr>
+<tr>
+<td>json-stream</td>
+<td>application/x-json-stream</td>
+</tr>
+<tr>
+<td>octet-stream</td>
+<td>application/octet-stream</td>
+</tr>
+<tr>
+<td>png</td>
+<td>image/png</td>
+</tr>
+<tr>
+<td>jpeg</td>
+<td>image/jpeg</td>
+</tr>
+<tr>
+<td>gif</td>
+<td>image/gif</td>
+</tr>
+</tbody>
+</table>
+<h2 id="参数类型">参数类型</h2>
+<ul>
+<li>query</li>
+<li>path</li>
+<li>header</li>
+<li>body</li>
+<li>formData</li>
+</ul>
+<h2 id="数据类型">数据类型</h2>
+<ul>
+<li>string (string)</li>
+<li>integer (int, uint, uint32, uint64)</li>
+<li>number (float32)</li>
+<li>boolean (bool)</li>
+<li>user defined struct</li>
+</ul>
+<h2 id="安全性">安全性</h2>
+<table>
+<thead>
+<tr>
+<th>注释</th>
+<th>描述</th>
+<th>参数</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>securitydefinitions.basic</td>
+<td><a href="https://swagger.io/docs/specification/2-0/authentication/basic-authentication/">Basic</a> auth.</td>
+<td></td>
+<td>// @securityDefinitions.basic BasicAuth</td>
+</tr>
+<tr>
+<td>securitydefinitions.apikey</td>
+<td><a href="https://swagger.io/docs/specification/2-0/authentication/api-keys/">API key</a> auth.</td>
+<td>in, name</td>
+<td>// @securityDefinitions.apikey ApiKeyAuth</td>
+</tr>
+<tr>
+<td>securitydefinitions.oauth2.application</td>
+<td><a href="https://swagger.io/docs/specification/authentication/oauth2/">OAuth2 application</a> auth.</td>
+<td>tokenUrl, scope</td>
+<td>// @securitydefinitions.oauth2.application OAuth2Application</td>
+</tr>
+<tr>
+<td>securitydefinitions.oauth2.implicit</td>
+<td><a href="https://swagger.io/docs/specification/authentication/oauth2/">OAuth2 implicit</a> auth.</td>
+<td>authorizationUrl, scope</td>
+<td>// @securitydefinitions.oauth2.implicit OAuth2Implicit</td>
+</tr>
+<tr>
+<td>securitydefinitions.oauth2.password</td>
+<td><a href="https://swagger.io/docs/specification/authentication/oauth2/">OAuth2 password</a> auth.</td>
+<td>tokenUrl, scope</td>
+<td>// @securitydefinitions.oauth2.password OAuth2Password</td>
+</tr>
+<tr>
+<td>securitydefinitions.oauth2.accessCode</td>
+<td><a href="https://swagger.io/docs/specification/authentication/oauth2/">OAuth2 access code</a> auth.</td>
+<td>tokenUrl, authorizationUrl, scope</td>
+<td>// @securitydefinitions.oauth2.accessCode OAuth2AccessCode</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>参数注释</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>in</td>
+<td>// @in header</td>
+</tr>
+<tr>
+<td>name</td>
+<td>// @name Authorization</td>
+</tr>
+<tr>
+<td>tokenUrl</td>
+<td>// @tokenUrl https://example.com/oauth/token</td>
+</tr>
+<tr>
+<td>authorizationurl</td>
+<td>// @authorizationurl https://example.com/oauth/authorize</td>
+</tr>
+<tr>
+<td>scope.hoge</td>
+<td>// @scope.write Grants write access</td>
+</tr>
+</tbody>
+</table>
+<h2 id="属性">属性</h2>
+<pre><code class="language-go">// @Param   enumstring  query     string     false  &quot;string enums&quot;       Enums(A, B, C)
+// @Param   enumint     query     int        false  &quot;int enums&quot;          Enums(1, 2, 3)
+// @Param   enumnumber  query     number     false  &quot;int enums&quot;          Enums(1.1, 1.2, 1.3)
+// @Param   string      query     string     false  &quot;string valid&quot;       minlength(5)  maxlength(10)
+// @Param   int         query     int        false  &quot;int valid&quot;          minimum(1)    maximum(10)
+// @Param   default     query     string     false  &quot;string default&quot;     default(A)
+// @Param   collection  query     []string   false  &quot;string collection&quot;  collectionFormat(multi)
+// @Param   extensions  query     []string   false  &quot;string collection&quot;  extensions(x-example=test,x-nullable)
+</code></pre>
+<p>也适用于结构体字段：</p>
+<pre><code class="language-go">type Foo struct {
+    Bar string `minLength:&quot;4&quot; maxLength:&quot;16&quot;`
+    Baz int `minimum:&quot;10&quot; maximum:&quot;20&quot; default:&quot;15&quot;`
+    Qux []string `enums:&quot;foo,bar,baz&quot;`
+}
+</code></pre>
+<h3 id="当前可用的">当前可用的</h3>
+<table>
+<thead>
+<tr>
+<th>字段名</th>
+<th>类型</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>default</td>
+<td>*</td>
+<td>声明如果未提供任何参数，则服务器将使用的默认参数值，例如，如果请求中的客户端未提供该参数，则用于控制每页结果数的“计数”可能默认为100。 （注意：“default”对于必需的参数没有意义）。参看 https://tools.ietf.org/html/draft-fge-json-schema-validation-00#section-6.2。 与JSON模式不同，此值务必符合此参数的定义<a href="#parameterType">类型</a>。</td>
+</tr>
+<tr>
+<td>maximum</td>
+<td><code>number</code></td>
+<td>参看 https://tools.ietf.org/html/draft-fge-json-schema-validation-00#section-5.1.2.</td>
+</tr>
+<tr>
+<td>minimum</td>
+<td><code>number</code></td>
+<td>参看 https://tools.ietf.org/html/draft-fge-json-schema-validation-00#section-5.1.3.</td>
+</tr>
+<tr>
+<td>maxLength</td>
+<td><code>integer</code></td>
+<td>参看 https://tools.ietf.org/html/draft-fge-json-schema-validation-00#section-5.2.1.</td>
+</tr>
+<tr>
+<td>minLength</td>
+<td><code>integer</code></td>
+<td>参看 https://tools.ietf.org/html/draft-fge-json-schema-validation-00#section-5.2.2.</td>
+</tr>
+<tr>
+<td>enums</td>
+<td>[*]</td>
+<td>参看 https://tools.ietf.org/html/draft-fge-json-schema-validation-00#section-5.5.1.</td>
+</tr>
+<tr>
+<td>format</td>
+<td><code>string</code></td>
+<td>上面提到的<a href="#parameterType">类型</a>的扩展格式。有关更多详细信息，请参见<a href="https://swagger.io/specification/v2/#dataTypeFormat">数据类型格式</a>。</td>
+</tr>
+<tr>
+<td>collectionFormat</td>
+<td><code>string</code></td>
+<td>指定query数组参数的格式。 可能的值为： <ul><li><code>csv</code> - 逗号分隔值 <code>foo,bar</code>. <li><code>ssv</code> - 空格分隔值 <code>foo bar</code>. <li><code>tsv</code> - 制表符分隔值 <code>foo\tbar</code>. <li><code>pipes</code> - 管道符分隔值 <code>foo|bar</code>. <li><code>multi</code> - 对应于多个参数实例，而不是单个实例 <code>foo=bar＆foo=baz</code> 的多个值。这仅对“<code>query</code>”或“<code>formData</code>”中的参数有效。 </ul> 默认值是 <code>csv</code>。</td>
+</tr>
+</tbody>
+</table>
+<h3 id="进一步的">进一步的</h3>
+<table>
+<thead>
+<tr>
+<th>字段名</th>
+<th style="text-align:center">类型</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>multipleOf</td>
+<td style="text-align:center"><code>number</code></td>
+<td>See https://tools.ietf.org/html/draft-fge-json-schema-validation-00#section-5.1.1.</td>
+</tr>
+<tr>
+<td>pattern</td>
+<td style="text-align:center"><code>string</code></td>
+<td>See https://tools.ietf.org/html/draft-fge-json-schema-validation-00#section-5.2.3.</td>
+</tr>
+<tr>
+<td>maxItems</td>
+<td style="text-align:center"><code>integer</code></td>
+<td>See https://tools.ietf.org/html/draft-fge-json-schema-validation-00#section-5.3.2.</td>
+</tr>
+<tr>
+<td>minItems</td>
+<td style="text-align:center"><code>integer</code></td>
+<td>See https://tools.ietf.org/html/draft-fge-json-schema-validation-00#section-5.3.3.</td>
+</tr>
+<tr>
+<td>uniqueItems</td>
+<td style="text-align:center"><code>boolean</code></td>
+<td>See https://tools.ietf.org/html/draft-fge-json-schema-validation-00#section-5.3.4.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="样例">样例</h2>
+<h3 id="多行的描述">多行的描述</h3>
+<p>可以在常规api描述或路由定义中添加跨越多行的描述，如下所示：</p>
+<pre><code class="language-go">// @description This is the first line
+// @description This is the second line
+// @description And so forth.
+</code></pre>
+<h3 id="用户自定义的具有数组类型的结构">用户自定义的具有数组类型的结构</h3>
+<pre><code class="language-go">// @Success 200 {array} model.Account &lt;-- This is a user defined struct.
+</code></pre>
+<pre><code class="language-go">package model
+
+type Account struct {
+    ID   int    `json:&quot;id&quot; example:&quot;1&quot;`
+    Name string `json:&quot;name&quot; example:&quot;account name&quot;`
+}
+</code></pre>
+<h3 id="响应对象中的模型组合">响应对象中的模型组合</h3>
+<pre><code class="language-go">// JSONResult的data字段类型将被proto.Order类型替换
+@success 200 {object} jsonresult.JSONResult{data=proto.Order} &quot;desc&quot;
+</code></pre>
+<pre><code class="language-go">type JSONResult struct {
+    Code    int          `json:&quot;code&quot; `
+    Message string       `json:&quot;message&quot;`
+    Data    interface{}  `json:&quot;data&quot;`
+}
+
+type Order struct { //in `proto` package
+    ...
+}
+</code></pre>
+<ul>
+<li>还支持对象数组和原始类型作为嵌套响应</li>
+</ul>
+<pre><code class="language-go">@success 200 {object} jsonresult.JSONResult{data=[]proto.Order} &quot;desc&quot;
+@success 200 {object} jsonresult.JSONResult{data=string} &quot;desc&quot;
+@success 200 {object} jsonresult.JSONResult{data=[]string} &quot;desc&quot;
+</code></pre>
+<ul>
+<li>替换多个字段的类型。如果某字段不存在，将添加该字段。</li>
+</ul>
+<pre><code class="language-go">@success 200 {object} jsonresult.JSONResult{data1=string,data2=[]string,data3=proto.Order,data4=[]proto.Order} &quot;desc&quot;
+</code></pre>
+<h3 id="在响应中增加头字段">在响应中增加头字段</h3>
+<pre><code class="language-go">// @Success      200              {string}  string    &quot;ok&quot;
+// @failure      400              {string}  string    &quot;error&quot;
+// @response     default          {string}  string    &quot;other error&quot;
+// @Header       200              {string}  Location  &quot;/entity/1&quot;
+// @Header       200,400,default  {string}  Token     &quot;token&quot;
+// @Header       all              {string}  Token2    &quot;token2&quot;
+</code></pre>
+<h3 id="使用多路径参数">使用多路径参数</h3>
+<pre><code class="language-go">/// ...
+// @Param  group_id    path  int  true  &quot;Group ID&quot;
+// @Param  account_id  path  int  true  &quot;Account ID&quot;
+// ...
+// @Router /examples/groups/{group_id}/accounts/{account_id} [get]
+</code></pre>
+<h3 id="结构体的示例值">结构体的示例值</h3>
+<pre><code class="language-go">type Account struct {
+    ID   int    `json:&quot;id&quot; example:&quot;1&quot;`
+    Name string `json:&quot;name&quot; example:&quot;account name&quot;`
+    PhotoUrls []string `json:&quot;photo_urls&quot; example:&quot;http://test/image/1.jpg,http://test/image/2.jpg&quot;`
+}
+</code></pre>
+<h3 id="结构体描述">结构体描述</h3>
+<pre><code class="language-go">type Account struct {
+    // ID this is userid
+    ID   int    `json:&quot;id&quot;`
+    Name string `json:&quot;name&quot;` // This is Name
+}
+</code></pre>
+<h3 id="使用swaggertype标签更改字段类型">使用<code>swaggertype</code>标签更改字段类型</h3>
+<p><a href="https://github.com/swaggo/swag/issues/201#issuecomment-475479409">#201</a></p>
+<pre><code class="language-go">type TimestampTime struct {
+    time.Time
+}
+
+///实现encoding.JSON.Marshaler接口
+func (t *TimestampTime) MarshalJSON() ([]byte, error) {
+    bin := make([]byte, 16)
+    bin = strconv.AppendInt(bin[:0], t.Time.Unix(), 10)
+    return bin, nil
+}
+
+///实现encoding.JSON.Unmarshaler接口
+func (t *TimestampTime) UnmarshalJSON(bin []byte) error {
+    v, err := strconv.ParseInt(string(bin), 10, 64)
+    if err != nil {
+        return err
+    }
+    t.Time = time.Unix(v, 0)
+    return nil
+}
+///
+
+type Account struct {
+    // 使用`swaggertype`标签将别名类型更改为内置类型integer
+    ID     sql.NullInt64 `json:&quot;id&quot; swaggertype:&quot;integer&quot;`
+
+    // 使用`swaggertype`标签更改struct类型为内置类型integer
+    RegisterTime TimestampTime `json:&quot;register_time&quot; swaggertype:&quot;primitive,integer&quot;`
+
+    // Array types can be overridden using &quot;array,&lt;prim_type&gt;&quot; format
+    Coeffs []big.Float `json:&quot;coeffs&quot; swaggertype:&quot;array,number&quot;`
+}
+</code></pre>
+<p><a href="https://github.com/swaggo/swag/issues/379">#379</a></p>
+<pre><code class="language-go">type CerticateKeyPair struct {
+    Crt []byte `json:&quot;crt&quot; swaggertype:&quot;string&quot; format:&quot;base64&quot; example:&quot;U3dhZ2dlciByb2Nrcw==&quot;`
+    Key []byte `json:&quot;key&quot; swaggertype:&quot;string&quot; format:&quot;base64&quot; example:&quot;U3dhZ2dlciByb2Nrcw==&quot;`
+}
+</code></pre>
+<p>生成的swagger文档如下：</p>
+<pre><code class="language-go">&quot;api.MyBinding&quot;: {
+  &quot;type&quot;:&quot;object&quot;,
+  &quot;properties&quot;:{
+    &quot;crt&quot;:{
+      &quot;type&quot;:&quot;string&quot;,
+      &quot;format&quot;:&quot;base64&quot;,
+      &quot;example&quot;:&quot;U3dhZ2dlciByb2Nrcw==&quot;
+    },
+    &quot;key&quot;:{
+      &quot;type&quot;:&quot;string&quot;,
+      &quot;format&quot;:&quot;base64&quot;,
+      &quot;example&quot;:&quot;U3dhZ2dlciByb2Nrcw==&quot;
+    }
+  }
+}
+</code></pre>
+<h3 id="使用swaggerignore标签排除字段">使用<code>swaggerignore</code>标签排除字段</h3>
+<pre><code class="language-go">type Account struct {
+    ID   string    `json:&quot;id&quot;`
+    Name string     `json:&quot;name&quot;`
+    Ignored int     `swaggerignore:&quot;true&quot;`
+}
+</code></pre>
+<h3 id="将扩展信息添加到结构字段">将扩展信息添加到结构字段</h3>
+<pre><code class="language-go">type Account struct {
+    ID   string    `json:&quot;id&quot;   extensions:&quot;x-nullable,x-abc=def,!x-omitempty&quot;` // 扩展字段必须以&quot;x-&quot;开头
+}
+</code></pre>
+<p>生成swagger文档，如下所示：</p>
+<pre><code class="language-go">&quot;Account&quot;: {
+    &quot;type&quot;: &quot;object&quot;,
+    &quot;properties&quot;: {
+        &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;x-nullable&quot;: true,
+            &quot;x-abc&quot;: &quot;def&quot;,
+            &quot;x-omitempty&quot;: false
+        }
+    }
+}
+</code></pre>
+<h3 id="对展示的模型重命名">对展示的模型重命名</h3>
+<pre><code class="language-go">type Resp struct {
+    Code int
+}//@name Response
+</code></pre>
+<h3 id="如何使用安全性注释">如何使用安全性注释</h3>
+<p>通用API信息。</p>
+<pre><code class="language-go">// @securityDefinitions.basic BasicAuth
+
+// @securitydefinitions.oauth2.application OAuth2Application
+// @tokenUrl https://example.com/oauth/token
+// @scope.write Grants write access
+// @scope.admin Grants read and write access to administrative information
+</code></pre>
+<p>每个API操作。</p>
+<pre><code class="language-go">// @Security ApiKeyAuth
+</code></pre>
+<p>使用AND条件。</p>
+<pre><code class="language-go">// @Security ApiKeyAuth
+// @Security OAuth2Application[write, admin]
+</code></pre>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://www.lvtao.net/post/go-gin-request-json/">
+              <h3 class="post-title">
+                下一篇：GoLang之Gin框架中接收json数据
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <table>
+    <tr><td><a href="https://www.ioncube.com/?xp=TQLLZT"><img src="/media/ioncube.jpg" width="100%"/></a></td></tr>
+    <tr><td><a href="https://app.cloudcone.com/?ref=9519"><img src="/media/cloudcone.gif" width="100%"/></a></td></tr>
+  </table>
+  <div class="slogan"></div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  Powered by <a href="https://lvtao.net" target="_blank">LVTAO</a> | <a class="rss" href="https://www.lvtao.net/atom.xml" target="_blank">RSS</a>
+</div>
+<script 
+async
+defer
+src="https://ask.lvtao.net/api/application/embed?protocol=https&host=ask.lvtao.net&token=e193b47f92f1b41e">
+</script>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

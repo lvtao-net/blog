@@ -1,0 +1,323 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>PHP生成验证码图片 | 吕滔博客</title>
+<meta name="description" content="">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://www.lvtao.net/favicon.ico?v=1714210602511">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://www.lvtao.net/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://www.lvtao.net">
+        <img class="avatar" src="https://www.lvtao.net/images/avatar.png?v=1714210602511" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://www.lvtao.net">
+        <h1 class="site-title">吕滔博客</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+        
+          <a href="https://medoo.lvtao.net" class="menu purple-link">
+            MeDoo中文手册
+          </a>
+        
+      
+        
+          <a href="https://tool.lvtao.net" class="menu purple-link">
+            工具箱
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">PHP生成验证码图片</h2>
+          <div class="post-info post-detail-info">
+            
+              <span>
+                <i class="icon-pricetags-outline"></i>
+                
+                  <a href="https://www.lvtao.net/tag/php/">
+                    php
+                    
+                  </a>
+                
+              </span>
+            
+             <div style="margin-top:5px;"><a href="https://app.cloudcone.com/?ref=9519" target="_blank">海外无需备案主机推荐，支持25端口邮件发送，无端口限制，支持支付宝、Paypal、信用卡等支付...</a></div>
+          </div>
+          <div class="post-content" v-pre>
+            <p>预览<br>
+<img src="https://www.lvtao.net/post-images/1667103853552.png" alt="" loading="lazy"><br>
+<img src="https://www.lvtao.net/post-images/1667103859107.png" alt="" loading="lazy"><br>
+<img src="https://www.lvtao.net/post-images/1667103864194.png" alt="" loading="lazy"><br>
+<img src="https://www.lvtao.net/post-images/1667103868467.png" alt="" loading="lazy"><br>
+目录结构<br>
+<img src="https://www.lvtao.net/post-images/1667103881514.png" alt="" loading="lazy"></p>
+<p>image.php</p>
+<pre><code class="language-php">&lt;?php
+    session_start();
+    $width = 150;
+    $height = 45;
+    $font_size = 20;
+    $font = &quot;./verdana.ttf&quot;;
+    $font = realpath($font);
+    $chars_length = 6;
+
+    $captcha_characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+    $image = imagecreatetruecolor($width, $height);
+    $bg_color = imagecolorallocate($image, rand(0,255), rand(0,255), rand(0,255));
+    imagefilledrectangle($image, 0, 0, $width, $height, $bg_color);
+
+    //background random-string-random-pos
+    $hori_line = round($height/8);
+    $vert_line = round($width/8);
+    $random_string = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    for($i=0; $i &lt; $vert_line; $i++) {
+        for ($j=0; $j &lt; $hori_line; $j++) { 
+            $random_letter = $random_string[rand(0, strlen($random_string)-1)];
+            $color = imagecolorallocate($image, rand(0,255), rand(0,255), rand(0,255));
+            imagestring($image, rand(1,2), rand(0,$width), rand(0,$height), $random_letter, $color);
+        }
+    }
+
+    $xw = ($width/$chars_length);
+    $x = 0;
+    $font_gap = $xw/2-$font_size/2;
+    $digit = '';
+    for($i = 0; $i &lt; $chars_length; $i++) {
+        $letter = $captcha_characters[rand(0, strlen($captcha_characters)-1)];
+        $digit .= $letter;
+        $font_color = imagecolorallocate($image, rand(0,255), rand(0,255), rand(0,255));
+        if ($i == 0) {
+            $x = 0;
+        }else {
+            $x = $xw*$i;
+        }
+        imagettftext($image, $font_size, rand(-20,20), $x+$font_gap, rand(22, $height-5), $font_color, $font, $letter);
+    }
+
+    // record token in session variable
+    $_SESSION['captcha_token'] = strtolower($digit);
+
+    // display image
+    header('Content-Type: image/png');
+    imagepng($image);
+    imagedestroy($image);
+?&gt;
+</code></pre>
+<p>index.html</p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;PHP CAPTCHA Test Form&lt;/title&gt;
+    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;&gt;
+    &lt;meta charset=&quot;utf-8&quot;&gt;
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css&quot;&gt;
+    &lt;link href=&quot;https://fonts.googleapis.com/icon?family=Material+Icons&quot; rel=&quot;stylesheet&quot;&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+    &lt;div class=&quot;p-5&quot;&gt;
+
+        &lt;div class=&quot;card&quot;&gt;
+            &lt;div class=&quot;card-header&quot;&gt;Message&lt;/div&gt;
+            &lt;div class=&quot;card-body&quot;&gt;
+
+                &lt;form id=&quot;contact-form&quot; method=&quot;post&quot; action=&quot;contact.php&quot;&gt;
+                    &lt;div class=&quot;form-group row align-items-center&quot;&gt;
+                        &lt;label for=&quot;message&quot; class=&quot;col-sm-2 col-form-label&quot;&gt;Message *&lt;/label&gt;
+                        &lt;div class=&quot;col-sm-10&quot;&gt;
+                            &lt;textarea class=&quot;form-control&quot; rows=&quot;2&quot; name=&quot;message&quot; id=&quot;message&quot;&gt;&lt;/textarea&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+
+                    &lt;div class=&quot;form-group row&quot;&gt;
+                        &lt;label class=&quot;col-sm-2 col-form-label&quot;&gt;Captcha *&lt;/label&gt;
+                        &lt;div class=&quot;col-sm-10&quot;&gt;
+                            &lt;div class=&quot;form-row align-items-center&quot;&gt;
+                                &lt;div class=&quot;col mb-3&quot;&gt;
+                                    &lt;input type=&quot;text&quot; class=&quot;form-control&quot; name=&quot;token&quot; id=&quot;token&quot; placeholder=&quot;Captcha&quot; style=&quot;min-width: 150px;&quot;&gt;
+                                &lt;/div&gt;
+
+                                &lt;div class=&quot;col mb-3&quot;&gt;
+                                    &lt;img src=&quot;./captcha/image.php?12325&quot; alt=&quot;CAPTCHA&quot; id=&quot;image-captcha&quot;&gt;
+                                    &lt;a href=&quot;#&quot; id=&quot;refresh-captcha&quot; class=&quot;align-middle&quot; title=&quot;refresh&quot;&gt;&lt;i class=&quot;material-icons align-middle&quot;&gt;refresh&lt;/i&gt;&lt;/a&gt;
+                                &lt;/div&gt;
+
+                            &lt;/div&gt;
+
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+
+                    &lt;button type=&quot;submit&quot; class=&quot;btn btn-primary&quot; name=&quot;submit&quot; id=&quot;submit&quot;&gt;submit&lt;/button&gt;
+                &lt;/form&gt;
+
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+    &lt;/div&gt;
+
+    &lt;script&gt;
+        var refreshButton = document.getElementById(&quot;refresh-captcha&quot;);
+        var captchaImage = document.getElementById(&quot;image-captcha&quot;);
+
+        refreshButton.onclick = function(event) {
+            event.preventDefault();
+            captchaImage.src = './captcha/image.php?' + Date.now();
+        };
+    &lt;/script&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>contact.php</p>
+<pre><code class="language-php">&lt;?php 
+
+    session_start();
+
+    if ( isset($_POST['message'], $_POST['token']) ) {
+
+        
+        $token = strtolower($_POST['token']);
+
+        // validate captcha code        
+        if (isset($_SESSION['captcha_token']) &amp;&amp; $_SESSION['captcha_token'] == $token) {
+
+            //success your code here
+
+            $to = &quot;somebody@example.com&quot;;
+            $subject = &quot;subject&quot;;
+            $message = $_POST['message'];
+            $headers = &quot;From: webmaster@example.com&quot; . &quot;\r\n&quot; .  &quot;CC: somebodyelse@example.com&quot;;
+            
+            //mail($to, $subject, $message, $headers);
+
+            echo &quot;success&quot;;
+
+        } else {
+            echo &quot;error CAPTCHA code&quot;;
+        }
+        
+    }
+?&gt;
+</code></pre>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://www.lvtao.net/post/javascript-byte-converter/">
+              <h3 class="post-title">
+                下一篇：Javascript字节转KB MB GB TB
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <table>
+    <tr><td><a href="https://www.ioncube.com/?xp=TQLLZT"><img src="/media/ioncube.jpg" width="100%"/></a></td></tr>
+    <tr><td><a href="https://app.cloudcone.com/?ref=9519"><img src="/media/cloudcone.gif" width="100%"/></a></td></tr>
+  </table>
+  <div class="slogan"></div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  Powered by <a href="https://lvtao.net" target="_blank">LVTAO</a> | <a class="rss" href="https://www.lvtao.net/atom.xml" target="_blank">RSS</a>
+</div>
+<script 
+async
+defer
+src="https://ask.lvtao.net/api/application/embed?protocol=https&host=ask.lvtao.net&token=e193b47f92f1b41e">
+</script>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

@@ -1,0 +1,460 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>ERC代币介绍-ERC-20、ERC-721和ERC-1155 | 吕滔博客</title>
+<meta name="description" content="">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://www.lvtao.net/favicon.ico?v=1714210602511">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://www.lvtao.net/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://www.lvtao.net">
+        <img class="avatar" src="https://www.lvtao.net/images/avatar.png?v=1714210602511" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://www.lvtao.net">
+        <h1 class="site-title">吕滔博客</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+        
+          <a href="https://medoo.lvtao.net" class="menu purple-link">
+            MeDoo中文手册
+          </a>
+        
+      
+        
+          <a href="https://tool.lvtao.net" class="menu purple-link">
+            工具箱
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">ERC代币介绍-ERC-20、ERC-721和ERC-1155</h2>
+          <div class="post-info post-detail-info">
+            
+              <span>
+                <i class="icon-pricetags-outline"></i>
+                
+                  <a href="https://www.lvtao.net/tag/qu-kuai-lian/">
+                    区块链
+                    
+                      ，
+                    
+                  </a>
+                
+                  <a href="https://www.lvtao.net/tag/eth/">
+                    ETH
+                    
+                  </a>
+                
+              </span>
+            
+             <div style="margin-top:5px;"><a href="https://app.cloudcone.com/?ref=9519" target="_blank">海外无需备案主机推荐，支持25端口邮件发送，无端口限制，支持支付宝、Paypal、信用卡等支付...</a></div>
+          </div>
+          <div class="post-content" v-pre>
+            <h1 id="什么是以太坊的erc">什么是以太坊的ERC？</h1>
+<p>ERC是Ethereum Request for Comments的首字母缩写。它就像技术文档，定义了适用于一群想要利用以太坊生态系统的开发者和用户的方法、行为、创新和研究。</p>
+<h1 id="什么是erc代币标准">什么是ERC代币标准？</h1>
+<p>ERC代币标准解释了所有建立在以太坊区块链上的ERC代币的某些规则。以太坊的社区会适当审查这套规则，并根据不断变化的要求进行修订。此外，ERC标准的设计是为了让ERC代币能够无缝互动。</p>
+<p>ERC-20、ERC-721和ERC-1155作为三种流行的ERC代币标准或协议出现，在各大行业都有其应用。以太坊社区完全批准了这些代币标准，它们在具体特征和功能方面有所不同。</p>
+<h1 id="以太坊代币标准的演变">以太坊代币标准的演变</h1>
+<p>以太坊持续推出不同的ERC代币标准，以使生态系统更易于使用，并支持各种用例。从ERC-20到ERC-721再到ERC-1155，以太坊社区成功地将此区块链打造成一个永远不会过时的主流协议</p>
+<h1 id="erc-20代币标准">ERC-20代币标准</h1>
+<p>ERC-20在2015年首次被提出，两年后的2017年，最终融入以太坊生态系统<br>
+特点</p>
+<ul>
+<li>ERC 20代币是 &quot;可替代性代币 &quot;的另一个名称。</li>
+<li>可替代性定义了资产或代币兑换相同价值资产的能力，例如两张1美元纸币。</li>
+<li>无论其特征和结构如何，每个ERC-20代币都严格等同于相同的价值。</li>
+<li>ERC代币最受欢迎的应用领域是稳定币、治理代币和ICO。</li>
+</ul>
+<h1 id="erc-721不可互换的代币">ERC-721：不可互换的代币</h1>
+<p>要了解ERC-721标准，你必须首先了解NFTs（不可替代的代币）。看看我们解释NFTs的详细见解，以及它们在区块链的去中心化世界中的作用。</p>
+<p>Cryptokitties（广为流传的非同质化代币）的创始人、CTO Dieter Shirley最初提议开发一种新的代币类型来支持NFTs。该提案将于2018年晚些时候获得批准。它专门用于NFTs，这意味着遵守ERC-721的规则开发的代币可以代表以太坊区块链上任何数字资产的价值。</p>
+<p>至此，我们得出结论：如果ERC-20对于发明新的加密货币至关重要，那么ERC-721对于代表某个人对这些数字资产所有权的证明来说是很有价值的。ERC-721可以表示以下内容：</p>
+<ul>
+<li>一个独特的数字艺术品</li>
+<li>推文和社交媒体文章</li>
+<li>游戏中的收藏品</li>
+<li>游戏人物</li>
+<li>任何卡通人物和数以百万计的其他NFTs....</li>
+</ul>
+<p>这种特殊类型的代币为利用NFTs的企业带来了惊人的可能性。同样，ERC-721也为他们带来了挑战，为了应对这些挑战，ERC-721标准开始发挥作用。</p>
+<p>请注意，每个NFTs都有一个uint256变量，称为tokenId。因此，对于每个EBR-721合同，合同地址键值对 uint256 tokenId必须是唯一的。</p>
+<p>此外，dApps还应该有一个 &quot;converter&quot;来调节NFTs的输入和输出过程。例如，converter将tokenId视为输入，并输出不可伪造的代币，如僵尸图像、杀戮、游戏收藏品等。</p>
+<p>特点</p>
+<ul>
+<li>ERC-721代币是不可伪造的代币（NFTs）的标准。</li>
+<li>这些代币不能被兑换成同等价值的东西，因为它们是独一无二的。</li>
+<li>每个ERC-721代表各自NFT的价值，可能有所不同。</li>
+<li>ERC-721代币最受欢迎的应用领域是游戏中的NFTs。</li>
+</ul>
+<h1 id="erc-1155多代币标准">ERC-1155:多代币标准</h1>
+<p>结合ERC-20和ERC-720的能力，Witek Radomski（Enjin的首席技术官）为Ethereum智能合约引入了一个包罗万象的代币标准。这是一个标准接口，支持开发同质化的、半同质化的、非同质化的代币和其他配置的通用智能合约。</p>
+<p>现在，您可以使用单个接口满足所有代币开发需求并解决问题，从而使ERC-1155成为游戏规则的改变者。这样一个独特的代币标准的想法是开发一个强大的智能合约接口，代表和管理不同形式的ERC代币。</p>
+<p>ERC-1155的另一个优点是，它改善了以前ERC代币标准的整体功能，使以太坊生态系统更加高效和可扩展。</p>
+<p>特点</p>
+<ul>
+<li>ERC-1155是一个智能合约接口，代表同质化的、半同质化的和非同质化的代币。</li>
+<li>ERC-1155可以执行ERC-20和ERC-720的功能，甚至可以同时执行两者。</li>
+<li>每个代币都可以根据代币的性质代表不同的价值；同质化的、半同质化的和非同质化的。</li>
+<li>ERC-1155适用于创建NFT、可兑换购物券、ICO等。</li>
+</ul>
+<h1 id="erc-20-erc-721和erc-1155的接口是怎样的">ERC-20、ERC-721和ERC-1155的接口是怎样的？</h1>
+<h2 id="erc-20">ERC-20</h2>
+<p>以下是ERC20的基本接口，描述了ERC20合约的功能和事件特征，接下来是对每个给定功能的解释。</p>
+<pre><code>contract ERC20 {
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Approval(
+        address indexed owner,
+        address indexed spender,
+        uint256 value
+    );
+
+    function totalSupply() public view returns (uint256);
+
+    function balanceOf(address who) public view returns (uint256);
+
+    function transfer(address to, uint256 value) public returns (bool);
+
+    function allowance(address owner, address spender)
+        public
+        view
+        returns (uint256);
+
+    function transferFrom(
+        address from,
+        address to,
+        uint256 value
+    ) public returns (bool);
+
+    function approve(address spender, uint256 value) public returns (bool);
+}
+</code></pre>
+<p><strong>totalsupply</strong><br>
+函数totalSupply是公开的，因此所有人都可以访问。它显示了目前正在流通的代币的总数。由于这个totalSupply函数被标记为视图修改器，所以它不消耗gas。此外，每当有新的代币被铸造出来，它就会更新内部的代币值totalSupply。</p>
+<pre><code>// its value is increased when new tokens are minteduint256 totalSupply_;
+// access the value of totalSupply_function totalSupply() public view returns (uint256) {  return totalSupply_;}
+</code></pre>
+<p><strong>balanceOf</strong><br>
+balanceOf是另一个带有视图修改器的公共函数，每个人都能访问，而且是不消耗gas的。它接受以太坊地址并返回该地址拥有的代币数量。</p>
+<pre><code>// Updated when tokens are minted or transferredmapping(address =&gt; uint256) balances;
+// Returns tokens held by the address passed as _ownerfunction balanceOf(address _owner)  public view returns (uint256 balance) {  return balances[_owner];}
+</code></pre>
+<p><strong>transfer</strong><br>
+transfer函数与上述两个功能不同，因为它需gas，而且会导致以太坊智能合约的变化。应各代币持有人的请求，它将代币从一个地址转移到另一个地址。</p>
+<pre><code>function transfer(address _to, uint256 _value) public returns (bool) {
+    // Check for blank addresses
+    require(_to != address(0));
+    // Check to ensure valid transfer
+    require(_value &lt;= balances[msg.sender]);
+    // SafeMath.sub will throw if there is not enough balance.
+    balances[msg.sender] = balances[msg.sender].sub(_value);
+    balances[_to] = balances[_to].add(_value);
+    // Event transfer defined in the ERC 20 interface above
+    Transfer(msg.sender, _to, _value);
+    return true;
+}
+</code></pre>
+<p><strong>allowance, approve and transferFrom</strong><br>
+最后的函数 allowance, approve, 和 transferFrom 支持如授权其他一些以太坊地址代表各自的持有人使用代币的高级功能。</p>
+<h2 id="erc-721">ERC-721</h2>
+<p>为了了解ERC-721是如何工作的，让我们看看它内部的接口。</p>
+<pre><code>contract ERC721 {
+    event Transfer(
+        address indexed _from,
+        address indexed _to,
+        uint256 _tokenId
+    );
+    event Approval(
+        address indexed _owner,
+        address indexed _approved,
+        uint256 _tokenId
+    );
+
+    function balanceOf(address _owner) public view returns (uint256 _balance);
+
+    function ownerOf(uint256 _tokenId) public view returns (address _owner);
+
+    function transfer(address _to, uint256 _tokenId) public;
+
+    function approve(address _to, uint256 _tokenId) public;
+
+    function takeOwnership(uint256 _tokenId) public;
+}
+</code></pre>
+<p><strong>balanceOf</strong><br>
+在下面的片段中， ownedTokens表示一个特定地址的完整的代币ID列表。而balanceOf函数返回该地址的代币数量。</p>
+<pre><code>mapping (address =&gt; uint256[]) private ownedTokens;
+function balanceOf(address _owner) public view returns (uint256) {  return ownedTokens[_owner].length;  }
+</code></pre>
+<p><strong>OwnerOf</strong><br>
+映射token所有者拥有的token，并输出该持有者的id。然而，由于它的可见性被设置为私有，通过使用ownerOf函数，你可以将这个映射的值设置为公共。同时它还需要在返回值之前对零地址进行检查。</p>
+<pre><code>mapping (uint256 =&gt; address) private tokenOwner;
+function ownerOf(uint256 _tokenId) public view returns (address) {  
+    address owner = tokenOwner[_tokenId];    
+    require(owner != address(0));    
+    return owner;  
+}
+</code></pre>
+<p><strong>transfer</strong><br>
+这个transfer函数将要转给的所有者的账户地址作为_to参数，要转移的token的id作为_tokenId参数，同时注意，它只能由token的当前所有者调用。它必须包括检查转移是否清除转移所需的批准检查的逻辑。然后是从当前所有者中移除令牌的所有权并将其添加到新所有者拥有的令牌列表的逻辑。</p>
+<pre><code>modifier onlyOwnerOf(uint256 _tokenId) {   require(ownerOf(_tokenId) == msg.sender);    _;  }function transfer(address _to, uint256 _tokenId)   public onlyOwnerOf(_tokenId) {   // Logic to clear approval for token transfer  // Logic to remove token from current token owner  // Logic to add Token to new token owner  }
+</code></pre>
+<p><strong>approve</strong><br>
+Approve 是另一个函数，用于声明给定令牌ID的所有权。它被一个只有OwnerOf的修饰语所限制，这说明只有代币持有者可以出于明确的原因访问这个函数。</p>
+<pre><code>mapping (uint256 =&gt; address) private tokenApprovals;
+modifier onlyOwnerOf(uint256 _tokenId) {   
+    require(ownerOf(_tokenId) == msg.sender);   
+    _;  
+}
+function approvedFor(uint256 _tokenId)   public view returns (address) {     
+    return tokenApprovals[_tokenId];  
+}
+function approve(address _to, uint256 _tokenId)  public onlyOwnerOf(_tokenId) {    
+    address owner = ownerOf(_tokenId);   
+    require(_to != owner);  
+    if (approvedFor(_tokenId) != 0 || _to != 0) {    
+        tokenApprovals[_tokenId] = _to;    
+        // Event initialised in the interface above   
+         Approval(owner, _to, _tokenId);   
+    }
+}
+</code></pre>
+<p><strong>takeOwnership</strong><br>
+函数takeOwnership接收_tokenId并对消息发送者进行同样的检查。如果他通过了类似于转移函数的检查逻辑，他必须返回拥有_tokenID的所有权账户地址。</p>
+<pre><code>function isApprovedFor(address _owner, uint256 _tokenId)   internal view returns (bool) {    
+    return approvedFor(_tokenId) == _owner;  
+}
+function takeOwnership(uint256 _tokenId) public { require(isApprovedFor(msg.sender, _tokenId));  
+// Logic to clear approval for token transfer  
+// Logic to remove token from current token owner  
+// Logic to add Token to new token owner}
+</code></pre>
+<h2 id="erc-1155">ERC-1155</h2>
+<p><strong>Batch Transfers</strong><br>
+批量转移与常规ERC-20转移密切相关。让我们来看看ERC-20 transferFrom函数。</p>
+<pre><code>// ERC-20function transferFrom(address from, address to, uint256 value) external returns (bool);
+// ERC-1155function 
+safeBatchTransferFrom(address _from,address _to,uint256[] calldata _ids,uint256[] calldata _values,bytes calldata _data) external;
+</code></pre>
+<p>ERC-1155的不同之处在于将令牌值作为一个数组和一个id数组传递。转移的结果是这样的。</p>
+<ul>
+<li>将200个ID为5的代币从_from转移到_to。</li>
+<li>将300个ID为7的代币从_from转到_to。</li>
+<li>从_from 转移3个id为15的代币到_to。<br>
+除了利用ERC-1155的函数作为transferFrom，没有转移，你可以通过设置表格地址到调用函数的地址来利用它作为常规转移。</li>
+</ul>
+<p><strong>Batch Balance</strong><br>
+相较于的ERC-20 balanceOf调用，同样具有其支持批处理的功能。提醒一下，这是ERC-20版本：</p>
+<pre><code>// ERC-20function balanceOf(address owner) external view returns (uint256);// ERC-1155function balanceOfBatch(address[] calldata _owners,uint256[] calldata _ids) external view returns (uint256[] memory);
+</code></pre>
+<p>对于余额调用来说更简单，我们可以在一次调用中检索到多个余额。我们传递所有者的数组，然后是令牌ID的数组。<br>
+例如，给定_ids=[3, 6, 13]和_owners=[0xbeef..., 0x1337..., 0x1111...]，返回值将是：</p>
+<pre><code>[balanceOf(0xbeef...),balanceOf(0x1337...),balanceOf(0x1111...)]
+</code></pre>
+<p><strong>Batch Approval</strong></p>
+<pre><code>// ERC-1155function setApprovalForAll(address _operator,bool _approved) external;function isApprovedForAll(address _owner,address _operator) external view returns (bool);
+</code></pre>
+<p>这里的approvals 与ERC-20略有不同。你需要使用setApprovalForAll将操作员设置为已批准或未批准，而不是批准特定的金额。</p>
+<p><strong>Receive Hook</strong></p>
+<pre><code>function onERC1155BatchReceived(address _operator,address _from,uint256[] calldata _ids,uint256[] calldata _values,bytes calldata _data) external returns(bytes4);
+</code></pre>
+<p>ERC-1155只支持智能合约的接收钩子。钩子函数必须返回一个预定义的magic bytes4值，如下所示。</p>
+<pre><code>bytes4(keccak256(&quot;onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)&quot;))
+</code></pre>
+<p>一旦接收合约返回这个值，我们就认为该合约现在可以接受转让，而且它了解如何管理ERC-1155代币。这就完成了!</p>
+<h2 id="erc20-vs-erc721-vs-erc1155-比较">ERC20 vs. ERC721 vs. ERC1155 比较</h2>
+<p>如果你想在以太坊区块链上创建任何种类的代币，那么你必须知道ERC-20、ERC721和ERC之间的区别。能够区分这些最普遍的ERC，你就可以选择正确的代币标准，完美地符合你的业务特定需求。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">技术规格</th>
+<th style="text-align:left">ERC-20</th>
+<th style="text-align:left">ERC-721</th>
+<th style="text-align:left">ERC-1155</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">使用的便利性</td>
+<td style="text-align:left">每笔交易需要进行单一操作</td>
+<td style="text-align:left">每笔交易需要进行单一操作</td>
+<td style="text-align:left">允许在一次交易中进行多项操作</td>
+</tr>
+<tr>
+<td style="text-align:left">BME（燃烧和铸造）模型</td>
+<td style="text-align:left">没有</td>
+<td style="text-align:left">有</td>
+<td style="text-align:left">有</td>
+</tr>
+<tr>
+<td style="text-align:left">支持的代币</td>
+<td style="text-align:left">同质化代币</td>
+<td style="text-align:left">非同质化代币</td>
+<td style="text-align:left">同质化和非同质代币</td>
+</tr>
+<tr>
+<td style="text-align:left">KYC核查</td>
+<td style="text-align:left">不需要KYC验证</td>
+<td style="text-align:left">内建的KYC/AML</td>
+<td style="text-align:left">内建的KYC/AML</td>
+</tr>
+<tr>
+<td style="text-align:left">用例</td>
+<td style="text-align:left">Bianance Coin, Maker, OmiseGo</td>
+<td style="text-align:left">Decentraland, Cryptokitties, Ethermon</td>
+<td style="text-align:left">Reedemable shopping vouchers</td>
+</tr>
+<tr>
+<td style="text-align:left">智能合约</td>
+<td style="text-align:left">需要一个共同的智能合约</td>
+<td style="text-align:left">要求每个代币有一个独特的智能合约</td>
+<td style="text-align:left">需要一个单一的智能合约来实现无限的代币</td>
+</tr>
+<tr>
+<td style="text-align:left">效率</td>
+<td style="text-align:left">需要更多的存储空间</td>
+<td style="text-align:left">可能需要更多的存储空间</td>
+<td style="text-align:left">需要更少的存储空间</td>
+</tr>
+<tr>
+<td style="text-align:left">代币转移</td>
+<td style="text-align:left">可以一次转移1或2个代币</td>
+<td style="text-align:left">支持单一代币一次性转移</td>
+<td style="text-align:left">支持许多代币的批量转移</td>
+</tr>
+<tr>
+<td style="text-align:left">本地化</td>
+<td style="text-align:left">支持单一语言</td>
+<td style="text-align:left">支持单一语言</td>
+<td style="text-align:left">支持语言的本地化</td>
+</tr>
+<tr>
+<td style="text-align:left">转移类型</td>
+<td style="text-align:left">用户之间的价值转移</td>
+<td style="text-align:left">权利的转让</td>
+<td style="text-align:left">价值或权利的转让</td>
+</tr>
+</tbody>
+</table>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://www.lvtao.net/post/python-500000rows-excel/">
+              <h3 class="post-title">
+                下一篇：使用Python生成一个50万行随机数据的excel表格
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <table>
+    <tr><td><a href="https://www.ioncube.com/?xp=TQLLZT"><img src="/media/ioncube.jpg" width="100%"/></a></td></tr>
+    <tr><td><a href="https://app.cloudcone.com/?ref=9519"><img src="/media/cloudcone.gif" width="100%"/></a></td></tr>
+  </table>
+  <div class="slogan"></div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  Powered by <a href="https://lvtao.net" target="_blank">LVTAO</a> | <a class="rss" href="https://www.lvtao.net/atom.xml" target="_blank">RSS</a>
+</div>
+<script 
+async
+defer
+src="https://ask.lvtao.net/api/application/embed?protocol=https&host=ask.lvtao.net&token=e193b47f92f1b41e">
+</script>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

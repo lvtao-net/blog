@@ -1,0 +1,1550 @@
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>吕滔博客</title>
+<meta name="description" content="">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://www.lvtao.net/favicon.ico?v=1714210602511">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://www.lvtao.net/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://www.lvtao.net">
+        <img class="avatar" src="https://www.lvtao.net/images/avatar.png?v=1714210602511" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://www.lvtao.net">
+        <h1 class="site-title">吕滔博客</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+        
+          <a href="https://medoo.lvtao.net" class="menu purple-link">
+            MeDoo中文手册
+          </a>
+        
+      
+        
+          <a href="https://tool.lvtao.net" class="menu purple-link">
+            工具箱
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+        <div class="content-container">
+          
+          
+
+<div class="archives-container">
+  
+    <h2 class="year">2024</h2>
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/solution/">
+            <h2 class="post-title">
+              `幂等`、`限流`、`降级`、`断路器`、`事务`、`缓存`、`分库分表` 等总结
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/other-tool/">
+            <h2 class="post-title">
+              一些好玩的工具推荐
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/open/">
+            <h2 class="post-title">
+              开放性设计问题相关的知识总结
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/os/">
+            <h2 class="post-title">
+              `JDK Tools`、`Linux Tools`、`Git` 等总结
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/monitor/">
+            <h2 class="post-title">
+              日志监控分析告警相关的知识
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/middleware/">
+            <h2 class="post-title">
+              `Redis`、`RocketMQ`、`Zookeeper`、`Netty`、`Tomcat` 等相关基础知识
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/jvm/">
+            <h2 class="post-title">
+              JVM中相关数据结构` + `算法` + `操作系统` + `计网` + `底层`
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/java/">
+            <h2 class="post-title">
+              JAVA知识 `JUC`、`Thread`、`Lock`、`I/O` 等相关知识
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/devOps/">
+            <h2 class="post-title">
+               `JDK Tools`、`Linux Tools`、`Git` 
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/database/">
+            <h2 class="post-title">
+              数据库知识 `事务`、`索引`、`锁`、`SQL优化` 等总结
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/BigData/">
+            <h2 class="post-title">
+              基础知识 `Redis`、`RocketMQ`、`Zookeeper`、`Netty`、`Tomcat` 等总结
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/architecture/">
+            <h2 class="post-title">
+              Architecture架构相关总结
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/algorithm/">
+            <h2 class="post-title">
+              `Data Structure`、`Algorithm`、`Design Pattern`等总结
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/eth-erc-20-vs-erc-721-vs-erc-1155/">
+            <h2 class="post-title">
+              ERC代币介绍-ERC-20、ERC-721和ERC-1155
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/python-500000rows-excel/">
+            <h2 class="post-title">
+              使用Python生成一个50万行随机数据的excel表格
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/java-stream-read-bigtxt/">
+            <h2 class="post-title">
+              使用Java对大文本内容读取并分组统计最小值、最大值、平均值
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/springboot-dev-prod-profile/">
+            <h2 class="post-title">
+              Springboot项目中设置pom.xml实现不同的环境切换、打包
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/springboot-druid-undertow-ad-filter/">
+            <h2 class="post-title">
+              Springboot+druid在undertow容器下广告拦截无效处理办法
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/macos-dnsmasq/">
+            <h2 class="post-title">
+              macOS安装dnsmasq
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  
+    <h2 class="year">2023</h2>
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/percona-xtrabackup-8-setup-backup-recover/">
+            <h2 class="post-title">
+              Percona XtraBackup 8.0数据库备份工具安装、备份、加密与还原
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/10m-sysctl-system/">
+            <h2 class="post-title">
+              千万并发连接调整系统参数
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/go-getlantern-systray-eth-price/">
+            <h2 class="post-title">
+              使用Golang编写一个在Mac通知栏上显示ETH价格的小工具
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/go-dlna-upnp/">
+            <h2 class="post-title">
+              Go语言(UPnP协议)实现局域网投屏到智能电视或支持DLNA设备
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/centos7-clash-for-linux/">
+            <h2 class="post-title">
+              Centos7安装配置clash for linux
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/mac-tesseract-ocr-data/">
+            <h2 class="post-title">
+              MAC平台下tesseract-ocr视觉识别的相关库下载及配置
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/go-ldflags-x-version/">
+            <h2 class="post-title">
+              Go 项目版本号管理方案之ldflags  -X 变量传递
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/go-get-domain-github/">
+            <h2 class="post-title">
+              Go语言中使用go get从自定义域名拉取包的配置方法
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/svg-waves/">
+            <h2 class="post-title">
+              SVG实现水波纹效果
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/macos-cgo-musl/">
+            <h2 class="post-title">
+              macOS下带CGO的交差编译Golang应用
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/golang-bufio-newReader/">
+            <h2 class="post-title">
+              Go语言读取大文件 高效处理
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/centos-growpart-no-rebot/">
+            <h2 class="post-title">
+              Linux 虚拟机在线热扩容分区
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/skus-gren/">
+            <h2 class="post-title">
+              skus生成算法
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/golang-sql-crontab/">
+            <h2 class="post-title">
+              GoLang实现通过数据库管理定时任务
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/otpauth/">
+            <h2 class="post-title">
+              otpauth格式详解
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/golang-gorm-tag/">
+            <h2 class="post-title">
+              GoLang之gorm库中tag小解
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/nodejs-npm-check-update/">
+            <h2 class="post-title">
+              nodejs项目更新依赖版本
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/php-env-file/">
+            <h2 class="post-title">
+              PHP加载env文件内容
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/nginx-conf/">
+            <h2 class="post-title">
+              nginx常用配置及和基本功能讲解
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/macos-mkcert-ssl-localhost/">
+            <h2 class="post-title">
+              使用mkcert创建本地信任SSL根证书
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/vim-chinese-setting/">
+            <h2 class="post-title">
+              解决Vim中文乱码问题 附本人简单配置
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/debian10-maddy-email-service/">
+            <h2 class="post-title">
+              在Debian10中使用Maddy搭建个人邮件服务系统
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/vue-api-router-permission/">
+            <h2 class="post-title">
+              vue通过api实现动态路由菜单，并实现权限管理
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/golang-mysql-cron/">
+            <h2 class="post-title">
+              GoLang从MySQL数据库读取定时任务数据，并异步执行
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/php-redis-kline/">
+            <h2 class="post-title">
+              PHP+Redis实现k线图数据生成，按秒、分钟、小时、天、周、月记录数据
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/mysql-date_sub/">
+            <h2 class="post-title">
+              MySQL DATE_SUB 函数各种用法及举例
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/mysql-score-user/">
+            <h2 class="post-title">
+              mysql按用户id，查询一个月内score字段总和并降序
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/jquery-slider/">
+            <h2 class="post-title">
+              jQuery Slider 是一个基于 jQuery 的图片轮播插件
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/macos-nodejs-n-versions/">
+            <h2 class="post-title">
+              macos 中管理多个nodejs版本
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/nginx-cors/">
+            <h2 class="post-title">
+              nginx配置API跨域
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/centos8-wireguard/">
+            <h2 class="post-title">
+              如何在CentOS 8上设置WireGuard
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/mac-wireguard/">
+            <h2 class="post-title">
+              Mac安装Wireguard
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/cloudflare-cors-error/">
+            <h2 class="post-title">
+              cloudflare跨域设置解决cors错误
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/telegram-phone-number/">
+            <h2 class="post-title">
+              Telegram快速解封的方法，解除this phone number is banned提醒
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/centos7-privoxy/">
+            <h2 class="post-title">
+              centos7 配置 snell-client
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/server-concurrency/">
+            <h2 class="post-title">
+              高并发服务器优化
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/go-windows-icon-rsrc/">
+            <h2 class="post-title">
+              windows平台下添加Go程序图标的方法
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/nodejs-node-sass-error/">
+            <h2 class="post-title">
+              NodeJS项目npm install执行报node-sass错误
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/webrtc-kraken-voice/">
+            <h2 class="post-title">
+              基于WebRTC的语音视频一对一通话系统搭建
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/go-webscoket-chatgpt/">
+            <h2 class="post-title">
+              chatgpt告诉我使用go语言实现webscoket多人聊天功能代码
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  
+    <h2 class="year">2022</h2>
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/golang-my-annotation/">
+            <h2 class="post-title">
+              GoLang 获取方法注释
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/golang-gin-get-input-data/">
+            <h2 class="post-title">
+              GoLang Gin 获取Input数据
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/go-swagger-docs/">
+            <h2 class="post-title">
+              GoLang Swagger声明式注释格式
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/go-gin-request-json/">
+            <h2 class="post-title">
+              GoLang之Gin框架中接收json数据
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/golang-gorm-page/">
+            <h2 class="post-title">
+              GoLang数据库gorm泛型封装分页功能
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/go-all-package/">
+            <h2 class="post-title">
+              Golang系列中常用包
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/golang-robfig-cron/">
+            <h2 class="post-title">
+              GoLang 定时robfig/cron使用
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/golang-goroutine/">
+            <h2 class="post-title">
+              GoLang并发编程
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/golang-decorator/">
+            <h2 class="post-title">
+              GoLang装饰器
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/golang-defer/">
+            <h2 class="post-title">
+              GoLang defer延时调用
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/golang-func/">
+            <h2 class="post-title">
+              GoLang 函数
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/golang-interface/">
+            <h2 class="post-title">
+              GoLang 接口 interface
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/golang-pointers/">
+            <h2 class="post-title">
+              GoLang指针
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/golang-array-slice/">
+            <h2 class="post-title">
+              GoLang数组与切片
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/golang-operators/">
+            <h2 class="post-title">
+              GoLang位运算
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/golang-data-types/">
+            <h2 class="post-title">
+              GoLang数据基础类型
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/golang-const-iota/">
+            <h2 class="post-title">
+              GoLang常量之iota
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/golang-fmt-printf/">
+            <h2 class="post-title">
+              GoLang 之 fmt.Printf 格式参数占位符
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/Irregular-photo-album/">
+            <h2 class="post-title">
+              纯CSS自动排版 相册效果
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/ssh-conf/">
+            <h2 class="post-title">
+              SSH密钥登录
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/nginx-ssl/">
+            <h2 class="post-title">
+              nginx配置ssl
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/fast-poster/">
+            <h2 class="post-title">
+              fast-poster海报系统配置教程
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/regexp/">
+            <h2 class="post-title">
+              正则表达式
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/nginx-image-valid/">
+            <h2 class="post-title">
+              nginx配置图片防盗链
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/nginx-wildcard-subdomains-domain/">
+            <h2 class="post-title">
+              nginx配置泛域名转发 指定不同目录或后缀
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/php-captcha-image-code-generator/">
+            <h2 class="post-title">
+              PHP生成验证码图片
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/javascript-byte-converter/">
+            <h2 class="post-title">
+              Javascript字节转KB MB GB TB
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/country-names-code/">
+            <h2 class="post-title">
+              全球国家名称、ISO代码、电话代码、货币简写、货币符号
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/javascript-shorten-long-numbers/">
+            <h2 class="post-title">
+              Javascript数字缩写为KMBTPE
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/android-keystore/">
+            <h2 class="post-title">
+              Android平台签名证书(.keystore)生成指南
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/php-btc-eth-ltc-key/">
+            <h2 class="post-title">
+              使用PHP生成以太坊、比特币、莱特币的地址带私钥
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/javascript-timestamp-setInterval/">
+            <h2 class="post-title">
+              一个简单的倒计时代码和发送验证码倒计时代码
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/php-crontab-funciton/">
+            <h2 class="post-title">
+              PHP计算计划任务时间是否可执行 精确到秒
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/macos-springboard/">
+            <h2 class="post-title">
+              自定义 macOS 启动台的图标排布网格
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/vue-select-color/">
+            <h2 class="post-title">
+              vue多个标签在三个颜色里循环
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/ffmpeg-cut-mp3/">
+            <h2 class="post-title">
+              利用FFMPEG剪辑功能之批量掐头去尾指定长度并清除metadata媒体信息
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/linux-growpart/">
+            <h2 class="post-title">
+              Linux云服务器磁盘动态扩容
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/systemctl/">
+            <h2 class="post-title">
+              systemctl简单的使用
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/php-xdebug-webGrind/">
+            <h2 class="post-title">
+              PHP性能调试之xdebug图形化工具之WebGrind简单安装及使用
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/git-submodule/">
+            <h2 class="post-title">
+              git仓库中子模块的添加、删除、更新
+            </h2>
+          </a>
+        </article>
+      
+    
+      
+        <article class="post">
+          <a href="https://www.lvtao.net/post/macos-mxsrvs-php-upgrade/">
+            <h2 class="post-title">
+              给macOS下的PHP集成环境之MxSrvs升级PHP7.4.6到7.4.29 顺手解决composer不能https的BUG
+            </h2>
+          </a>
+        </article>
+      
+    
+  
+</div>
+
+
+        </div>
+
+        <div class="site-footer">
+  <table>
+    <tr><td><a href="https://www.ioncube.com/?xp=TQLLZT"><img src="/media/ioncube.jpg" width="100%"/></a></td></tr>
+    <tr><td><a href="https://app.cloudcone.com/?ref=9519"><img src="/media/cloudcone.gif" width="100%"/></a></td></tr>
+  </table>
+  <div class="slogan"></div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  Powered by <a href="https://lvtao.net" target="_blank">LVTAO</a> | <a class="rss" href="https://www.lvtao.net/atom.xml" target="_blank">RSS</a>
+</div>
+<script 
+async
+defer
+src="https://ask.lvtao.net/api/application/embed?protocol=https&host=ask.lvtao.net&token=e193b47f92f1b41e">
+</script>
+
+
+      </div>
+      <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+    </div>
+  </body>
+</html>

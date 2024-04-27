@@ -1,0 +1,288 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>使用PHP生成以太坊、比特币、莱特币的地址带私钥 | 吕滔博客</title>
+<meta name="description" content="">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://www.lvtao.net/favicon.ico?v=1714210602511">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://www.lvtao.net/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://www.lvtao.net">
+        <img class="avatar" src="https://www.lvtao.net/images/avatar.png?v=1714210602511" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://www.lvtao.net">
+        <h1 class="site-title">吕滔博客</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+        
+          <a href="https://medoo.lvtao.net" class="menu purple-link">
+            MeDoo中文手册
+          </a>
+        
+      
+        
+          <a href="https://tool.lvtao.net" class="menu purple-link">
+            工具箱
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">使用PHP生成以太坊、比特币、莱特币的地址带私钥</h2>
+          <div class="post-info post-detail-info">
+            
+              <span>
+                <i class="icon-pricetags-outline"></i>
+                
+                  <a href="https://www.lvtao.net/tag/php/">
+                    php
+                    
+                  </a>
+                
+              </span>
+            
+             <div style="margin-top:5px;"><a href="https://app.cloudcone.com/?ref=9519" target="_blank">海外无需备案主机推荐，支持25端口邮件发送，无端口限制，支持支付宝、Paypal、信用卡等支付...</a></div>
+          </div>
+          <div class="post-content" v-pre>
+            <p>此文档只是生成，如何使用它的密钥转账等操作有待研究。回头有空再说</p>
+<h3 id="项目依赖">项目依赖：</h3>
+<p><code>bitcoin-php</code>是bitcoin的php实现库，用于创建助记词和生成私钥 （此第三库需要运行在64位的<code>php7.0+</code>上）<br>
+<code>ethereum-util</code>是以太坊常用函数php实现库</p>
+<pre><code>composer require bitwasp/bitcoin
+composer require web3p/ethereum-util
+</code></pre>
+<h3 id="创建助记词并生成btc私钥wif格式可用于导入其他钱包-地址">创建助记词并生成BTC私钥(WIF格式，可用于导入其他钱包)、地址：</h3>
+<pre><code>&lt;?php
+require_once './vendor/autoload.php';
+
+use BitWasp\Bitcoin\Address\PayToPubKeyHashAddress;
+use BitWasp\Bitcoin\Bitcoin;
+use BitWasp\Bitcoin\Crypto\Random\Random;
+use BitWasp\Bitcoin\Key\Factory\HierarchicalKeyFactory;
+use BitWasp\Bitcoin\Mnemonic\Bip39\Bip39Mnemonic;
+use BitWasp\Bitcoin\Mnemonic\Bip39\Bip39SeedGenerator;
+use BitWasp\Bitcoin\Mnemonic\MnemonicFactory;
+
+// Bip39
+$math = Bitcoin::getMath();
+$network = Bitcoin::getNetwork();
+$random = new Random();
+// 生成随机数(initial entropy)
+$entropy = $random-&gt;bytes(Bip39Mnemonic::MIN_ENTROPY_BYTE_LEN);
+$bip39 = MnemonicFactory::bip39();
+// 通过随机数生成助记词
+$mnemonic = $bip39-&gt;entropyToMnemonic($entropy);
+echo &quot;mnemonic: &quot; . $mnemonic.PHP_EOL.PHP_EOL;// 助记词
+
+$seedGenerator = new Bip39SeedGenerator();
+// 通过助记词生成种子，传入可选加密串'hello'
+$seed = $seedGenerator-&gt;getSeed($mnemonic);
+echo &quot;seed: &quot; . $seed-&gt;getHex() . PHP_EOL;
+$hdFactory = new HierarchicalKeyFactory();
+$master = $hdFactory-&gt;fromEntropy($seed);
+
+$hardened = $master-&gt;derivePath(&quot;49'/0'/0'/0/0&quot;);
+echo 'WIF: ' . $hardened-&gt;getPrivateKey()-&gt;toWif();
+echo PHP_EOL;
+$address = new PayToPubKeyHashAddress($hardened-&gt;getPublicKey()-&gt;getPubKeyHash());
+echo 'address: ' . $address-&gt;getAddress();
+echo PHP_EOL;
+</code></pre>
+<h3 id="创建助记词并生成eth私钥-地址">创建助记词并生成ETH私钥、地址</h3>
+<pre><code>&lt;?php
+require_once './vendor/autoload.php';
+
+use BitWasp\Bitcoin\Bitcoin;
+use BitWasp\Bitcoin\Crypto\Random\Random;
+use BitWasp\Bitcoin\Key\Factory\HierarchicalKeyFactory;
+use BitWasp\Bitcoin\Mnemonic\Bip39\Bip39Mnemonic;
+use BitWasp\Bitcoin\Mnemonic\Bip39\Bip39SeedGenerator;
+use BitWasp\Bitcoin\Mnemonic\MnemonicFactory;
+use Web3p\EthereumUtil\Util;
+
+// Bip39
+$math = Bitcoin::getMath();
+$network = Bitcoin::getNetwork();
+$random = new Random();
+// 生成随机数(initial entropy)
+$entropy = $random-&gt;bytes(Bip39Mnemonic::MIN_ENTROPY_BYTE_LEN);
+$bip39 = MnemonicFactory::bip39();
+// 通过随机数生成助记词
+$mnemonic = $bip39-&gt;entropyToMnemonic($entropy);
+echo &quot;mnemonic: &quot; . $mnemonic.PHP_EOL.PHP_EOL;// 助记词
+
+$seedGenerator = new Bip39SeedGenerator();
+// 通过助记词生成种子，传入可选加密串'hello'
+$seed = $seedGenerator-&gt;getSeed($mnemonic);
+echo &quot;seed: &quot; . $seed-&gt;getHex() . PHP_EOL;
+$hdFactory = new HierarchicalKeyFactory();
+$master = $hdFactory-&gt;fromEntropy($seed);
+
+$util = new Util();
+// 设置路径account
+$hardened = $master-&gt;derivePath(&quot;44'/60'/0'/0/0&quot;);
+echo &quot; - m/44'/60'/0'/0/0 &quot; .PHP_EOL;
+echo &quot; public key: &quot; . $hardened-&gt;getPublicKey()-&gt;getHex().PHP_EOL;
+echo &quot; private key: &quot; . $hardened-&gt;getPrivateKey()-&gt;getHex().PHP_EOL;// 可以导入到imtoken使用的私钥
+echo &quot; address: &quot; . $util-&gt;publicKeyToAddress($util-&gt;privateKeyToPublicKey($hardened-&gt;getPrivateKey()-&gt;getHex())) . PHP_EOL;// 私钥导入imtoken后一样的地址
+</code></pre>
+<h3 id="创建助记词并生成ltc私钥-地址">创建助记词并生成LTC私钥、地址</h3>
+<pre><code>&lt;?php
+require_once './vendor/autoload.php';
+
+use BitWasp\Bitcoin\Address\PayToPubKeyHashAddress;
+use BitWasp\Bitcoin\Bitcoin;
+use BitWasp\Bitcoin\Crypto\Random\Random;
+use BitWasp\Bitcoin\Key\Factory\HierarchicalKeyFactory;
+use BitWasp\Bitcoin\Mnemonic\Bip39\Bip39Mnemonic;
+use BitWasp\Bitcoin\Mnemonic\Bip39\Bip39SeedGenerator;
+use BitWasp\Bitcoin\Mnemonic\MnemonicFactory;
+use BitWasp\Bitcoin\Network\NetworkFactory;
+
+// Bip39
+$math = Bitcoin::getMath();// 设置莱特币网络
+$network = NetworkFactory::litecoin();
+$random = new Random();
+// 生成随机数(initial entropy)
+$entropy = $random-&gt;bytes(Bip39Mnemonic::MIN_ENTROPY_BYTE_LEN);
+$bip39 = MnemonicFactory::bip39();
+// 通过随机数生成助记词
+$mnemonic = $bip39-&gt;entropyToMnemonic($entropy);
+//$mnemonic = 'security hurdle lift acoustic skate recall hotel elegant amateur hidden escape slow';
+echo &quot;mnemonic: &quot; . $mnemonic.PHP_EOL.PHP_EOL;// 助记词
+
+$seedGenerator = new Bip39SeedGenerator();
+// 通过助记词生成种子，传入可选加密串'hello'
+$seed = $seedGenerator-&gt;getSeed($mnemonic);
+echo &quot;seed: &quot; . $seed-&gt;getHex() . PHP_EOL;
+$hdFactory = new HierarchicalKeyFactory();
+$master = $hdFactory-&gt;fromEntropy($seed);
+
+$hardened = $master-&gt;derivePath(&quot;44'/2'/0'/0/0&quot;);
+echo 'WIF ' . $hardened-&gt;getPrivateKey()-&gt;toWif($network);
+echo PHP_EOL;
+$address = new PayToPubKeyHashAddress($hardened-&gt;getPublicKey()-&gt;getPubKeyHash());
+echo 'address ' . $address-&gt;getAddress($network);
+echo PHP_EOL;
+</code></pre>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://www.lvtao.net/post/javascript-timestamp-setInterval/">
+              <h3 class="post-title">
+                下一篇：一个简单的倒计时代码和发送验证码倒计时代码
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <table>
+    <tr><td><a href="https://www.ioncube.com/?xp=TQLLZT"><img src="/media/ioncube.jpg" width="100%"/></a></td></tr>
+    <tr><td><a href="https://app.cloudcone.com/?ref=9519"><img src="/media/cloudcone.gif" width="100%"/></a></td></tr>
+  </table>
+  <div class="slogan"></div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  Powered by <a href="https://lvtao.net" target="_blank">LVTAO</a> | <a class="rss" href="https://www.lvtao.net/atom.xml" target="_blank">RSS</a>
+</div>
+<script 
+async
+defer
+src="https://ask.lvtao.net/api/application/embed?protocol=https&host=ask.lvtao.net&token=e193b47f92f1b41e">
+</script>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

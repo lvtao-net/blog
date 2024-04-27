@@ -1,0 +1,294 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>解决Vim中文乱码问题 附本人简单配置 | 吕滔博客</title>
+<meta name="description" content="">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://www.lvtao.net/favicon.ico?v=1714210602511">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://www.lvtao.net/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://www.lvtao.net">
+        <img class="avatar" src="https://www.lvtao.net/images/avatar.png?v=1714210602511" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://www.lvtao.net">
+        <h1 class="site-title">吕滔博客</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+        
+          <a href="https://medoo.lvtao.net" class="menu purple-link">
+            MeDoo中文手册
+          </a>
+        
+      
+        
+          <a href="https://tool.lvtao.net" class="menu purple-link">
+            工具箱
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">解决Vim中文乱码问题 附本人简单配置</h2>
+          <div class="post-info post-detail-info">
+            
+              <span>
+                <i class="icon-pricetags-outline"></i>
+                
+                  <a href="https://www.lvtao.net/tag/vim/">
+                    vim
+                    
+                  </a>
+                
+              </span>
+            
+             <div style="margin-top:5px;"><a href="https://app.cloudcone.com/?ref=9519" target="_blank">海外无需备案主机推荐，支持25端口邮件发送，无端口限制，支持支付宝、Paypal、信用卡等支付...</a></div>
+          </div>
+          <div class="post-content" v-pre>
+            <p><code>vim /etc/vim/vimrc</code></p>
+<pre><code>set fileencodings=utf-8,ucs-bom,gb18030,gbk,gb2312,cp936
+set termencoding=utf-8
+set encoding=utf-8
+
+#我们也可以通过以下方式将TAB的宽度设置为4个空格，保证代码格式看起来更整齐
+set ts=4
+set softtabstop=4
+set shiftwidth=4
+set expandtab
+set autoindent
+</code></pre>
+<p>俺的配置</p>
+<pre><code>&quot; 不要使用vi的键盘模式，而是vim自己的
+set nocompatible
+filetype off
+
+let mapleader = &quot;,&quot;
+let g:mapleader = ','
+
+set nobackup
+set nowb
+set noswapfile
+
+&quot;编码
+&quot;set fencs=utf-8,ucs-bom,shift-jis,gb18030,gbk,gb2312,cp936
+&quot;set termencoding=utf-8
+set encoding=utf-8
+set fileencodings=utf-8,gbk,chinese,cp936,gb18030,utf-16le,utf-16,big5,euc-jp,euc-kr,latin-1
+&quot;set fileencoding=utf-8
+
+set t_Co=256
+&quot;Enable sytax higglighting
+syntax on
+&quot;Select a colorscheme
+colorscheme elflord
+set guifont=Monaco:h12
+set guifontwide=Monaco:h12
+let g:molokai_original = 1
+&quot;可以使用退格删除文字
+set backspace=indent,eol,start
+&quot;显示光标所在位置
+set ruler
+set rulerformat=%57(%50t[%{&amp;ff},%Y]\ %m\ %l,%c\ %p%%%)
+&quot;显示未输入完的命令
+set showcmd
+
+&quot; 搜索时忽略大小写，但在有一个或以上大写字母时仍大小写敏感
+set ignorecase
+set smartcase
+&quot;set incsearch		&quot; 实时搜索
+set hlsearch		&quot; 搜索时高亮显示被找到的文本
+set wildignore+=*/tmp/*,*.so,*.o,*.a,*.obj,*.swp,*.zip,*.pyc,*.pyo,*.class,.DS_Store,*/.idea/*  &quot; MacOSX/Linux
+
+&quot;去掉搜索高亮
+noremap &lt;silent&gt;&lt;leader&gt;/ :nohls&lt;CR&gt;
+
+&quot;允许撤销次数
+set undolevels=1000
+&quot;Tab键的宽度
+set wildmenu
+set matchpairs=(:),{:},[:],&lt;:&gt;
+set whichwrap=b,s,&lt;,&gt;,[,]
+&quot;显示行号
+set number
+&quot;光标移动到buffer的顶部和底部时候保持3行距离
+set scrolloff=3
+&quot;允许折叠/禁用折叠
+&quot;set foldenable
+set nofoldenable
+&quot;手动折叠
+set foldmethod=manual
+
+&quot; 设置当文件被改动时自动载入
+set autoread
+&quot; quickfix模式
+&quot;autocmd FileType c,cpp map &lt;buffer&gt; &lt;leader&gt;&lt;space&gt; :w&lt;cr&gt;:make&lt;cr&gt;
+&quot;代码补全
+set completeopt=preview,menu
+
+&quot;共享剪贴板
+set clipboard+=unnamed
+
+&quot; 总是显示状态行
+set laststatus=2
+
+&quot; 带有如下符号的单词不要被换行分割
+set iskeyword+=_,$,@,%,#,-
+&quot;字符间插入的像素行数目
+set linespace=2
+
+&quot; 高亮显示匹配的括号
+set showmatch
+set helplang=cn		&quot;设置中文帮助
+set encoding=utf-8	&quot;打开uft-8文件不乱码
+set history=500		&quot;保留历史记录
+set magic			&quot;用于正则表达式
+set mouse=a			&quot;设定在任何模式下鼠标都可用
+&quot; 插入模式输入中文完毕回到普通模式时禁用输入法
+&quot;se imd
+&quot;au InsertEnter * se noimd
+&quot;au InsertLeave * se imd
+&quot;au FocusGained * se imd
+
+&quot;关于高亮
+:let hs_highlight_delimiters=1            &quot; 高亮定界符
+:let hs_highlight_boolean=1               &quot; 把True和False识别为关键字
+:let hs_highlight_types=1                 &quot; 把基本类型的名字识别为关键字
+:let hs_highlight_more_types=1            &quot; 把更多常用类型识别为关键字
+:let hs_highlight_debug=1                 &quot; 高亮调试函数的名字
+:let hs_allow_hash_operator=1             &quot; 阻止把#高亮为错误
+
+set ambiwidth=single
+syntax enable
+&quot;键盘命令
+map &lt;D-v&gt; &quot;+gp
+map &lt;D-c&gt; &quot;+y
+
+&quot;设置空格
+set shiftwidth=4
+set tabstop=4
+autocmd FileType html,python,vim,javascript setlocal shiftwidth=2
+autocmd FileType html,python,vim,javascript setlocal tabstop=2
+set expandtab
+set smartindent
+set smarttab
+</code></pre>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://www.lvtao.net/post/debian10-maddy-email-service/">
+              <h3 class="post-title">
+                下一篇：在Debian10中使用Maddy搭建个人邮件服务系统
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <table>
+    <tr><td><a href="https://www.ioncube.com/?xp=TQLLZT"><img src="/media/ioncube.jpg" width="100%"/></a></td></tr>
+    <tr><td><a href="https://app.cloudcone.com/?ref=9519"><img src="/media/cloudcone.gif" width="100%"/></a></td></tr>
+  </table>
+  <div class="slogan"></div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  Powered by <a href="https://lvtao.net" target="_blank">LVTAO</a> | <a class="rss" href="https://www.lvtao.net/atom.xml" target="_blank">RSS</a>
+</div>
+<script 
+async
+defer
+src="https://ask.lvtao.net/api/application/embed?protocol=https&host=ask.lvtao.net&token=e193b47f92f1b41e">
+</script>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

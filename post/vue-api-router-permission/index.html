@@ -1,0 +1,268 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>vue通过api实现动态路由菜单，并实现权限管理 | 吕滔博客</title>
+<meta name="description" content="">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://www.lvtao.net/favicon.ico?v=1714210602511">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://www.lvtao.net/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://www.lvtao.net">
+        <img class="avatar" src="https://www.lvtao.net/images/avatar.png?v=1714210602511" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://www.lvtao.net">
+        <h1 class="site-title">吕滔博客</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+        
+          <a href="https://medoo.lvtao.net" class="menu purple-link">
+            MeDoo中文手册
+          </a>
+        
+      
+        
+          <a href="https://tool.lvtao.net" class="menu purple-link">
+            工具箱
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">vue通过api实现动态路由菜单，并实现权限管理</h2>
+          <div class="post-info post-detail-info">
+            
+              <span>
+                <i class="icon-pricetags-outline"></i>
+                
+                  <a href="https://www.lvtao.net/tag/vue/">
+                    vue
+                    
+                  </a>
+                
+              </span>
+            
+             <div style="margin-top:5px;"><a href="https://app.cloudcone.com/?ref=9519" target="_blank">海外无需备案主机推荐，支持25端口邮件发送，无端口限制，支持支付宝、Paypal、信用卡等支付...</a></div>
+          </div>
+          <div class="post-content" v-pre>
+            <p>要实现动态路由菜单和权限管理，你需要先了解Vue Router和Vue的全局状态管理工具Vuex。</p>
+<ol>
+<li>在Vue Router中配置动态路由<br>
+在Vue Router中，你可以通过编程方式动态添加路由。在你的应用程序中，你可以使用一个API接口来获取路由信息，并将其添加到Vue Router中。例如：</li>
+</ol>
+<pre><code>import Vue from 'vue'
+import Router from 'vue-router'
+
+Vue.use(Router)
+
+const router = new Router({
+  routes: [
+    {
+      path: '/',
+      name: 'home',
+      component: Home
+    }
+  ]
+})
+
+// 通过API获取路由信息并添加到Vue Router中
+fetch('/api/routes')
+  .then(response =&gt; response.json())
+  .then(routes =&gt; {
+    router.addRoutes(routes)
+  })
+</code></pre>
+<ol start="2">
+<li>在Vuex中管理用户权限<br>
+在Vue中，你可以使用Vuex来管理全局状态。你可以将用户权限信息存储在Vuex的状态树中，并且在应用程序中的各个组件中使用这些信息来控制用户访问权限。<br>
+例如，你可以在Vuex中创建一个名为“auth”的模块，其中包含用户信息和权限信息：</li>
+</ol>
+<pre><code>const auth = {
+  state: {
+    user: null,
+    permissions: []
+  },
+  mutations: {
+    setUser(state, user) {
+      state.user = user
+    },
+    setPermissions(state, permissions) {
+      state.permissions = permissions
+    }
+  },
+  actions: {
+    login({ commit }, credentials) {
+      // 登录逻辑
+      commit('setUser', user)
+      commit('setPermissions', permissions)
+    },
+    logout({ commit }) {
+      // 登出逻辑
+      commit('setUser', null)
+      commit('setPermissions', [])
+    }
+  },
+  getters: {
+    isAuthenticated(state) {
+      return !!state.user
+    },
+    hasPermission: (state) =&gt; (permission) =&gt; {
+      return state.permissions.includes(permission)
+    }
+  }
+}
+</code></pre>
+<ol start="3">
+<li>在组件中使用路由和权限信息<br>
+在你的组件中，你可以使用Vue Router的<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>r</mi><mi>o</mi><mi>u</mi><mi>t</mi><mi>e</mi><mi mathvariant="normal">对</mi><mi mathvariant="normal">象</mi><mi mathvariant="normal">来</mi><mi mathvariant="normal">获</mi><mi mathvariant="normal">取</mi><mi mathvariant="normal">当</mi><mi mathvariant="normal">前</mi><mi mathvariant="normal">路</mi><mi mathvariant="normal">由</mi><mi mathvariant="normal">信</mi><mi mathvariant="normal">息</mi><mi mathvariant="normal">，</mi><mi mathvariant="normal">并</mi><mi mathvariant="normal">使</mi><mi mathvariant="normal">用</mi><mi>V</mi><mi>u</mi><mi>e</mi><mi>x</mi><mi mathvariant="normal">的</mi></mrow><annotation encoding="application/x-tex">route对象来获取当前路由信息，并使用Vuex的</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">r</span><span class="mord mathdefault">o</span><span class="mord mathdefault">u</span><span class="mord mathdefault">t</span><span class="mord mathdefault">e</span><span class="mord cjk_fallback">对</span><span class="mord cjk_fallback">象</span><span class="mord cjk_fallback">来</span><span class="mord cjk_fallback">获</span><span class="mord cjk_fallback">取</span><span class="mord cjk_fallback">当</span><span class="mord cjk_fallback">前</span><span class="mord cjk_fallback">路</span><span class="mord cjk_fallback">由</span><span class="mord cjk_fallback">信</span><span class="mord cjk_fallback">息</span><span class="mord cjk_fallback">，</span><span class="mord cjk_fallback">并</span><span class="mord cjk_fallback">使</span><span class="mord cjk_fallback">用</span><span class="mord mathdefault" style="margin-right:0.22222em;">V</span><span class="mord mathdefault">u</span><span class="mord mathdefault">e</span><span class="mord mathdefault">x</span><span class="mord cjk_fallback">的</span></span></span></span>store对象来获取用户权限信息。</li>
+</ol>
+<p>例如，你可以在一个菜单组件中检查用户是否有访问当前路由的权限：</p>
+<pre><code>&lt;template&gt;
+  &lt;div&gt;
+    &lt;ul&gt;
+      &lt;li v-for=&quot;route in routes&quot; :key=&quot;route.path&quot;&gt;
+        &lt;router-link :to=&quot;route.path&quot; v-if=&quot;hasPermission(route.permission)&quot;&gt;
+          {{ route.name }}
+        &lt;/router-link&gt;
+      &lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+export default {
+  computed: {
+    routes() {
+      return this.$router.options.routes
+    }
+  },
+  methods: {
+    hasPermission(permission) {
+      return this.$store.getters.hasPermission(permission)
+    }
+  }
+}
+&lt;/script&gt;
+</code></pre>
+<p>在这个例子中，组件会遍历所有路由，并通过hasPermission方法检查用户是否有访问当前路由的权限。如果用户没有该权限，该路由将不会被渲染为链接。</p>
+<p>总之，通过使用Vue Router和Vuex，你可以轻松地实现动态路由菜单和权限管理。</p>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://www.lvtao.net/post/golang-mysql-cron/">
+              <h3 class="post-title">
+                下一篇：GoLang从MySQL数据库读取定时任务数据，并异步执行
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <table>
+    <tr><td><a href="https://www.ioncube.com/?xp=TQLLZT"><img src="/media/ioncube.jpg" width="100%"/></a></td></tr>
+    <tr><td><a href="https://app.cloudcone.com/?ref=9519"><img src="/media/cloudcone.gif" width="100%"/></a></td></tr>
+  </table>
+  <div class="slogan"></div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  Powered by <a href="https://lvtao.net" target="_blank">LVTAO</a> | <a class="rss" href="https://www.lvtao.net/atom.xml" target="_blank">RSS</a>
+</div>
+<script 
+async
+defer
+src="https://ask.lvtao.net/api/application/embed?protocol=https&host=ask.lvtao.net&token=e193b47f92f1b41e">
+</script>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

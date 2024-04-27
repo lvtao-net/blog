@@ -1,0 +1,788 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>纯CSS自动排版 相册效果 | 吕滔博客</title>
+<meta name="description" content="">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://www.lvtao.net/favicon.ico?v=1714210602511">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://www.lvtao.net/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://www.lvtao.net">
+        <img class="avatar" src="https://www.lvtao.net/images/avatar.png?v=1714210602511" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://www.lvtao.net">
+        <h1 class="site-title">吕滔博客</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+        
+          <a href="https://medoo.lvtao.net" class="menu purple-link">
+            MeDoo中文手册
+          </a>
+        
+      
+        
+          <a href="https://tool.lvtao.net" class="menu purple-link">
+            工具箱
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">纯CSS自动排版 相册效果</h2>
+          <div class="post-info post-detail-info">
+            
+              <span>
+                <i class="icon-pricetags-outline"></i>
+                
+                  <a href="https://www.lvtao.net/tag/css/">
+                    css
+                    
+                  </a>
+                
+              </span>
+            
+             <div style="margin-top:5px;"><a href="https://app.cloudcone.com/?ref=9519" target="_blank">海外无需备案主机推荐，支持25端口邮件发送，无端口限制，支持支付宝、Paypal、信用卡等支付...</a></div>
+          </div>
+          <div class="post-content" v-pre>
+            <p>效果预览<br>
+<img src="https://www.lvtao.net/post-images/1667576613409.png" alt="" loading="lazy"></p>
+<p>html</p>
+<pre><code class="language-html">&lt;body&gt;
+	&lt;article&gt;
+		&lt;div class=&quot;item&quot;&gt;
+			&lt;div class=&quot;photos&quot;&gt;
+				&lt;img src=&quot;http://cdn.snapic.cn/img/image/Elianne-Dipp.jpg&quot; alt=&quot;Photo by Elianne Dipp&quot;&gt;
+			&lt;/div&gt;
+			&lt;div class=&quot;description&quot;&gt;Photo by Elianne Dipp&lt;/div&gt;
+		&lt;/div&gt;
+		&lt;div class=&quot;item&quot;&gt;
+			&lt;div class=&quot;photos&quot;&gt;
+				&lt;img src=&quot;http://cdn.snapic.cn/img/image/Jared-Rice.jpg&quot; alt=&quot;Photo by Jared Rice&quot;&gt;
+			&lt;/div&gt;
+			&lt;div class=&quot;description&quot;&gt;Photo by Jared Rice&lt;/div&gt;
+		&lt;/div&gt;
+		&lt;div class=&quot;item&quot;&gt;
+			&lt;div class=&quot;photos&quot;&gt;
+				&lt;img src=&quot;http://cdn.snapic.cn/img/image/Gaddafi-Rusli.jpg&quot; alt=&quot;Photo by Gaddafi Rusli&quot;&gt;
+			&lt;/div&gt;
+			&lt;div class=&quot;description&quot;&gt;Photo by Gaddafi Rusli&lt;/div&gt;
+		&lt;/div&gt;
+		&lt;div class=&quot;item&quot;&gt;
+			&lt;div class=&quot;photos&quot;&gt;
+				&lt;img src=&quot;http://cdn.snapic.cn/img/image/Guzman-Barquin.jpg&quot; alt=&quot;Photo by Guzman Barquin&quot;&gt;
+			&lt;/div&gt;
+			&lt;div class=&quot;description&quot;&gt;Photo by Guzman Barquin&lt;/div&gt;
+		&lt;/div&gt;
+		&lt;div class=&quot;item&quot;&gt;
+			&lt;div class=&quot;photos&quot;&gt;
+				&lt;img src=&quot;http://cdn.snapic.cn/img/image/Gabmarjan.jpg&quot; alt=&quot;Photo by Gabmarjan&quot;&gt;
+			&lt;/div&gt;
+			&lt;div class=&quot;description&quot;&gt;Photo by Gabmarjan&lt;/div&gt;
+		&lt;/div&gt;
+		&lt;div class=&quot;item&quot;&gt;
+			&lt;div class=&quot;photos&quot;&gt;
+				&lt;img src=&quot;http://cdn.snapic.cn/img/image/Kalen-Emsley.jpg&quot; alt=&quot;Photo by Kalen Emsley&quot;&gt;
+			&lt;/div&gt;
+			&lt;div class=&quot;description&quot;&gt;Photo by Kalen Emsley&lt;/div&gt;
+		&lt;/div&gt;
+		&lt;div class=&quot;item&quot;&gt;
+			&lt;div class=&quot;photos&quot;&gt;
+				&lt;img src=&quot;http://cdn.snapic.cn/img/image/Tran-Mau-Tri-Tam.jpg&quot; alt=&quot;Photo by Tran Mau Tri Tam&quot;&gt;
+			&lt;/div&gt;
+			&lt;div class=&quot;description&quot;&gt;Photo by Tran Mau Tri Tam&lt;/div&gt;
+		&lt;/div&gt;
+		&lt;div class=&quot;item&quot;&gt;
+			&lt;div class=&quot;photos&quot;&gt;
+				&lt;img src=&quot;http://cdn.snapic.cn/img/image/Brooke-Lark.jpg&quot; alt=&quot;Photo by Brooke Lark&quot;&gt;
+			&lt;/div&gt;
+			&lt;div class=&quot;description&quot;&gt;Photo by Brooke Lark&lt;/div&gt;
+		&lt;/div&gt;
+		&lt;div class=&quot;item&quot;&gt;
+			&lt;div class=&quot;photos&quot;&gt;
+				&lt;img src=&quot;http://cdn.snapic.cn/img/image/Amos-Bar-Zeev.jpg&quot; alt=&quot;Photo by Amos Bar Zeev&quot;&gt;
+			&lt;/div&gt;
+			&lt;div class=&quot;description&quot;&gt;Photo by Amos Bar Zeev&lt;/div&gt;
+		&lt;/div&gt;
+		&lt;div class=&quot;item&quot;&gt;
+			&lt;div class=&quot;photos&quot;&gt;
+				&lt;img src=&quot;http://cdn.snapic.cn/img/image/Ryan-KLAUS.jpg&quot; alt=&quot;Photo by Ryan KLAUS&quot;&gt;
+			&lt;/div&gt;
+			&lt;div class=&quot;description&quot;&gt;Photo by Ryan KLAUS&lt;/div&gt;
+		&lt;/div&gt;
+		&lt;div class=&quot;item&quot;&gt;
+			&lt;div class=&quot;photos&quot;&gt;
+				&lt;img src=&quot;http://cdn.snapic.cn/img/image/Will-Africano.jpg&quot; alt=&quot;Photo by Will Africano&quot;&gt;
+			&lt;/div&gt;
+			&lt;div class=&quot;description&quot;&gt;Photo by Will Africano&lt;/div&gt;
+		&lt;/div&gt;
+		&lt;div class=&quot;item&quot;&gt;
+			&lt;div class=&quot;photos&quot;&gt;
+				&lt;img src=&quot;http://cdn.snapic.cn/img/image/Ryan-Christodoulou.jpg&quot; alt=&quot;Photo by Ryan Christodoulou&quot;&gt;
+			&lt;/div&gt;
+			&lt;div class=&quot;description&quot;&gt;Photo by Ryan Christodoulou&lt;/div&gt;
+		&lt;/div&gt;
+		&lt;div class=&quot;item&quot;&gt;
+			&lt;div class=&quot;photos&quot;&gt;
+				&lt;img src=&quot;http://cdn.snapic.cn/img/image/Sake-Le.jpg&quot; alt=&quot;Photo by Sake Le&quot;&gt;
+			&lt;/div&gt;
+			&lt;div class=&quot;description&quot;&gt;Photo by Sake Le&lt;/div&gt;
+		&lt;/div&gt;
+		&lt;div class=&quot;item&quot;&gt;
+			&lt;div class=&quot;photos&quot;&gt;
+				&lt;img src=&quot;http://cdn.snapic.cn/img/image/Levi-Guzman.jpg&quot; alt=&quot;Photo by Levi Guzman&quot;&gt;
+			&lt;/div&gt;
+			&lt;div class=&quot;description&quot;&gt;Photo by Levi Guzman&lt;/div&gt;
+		&lt;/div&gt;
+		&lt;div class=&quot;item&quot;&gt;
+			&lt;div class=&quot;photos&quot;&gt;
+				&lt;img src=&quot;http://cdn.snapic.cn/img/image/Elianne-Dipp.jpg&quot; alt=&quot;Photo by Elianne Dipp&quot;&gt;
+			&lt;/div&gt;
+			&lt;div class=&quot;description&quot;&gt;Photo by Elianne Dipp&lt;/div&gt;
+		&lt;/div&gt;
+	&lt;/article&gt;
+&lt;/body&gt;
+</code></pre>
+<p>css样式</p>
+<pre><code class="language-css"> html {
+	-ms-text-size-adjust:100%;
+	-webkit-text-size-adjust:100%;
+}
+html,body {
+	font-family:&quot;Arial&quot;,&quot;Microsoft JhengHei&quot;,Apple LiGothic Medium,sans-serif;
+	margin:0;
+	padding:0;
+	font-size:62.5%;
+	font-weight:normal;
+	line-height:1.2;
+	word-wrap:break-word;
+	box-sizing:border-box;
+	background-color:var(--color-white);
+}
+a {
+	font-size:3em;
+	color:var(--color-a);
+	text-decoration:none;
+	-webkit-transition:all .3s ease-in-out;
+	-moz-transition:all .3s ease-in-out;
+	-ms-transition:all .3s ease-in-out;
+	-o-transition:all .3s ease-in-out;
+	transition:all .3s ease-in-out;
+}
+a:hover {
+	color:var(--color-black);
+	outline-width:0;
+}
+:root {
+	--color-black:#000000;
+	--color-1:#121212;
+	--color-a:#aaaaaa;
+	--color-white:#ffffff;
+}
+article {
+	display:flex;
+	flex-wrap:wrap;
+	padding:0.5rem;
+}
+.item {
+	position:relative;
+	margin:0.5rem;
+	width:calc(55% / 2 - 1rem);
+}
+.photos {
+	position:relative;
+	padding-top:calc(100% * 1);
+	width:100%;
+	height:0;
+}
+.item:nth-child(3),.item:nth-child(4),.item:nth-child(3n):nth-child(odd),.item:nth-child(3n + 1):nth-child(even) {
+	width:calc(45% - 1rem);
+}
+.item:nth-child(3) .photos,.item:nth-child(4) .photos,.item:nth-child(3n):nth-child(odd) .photos,.item:nth-child(3n + 1):nth-child(even) .photos {
+	padding-top:calc(100% - (100% - 45% / 2 + 1rem) / 2);
+}
+.photos img {
+	position:absolute;
+	width:100%;
+	height:100%;
+	top:0;
+	left:0;
+	border-radius:0.5rem;
+	object-fit:cover;
+	overflow:hidden;
+}
+.description {
+	display:flex;
+	position:absolute;
+	top:0;
+	left:0;
+	padding:0 2rem;
+	width:calc(100% - 4rem);
+	height:100%;
+	font-size:3.8em;
+	color:var(--color-1);
+	align-items:center;
+	justify-content:center;
+	-webkit-transition:all .3s ease-in-out;
+	-moz-transition:all .3s ease-in-out;
+	-ms-transition:all .3s ease-in-out;
+	-o-transition:all .3s ease-in-out;
+	transition:all .3s ease-in-out;
+	overflow:hidden;
+	opacity:0;
+	z-index:1;
+}
+.description:after {
+	position:absolute;
+	content:'';
+	width:100%;
+	height:100%;
+	background-color:rgb(255 255 255 / 75%);
+	-webkit-transition:all .3s ease-in-out;
+	-moz-transition:all .3s ease-in-out;
+	-ms-transition:all .3s ease-in-out;
+	-o-transition:all .3s ease-in-out;
+	transition:all .3s ease-in-out;
+	opacity:0;
+	z-index:-1;
+}
+.item:hover .description,.item:hover .description:after {
+	opacity:1;
+}
+@media screen and (max-width:768px) {
+	.description {
+	font-size:3em;
+}
+}@media screen and (max-width:640px) {
+	.item {
+        width:100% !important;
+    }
+    .photos {
+        padding-top:calc(100% * 2/3) !important;
+    }
+    .description {
+        font-size:3.8em;
+    }
+}
+</code></pre>
+<p>效果预览2 大图+固定方格大小<br>
+<img src="https://www.lvtao.net/post-images/1667576986848.png" alt="" loading="lazy"><br>
+<img src="https://www.lvtao.net/post-images/1667576992712.png" alt="" loading="lazy"></p>
+<pre><code class="language-html">&lt;body&gt;
+    &lt;header&gt;
+		&lt;div class=&quot;title&quot;&gt;Lopwon Foto&lt;/div&gt;
+		&lt;div class=&quot;blog&quot;&gt;
+			&lt;a href=&quot;#&quot;&gt;Hello World&lt;/a&gt;
+		&lt;/div&gt;
+	&lt;/header&gt;
+
+	&lt;article&gt;
+		&lt;div class=&quot;item&quot;&gt;
+			&lt;div class=&quot;photos&quot;&gt;
+				&lt;img src=&quot;http://cdn.snapic.cn/img/image/Tran-Mau-Tri-Tam.jpg&quot; alt=&quot;Photo by Tran Mau Tri Tam&quot; /&gt;
+			&lt;/div&gt;
+			&lt;div class=&quot;description&quot;&gt;Photo by Tran Mau Tri Tam&lt;/div&gt;
+		&lt;/div&gt;
+		&lt;div class=&quot;item&quot;&gt;
+			&lt;div class=&quot;photos&quot;&gt;
+				&lt;img src=&quot;http://cdn.snapic.cn/img/image/Elianne-Dipp.jpg&quot; alt=&quot;Photo by Elianne Dipp&quot; /&gt;
+			&lt;/div&gt;
+			&lt;div class=&quot;description&quot;&gt;Photo by Elianne Dipp&lt;/div&gt;
+		&lt;/div&gt;
+		&lt;div class=&quot;item&quot;&gt;
+			&lt;div class=&quot;photos&quot;&gt;
+				&lt;img src=&quot;http://cdn.snapic.cn/img/image/Jared-Rice.jpg&quot; alt=&quot;Photo by Jared Rice&quot; /&gt;
+			&lt;/div&gt;
+			&lt;div class=&quot;description&quot;&gt;Photo by Jared Rice&lt;/div&gt;
+		&lt;/div&gt;
+		&lt;div class=&quot;item&quot;&gt;
+			&lt;div class=&quot;photos&quot;&gt;
+				&lt;img src=&quot;http://cdn.snapic.cn/img/image/Gaddafi-Rusli.jpg&quot; alt=&quot;Photo by Gaddafi Rusli&quot; /&gt;
+			&lt;/div&gt;
+			&lt;div class=&quot;description&quot;&gt;Photo by Gaddafi Rusli&lt;/div&gt;
+		&lt;/div&gt;
+		&lt;div class=&quot;item&quot;&gt;
+			&lt;div class=&quot;photos&quot;&gt;
+				&lt;img src=&quot;http://cdn.snapic.cn/img/image/Guzman-Barquin.jpg&quot; alt=&quot;Photo by Guzman Barquin&quot; /&gt;
+			&lt;/div&gt;
+			&lt;div class=&quot;description&quot;&gt;Photo by Guzman Barquin&lt;/div&gt;
+		&lt;/div&gt;
+		&lt;div class=&quot;item&quot;&gt;
+			&lt;div class=&quot;photos&quot;&gt;
+				&lt;img src=&quot;http://cdn.snapic.cn/img/image/Gabmarjan.jpg&quot; alt=&quot;Photo by Gabmarjan&quot; /&gt;
+			&lt;/div&gt;
+			&lt;div class=&quot;description&quot;&gt;Photo by Gabmarjan&lt;/div&gt;
+		&lt;/div&gt;
+		&lt;div class=&quot;item&quot;&gt;
+			&lt;div class=&quot;photos&quot;&gt;
+				&lt;img src=&quot;http://cdn.snapic.cn/img/image/Kalen-Emsley.jpg&quot; alt=&quot;Photo by Kalen Emsley&quot; /&gt;
+			&lt;/div&gt;
+			&lt;div class=&quot;description&quot;&gt;Photo by Kalen Emsley&lt;/div&gt;
+		&lt;/div&gt;
+		&lt;div class=&quot;item&quot;&gt;
+			&lt;div class=&quot;photos&quot;&gt;
+				&lt;img src=&quot;http://cdn.snapic.cn/img/image/Brooke-Lark.jpg&quot; alt=&quot;Photo by Brooke Lark&quot; /&gt;
+			&lt;/div&gt;
+			&lt;div class=&quot;description&quot;&gt;Photo by Brooke Lark&lt;/div&gt;
+		&lt;/div&gt;
+		&lt;div class=&quot;item&quot;&gt;
+			&lt;div class=&quot;photos&quot;&gt;
+				&lt;img src=&quot;http://cdn.snapic.cn/img/image/Amos-Bar-Zeev.jpg&quot; alt=&quot;Photo by Amos Bar Zeev&quot; /&gt;
+			&lt;/div&gt;
+			&lt;div class=&quot;description&quot;&gt;Photo by Amos Bar Zeev&lt;/div&gt;
+		&lt;/div&gt;
+		&lt;div class=&quot;item&quot;&gt;
+			&lt;div class=&quot;photos&quot;&gt;
+				&lt;img src=&quot;http://cdn.snapic.cn/img/image/Ryan-KLAUS.jpg&quot; alt=&quot;Photo by Ryan KLAUS&quot; /&gt;
+			&lt;/div&gt;
+			&lt;div class=&quot;description&quot;&gt;Photo by Ryan KLAUS&lt;/div&gt;
+		&lt;/div&gt;
+		&lt;div class=&quot;item&quot;&gt;
+			&lt;div class=&quot;photos&quot;&gt;
+				&lt;img src=&quot;http://cdn.snapic.cn/img/image/Will-Africano.jpg&quot; alt=&quot;Photo by Will Africano&quot; /&gt;
+			&lt;/div&gt;
+			&lt;div class=&quot;description&quot;&gt;Photo by Will Africano&lt;/div&gt;
+		&lt;/div&gt;
+		&lt;div class=&quot;item&quot;&gt;
+			&lt;div class=&quot;photos&quot;&gt;
+				&lt;img src=&quot;http://cdn.snapic.cn/img/image/Ryan-Christodoulou.jpg&quot; alt=&quot;Photo by Ryan Christodoulou&quot; /&gt;
+			&lt;/div&gt;
+			&lt;div class=&quot;description&quot;&gt;Photo by Ryan Christodoulou&lt;/div&gt;
+		&lt;/div&gt;
+		&lt;div class=&quot;item&quot;&gt;
+			&lt;div class=&quot;photos&quot;&gt;
+				&lt;img src=&quot;http://cdn.snapic.cn/img/image/Sake-Le.jpg&quot; alt=&quot;Photo by Sake Le&quot; /&gt;
+			&lt;/div&gt;
+			&lt;div class=&quot;description&quot;&gt;Photo by Sake Le&lt;/div&gt;
+		&lt;/div&gt;
+		&lt;div class=&quot;item&quot;&gt;
+			&lt;div class=&quot;photos&quot;&gt;
+				&lt;img src=&quot;http://cdn.snapic.cn/img/image/Levi-Guzman.jpg&quot; alt=&quot;Photo by Levi Guzman&quot; /&gt;
+			&lt;/div&gt;
+			&lt;div class=&quot;description&quot;&gt;Photo by Levi Guzman&lt;/div&gt;
+		&lt;/div&gt;
+		&lt;div class=&quot;item&quot;&gt;
+			&lt;div class=&quot;photos&quot;&gt;
+				&lt;img src=&quot;http://cdn.snapic.cn/img/image/Tran-Mau-Tri-Tam.jpg&quot; alt=&quot;Photo by Tran Mau Tri Tam&quot; /&gt;
+			&lt;/div&gt;
+			&lt;div class=&quot;description&quot;&gt;Photo by Tran Mau Tri Tam&lt;/div&gt;
+		&lt;/div&gt;
+	&lt;/article&gt;
+&lt;/body&gt;
+</code></pre>
+<p>css</p>
+<pre><code class="language-css">html {
+	-ms-text-size-adjust:100%;
+	-webkit-text-size-adjust:100%;
+}
+html,body {
+	font-family:&quot;Arial&quot;,&quot;Microsoft JhengHei&quot;,Apple LiGothic Medium,sans-serif;
+	margin:0;
+	padding:0;
+	font-size:62.5%;
+	font-weight:normal;
+	line-height:1.2;
+	word-wrap:break-word;
+	box-sizing:border-box;
+	background-color:var(--color-white);
+}
+a {
+	font-size:2em;
+	color:var(--color-a);
+	text-decoration:none;
+	-webkit-transition:all .3s ease-in-out;
+	-moz-transition:all .3s ease-in-out;
+	-ms-transition:all .3s ease-in-out;
+	-o-transition:all .3s ease-in-out;
+	transition:all .3s ease-in-out;
+}
+a:hover {
+	color:var(--color-white);
+	outline-width:0;
+}
+:root {
+	--color-black:#000000;
+	--color-1:#121212;
+	--color-a:#aaaaaa;
+	--color-white:#ffffff;
+}
+header {
+	display:flex;
+	justify-content:space-between;
+	flex-direction:column;
+	position:absolute;
+	top:calc(50% - 10em);
+	left:5rem;
+	-webkit-transform:translate(0%,-50%);
+	-moz-transform:translate(0%,-50%);
+	-ms-transform:translate(0%,-50%);
+	-o-transform:translate(0%,-50%);
+	transform:translate(0%,-50%);
+	z-index:1;
+}
+.title {
+	font-size:10em;
+	color:var(--color-white);
+}
+.blog {
+	display:inline-block;
+	margin-top:3rem;
+}
+.blog a {
+	padding:1rem 1.5rem;
+	border-radius:3rem;
+	font-size:3em;
+	color:white;
+	background-color:green;
+}
+.blog a:hover {
+	color:white;
+	background-color:limegreen;
+}
+article {
+	display:flex;
+	flex-wrap:wrap;
+	padding:0.5rem;
+}
+.item:nth-child(1) {
+	position:absolute;
+	top:0;
+	left:0;
+	margin:0;
+	padding:0;
+	width:100%;
+	height:100vh;
+	z-index:0;
+}
+.item:nth-child(1) .photos {
+	position:relative;
+	padding:0;
+	width:100%;
+	height:100vh;
+}
+.item:nth-child(1) .photos:after {
+	content:'';
+	position:absolute;
+	top:0;
+	left:0;
+	width:75%;
+	height:100%;
+	background-image:linear-gradient(to left,rgba(0 0 0 / 0%) 0%,rgba(0 0 0 / 25%) 25%,rgba(0 0 0 / 50%) 50%,rgba(0 0 0 / 75%) 75%,rgba(0 0 0 / 95%) 100%);
+	z-index:1;
+}
+.item:nth-child(1) .description {
+	display:block;
+	top:calc(50% + 2em);
+	left:5rem;
+	padding:0;
+	width:auto;
+	height:auto;
+	font-size:2.5em;
+	color:var(--color-a);
+	opacity:1 !important;
+}
+.item:nth-child(1) .description:after {
+	background-color:transparent;
+}
+.item:nth-child(2) {
+	position:absolute;
+	top:0;
+	right:0;
+	margin:0;
+	padding:1rem 1rem 7rem 1rem;
+	width:calc(25% - 1rem);
+	border-radius:0.25rem;
+	background-color:var(--color-white);
+	-webkit-transform:translate(-15rem,5rem) rotate(15deg);
+	-moz-transform:translate(-15rem,5rem) rotate(15deg);
+	-ms-transform:translate(-15rem,5rem) rotate(15deg);
+	-o-transform:translate(-15rem,5rem) rotate(15deg);
+	transform:translate(-15rem,5rem) rotate(15deg);
+	box-shadow:0px 5px 10px 0px rgb(0 0 0 / 25%);
+	z-index:1;
+}
+.item:nth-child(2):hover {
+	border-radius:0.5rem;
+	z-index:2;
+}
+.item:nth-child(2) .photos {
+	position:relative;
+	padding-top:calc(100% * 1) !important;
+	width:100%;
+	padding:0;
+}
+.item:nth-child(3) {
+	position:absolute;
+	top:0;
+	right:0;
+	margin:0;
+	padding:1rem 1rem 7rem 1rem;
+	width:calc(25% - 1rem);
+	border-radius:0.25rem;
+	background-color:var(--color-white);
+	-webkit-transform:translate(-5rem,15rem) rotate(5deg);
+	-moz-transform:translate(-5rem,15rem) rotate(5deg);
+	-ms-transform:translate(-5rem,15rem) rotate(5deg);
+	-o-transform:translate(-5rem,15rem) rotate(5deg);
+	transform:translate(-5rem,15rem) rotate(5deg);
+	box-shadow:0px 5px 10px 0px rgb(0 0 0 / 25%);
+	z-index:1;
+}
+.item:nth-child(3) .photos {
+	position:relative;
+	padding-top:calc(100% * 1) !important;
+	width:100%;
+	padding:0;
+}
+.item:nth-child(n + 4) {
+	position:relative;
+	margin:0.5rem;
+	width:calc(33.33333% - 1rem);
+	top:100vh;
+	left:0;
+}
+.item:nth-child(n + 4) .photos {
+	position:relative;
+	padding-top:calc(100% * 2/3);
+	width:100%;
+	height:0;
+}
+.item:nth-last-child(1),.item:nth-last-child(2),.item:nth-last-child(3) {
+	padding-bottom:1rem;
+}
+.photos img {
+	position:absolute;
+	width:100%;
+	height:100%;
+	top:0;
+	left:0;
+	object-fit:cover;
+	overflow:hidden;
+}
+.description {
+	display:flex;
+	position:absolute;
+	top:0;
+	left:0;
+	padding:0 2rem;
+	width:calc(100% - 4rem);
+	height:100%;
+	font-size:3.8em;
+	color:var(--color-1);
+	align-items:center;
+	justify-content:center;
+	-webkit-transition:all .3s ease-in-out;
+	-moz-transition:all .3s ease-in-out;
+	-ms-transition:all .3s ease-in-out;
+	-o-transition:all .3s ease-in-out;
+	transition:all .3s ease-in-out;
+	overflow:hidden;
+	opacity:0;
+	z-index:1;
+}
+.description:after {
+	position:absolute;
+	content:'';
+	width:100%;
+	height:100%;
+	background-color:rgb(255 255 255 / 75%);
+	-webkit-transition:all .3s ease-in-out;
+	-moz-transition:all .3s ease-in-out;
+	-ms-transition:all .3s ease-in-out;
+	-o-transition:all .3s ease-in-out;
+	transition:all .3s ease-in-out;
+	opacity:0;
+	z-index:-1;
+}
+.item:hover .description,.item:hover .description:after {
+	opacity:1;
+}
+@media screen and (max-width:768px) {
+	header,footer,.item:nth-child(1) .description {
+	left:2rem;
+}
+.item:nth-child(2) {
+	width:calc(35% - 1rem) !important;
+	-webkit-transform:translate(-10rem,25rem) rotate(15deg);
+	-moz-transform:translate(-10rem,25rem) rotate(15deg);
+	-ms-transform:translate(-10rem,25rem) rotate(15deg);
+	-o-transform:translate(-10rem,25rem) rotate(15deg);
+	transform:translate(-10rem,25rem) rotate(15deg);
+}
+.item:nth-child(3) {
+	width:calc(35% - 1rem) !important;
+	-webkit-transform:translate(-3rem,5rem) rotate(355deg);
+	-moz-transform:translate(-3rem,5rem) rotate(355deg);
+	-ms-transform:translate(-3rem,5rem) rotate(355deg);
+	-o-transform:translate(-3rem,5rem) rotate(355deg);
+	transform:translate(-3rem,5rem) rotate(355deg);
+}
+.description {
+	font-size:3em;
+}
+}
+@media screen and (max-width:640px) {
+	.item {
+        width:100% !important;
+    }
+    .description {
+        font-size:3.8em;
+    }
+    .item:nth-child(2) {
+        -webkit-transform:translate(-15rem,35rem) rotate(15deg);
+        -moz-transform:translate(-15rem,35rem) rotate(15deg);
+        -ms-transform:translate(-15rem,35rem) rotate(15deg);
+        -o-transform:translate(-15rem,35rem) rotate(15deg);
+        transform:translate(-15rem,35rem) rotate(15deg);
+    }
+    .item:nth-child(3) {
+        -webkit-transform:translate(-3rem,30rem) rotate(355deg);
+        -moz-transform:translate(-3rem,30rem) rotate(355deg);
+        -ms-transform:translate(-3rem,30rem) rotate(355deg);
+        -o-transform:translate(-3rem,30rem) rotate(355deg);
+        transform:translate(-3rem,30rem) rotate(355deg);
+    }
+    .item:nth-child(2) .description,.item:nth-child(3) .description {
+        font-size:3em;
+    }
+}
+@media screen and (max-width:480px) {
+	.title {
+        font-size:7em;
+    }
+    .item:nth-child(2) {
+        -webkit-transform:translate(-10rem,45rem) rotate(15deg);
+        -moz-transform:translate(-10rem,45rem) rotate(15deg);
+        -ms-transform:translate(-10rem,45rem) rotate(15deg);
+        -o-transform:translate(-10rem,45rem) rotate(15deg);
+        transform:translate(-10rem,45rem) rotate(15deg);
+    }
+    .item:nth-child(3) {
+        -webkit-transform:translate(-3rem,35rem) rotate(355deg);
+        -moz-transform:translate(-3rem,35rem) rotate(355deg);
+        -ms-transform:translate(-3rem,35rem) rotate(355deg);
+        -o-transform:translate(-3rem,35rem) rotate(355deg);
+        transform:translate(-3rem,35rem) rotate(355deg);
+    }
+}
+</code></pre>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://www.lvtao.net/post/ssh-conf/">
+              <h3 class="post-title">
+                下一篇：SSH密钥登录
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <table>
+    <tr><td><a href="https://www.ioncube.com/?xp=TQLLZT"><img src="/media/ioncube.jpg" width="100%"/></a></td></tr>
+    <tr><td><a href="https://app.cloudcone.com/?ref=9519"><img src="/media/cloudcone.gif" width="100%"/></a></td></tr>
+  </table>
+  <div class="slogan"></div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  Powered by <a href="https://lvtao.net" target="_blank">LVTAO</a> | <a class="rss" href="https://www.lvtao.net/atom.xml" target="_blank">RSS</a>
+</div>
+<script 
+async
+defer
+src="https://ask.lvtao.net/api/application/embed?protocol=https&host=ask.lvtao.net&token=e193b47f92f1b41e">
+</script>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

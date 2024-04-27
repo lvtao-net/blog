@@ -1,0 +1,314 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>Centos7安装配置clash for linux | 吕滔博客</title>
+<meta name="description" content="">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://www.lvtao.net/favicon.ico?v=1714210602511">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://www.lvtao.net/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://www.lvtao.net">
+        <img class="avatar" src="https://www.lvtao.net/images/avatar.png?v=1714210602511" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://www.lvtao.net">
+        <h1 class="site-title">吕滔博客</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+        
+          <a href="https://medoo.lvtao.net" class="menu purple-link">
+            MeDoo中文手册
+          </a>
+        
+      
+        
+          <a href="https://tool.lvtao.net" class="menu purple-link">
+            工具箱
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">Centos7安装配置clash for linux</h2>
+          <div class="post-info post-detail-info">
+            
+              <span>
+                <i class="icon-pricetags-outline"></i>
+                
+                  <a href="https://www.lvtao.net/tag/centos/">
+                    centos
+                    
+                  </a>
+                
+              </span>
+            
+             <div style="margin-top:5px;"><a href="https://app.cloudcone.com/?ref=9519" target="_blank">海外无需备案主机推荐，支持25端口邮件发送，无端口限制，支持支付宝、Paypal、信用卡等支付...</a></div>
+          </div>
+          <div class="post-content" v-pre>
+            <h2 id="安装clash">安装clash</h2>
+<h4 id="安装最新的clash-for-linux最新版本页面">安装最新的clash for linux最新版本<a href="https://github.com/Dreamacro/clash/releases">页面</a></h4>
+<pre><code>cd /usr/local
+wget https://github.com/Dreamacro/clash/releases/download/v1.18.0/clash-linux-amd64-v1.18.0.gz
+</code></pre>
+<h4 id="解压到当前目录">解压到当前目录</h4>
+<p><code>gzip -d clash-linux-amd64-v1.18.0.gz</code></p>
+<h4 id="重命名为clash">重命名为clash</h4>
+<p><code>mv clash-linux-amd64-v1.18.0 clash</code></p>
+<h1 id="给与权限">给与权限</h1>
+<p><code>chmod u+x clash</code></p>
+<h2 id="安装countrymmdb-这个数据可以考虑下载最新的替换">安装Country.mmdb (这个数据可以考虑下载最新的替换)</h2>
+<pre><code>mkdir -p /root/.config/clash &amp;&amp; cd /root/.config/clash
+wget https://github.com/Dreamacro/maxmind-geoip/releases/download/20230812/Country.mmdb
+</code></pre>
+<h2 id="配置文件">配置文件</h2>
+<p>在目录<code>/root/.config/clash</code>下新建<code>config.yaml</code><br>
+以下是示例，参考即可</p>
+<pre><code class="language-yaml"># HTTP 代理端口
+port: 7890
+
+# SOCKS5 代理端口
+socks-port: 7891
+
+# Linux 和 macOS 的 redir 代理端口
+redir-port: 7892
+
+# 允许局域网的连接
+allow-lan: true
+
+# 规则模式：Rule（规则） / Global（全局代理）/ Direct（全局直连）
+mode: rule
+
+# 设置日志输出级别 (默认级别：silent，即不输出任何内容，以避免因日志内容过大而导致程序内存溢出）。
+# 5 个级别：silent / info / warning / error / debug。级别越高日志输出量越大，越倾向于调试，若需要请自行开启。
+log-level: silent
+# Clash 的 RESTful API
+external-controller: '0.0.0.0:9090'
+secret: '123456'
+external-ui: /root/clash-dashboard
+
+# RESTful API 的口令
+secret: '12345678' # 密码可以设置简单些，也可以不用设置
+
+# 您可以将静态网页资源（如 clash-dashboard）放置在一个目录中，clash 将会服务于 `RESTful API/ui`
+# 参数应填写配置目录的相对路径或绝对路径。
+# external-ui: folder
+</code></pre>
+<h3 id="设置外部控制ui">设置外部控制ui</h3>
+<p>我们的clash安装在Linux，不是图形化操作界面，很难更换节点。配置好ui页面就可以通过外部网页访问并控制。</p>
+<pre><code>cd /root
+git clone https://github.com/Dreamacro/clash-dashboard.git
+cd clash-dashboard
+git checkout -b gh-pages origin/gh-pages
+</code></pre>
+<p>网页访问http://主机ip:9090/ui，选择想要的节点</p>
+<p>新开终端窗口，设置http代理</p>
+<pre><code class="language-sh">export https_proxy=http://127.0.0.1:7890 
+export http_proxy=http://127.0.0.1:7890 
+# 或
+export  all_proxy=socks5://127.0.0.1:7890
+</code></pre>
+<p>测试<br>
+<code>curl ifconfig.me</code></p>
+<p>我的配置示例：</p>
+<pre><code class="language-yaml">mixed-port: 7890
+mode: rule
+proxies:
+  - name: &quot;snell&quot;
+    type: snell
+    server: 1.1.1.1
+    port: 11111
+    psk: 1233211234567
+    obfs-opts:
+        mode: tls
+proxy-groups:
+  - name: Proxy
+    type: select
+    proxies:
+      - snell
+
+rules:
+  - DOMAIN-SUFFIX,github.com,Proxy
+  - DOMAIN-SUFFIX,google.com,Proxy
+  - DOMAIN-SUFFIX,openai.com,Proxy
+  # 国内网站
+  - DOMAIN-SUFFIX,cn,DIRECT
+  - DOMAIN-KEYWORD,-cn,DIRECT
+  # 最终规则
+  - GEOIP,CN,DIRECT
+  - MATCH,Proxy
+</code></pre>
+<h2 id="配置开机启动">配置开机启动</h2>
+<p>添加启动信息<br>
+<code>sudo vi /etc/systemd/system/clash.service</code></p>
+<p>加入以下内容</p>
+<pre><code class="language-conf">[Unit]
+Description=Clash daemon, A rule-based proxy in Go.
+[Service]
+Type=simple
+User=root
+ExecStart=/root/clash/clash -d /root/.config/clash/
+Restart=on-failure
+[Install]
+WantedBy=multi-user.target
+</code></pre>
+<p>重新加载systemctl daemon<br>
+<code>sudo systemctl daemon-reload</code></p>
+<p>启动clash<br>
+<code>sudo systemctl start clash.service</code></p>
+<p>设置Clash开机自启动<br>
+<code>sudo systemctl enable clash.service</code></p>
+<p>以下是管理clash的相关命令<br>
+启动Clash<br>
+<code>sudo systemctl start clash.service</code><br>
+重启Clash<br>
+<code>sudo systemctl restart clash.service</code><br>
+查看Clash运行状态<br>
+<code>sudo systemctl status clash.service</code><br>
+开机启动<br>
+<code>sudo systemctl enable clash</code><br>
+禁用开机启动<br>
+<code>sudo systemctl disable clash</code><br>
+日志<br>
+<code>sudo journalctl -xe</code></p>
+<h2 id="永久设置代理">永久设置代理</h2>
+<pre><code>vi /etc/profile
+export https_proxy=http://127.0.0.1:7890 http_proxy=http://127.0.0.1:7890 all_proxy=socks5://127.0.0.1:7890
+</code></pre>
+<p>如果需临时取消代理<br>
+<code>unset http_proxy https_proxy all_proxy</code></p>
+<h2 id="其它">其它...</h2>
+<p>测试代理正常运行后，建议修改配置文件中的日志输出级别，即修改info为silent，表示不输出任何内容，防止日志内容过大导致程序内存溢出。<br>
+使用腾讯云主机跑clash等敏感程序，最好将内置的监听删除</p>
+<pre><code class="language-sh">bash /usr/local/qcloud/YunJing/uninst.sh
+bash /usr/local/qcloud/stargate/admin/uninstall.sh
+bash /usr/local/qcloud/monitor/barad/admin/uninstall.sh
+systemctl stop tat_agent
+systemctl disable tat_agent
+rm -f /etc/systemd/system/tat_agent.service
+
+# 自行删除 Cron 中残留的定时任务
+crontab -e
+
+# 检查
+ps -ef | grep agent
+</code></pre>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://www.lvtao.net/post/mac-tesseract-ocr-data/">
+              <h3 class="post-title">
+                下一篇：MAC平台下tesseract-ocr视觉识别的相关库下载及配置
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <table>
+    <tr><td><a href="https://www.ioncube.com/?xp=TQLLZT"><img src="/media/ioncube.jpg" width="100%"/></a></td></tr>
+    <tr><td><a href="https://app.cloudcone.com/?ref=9519"><img src="/media/cloudcone.gif" width="100%"/></a></td></tr>
+  </table>
+  <div class="slogan"></div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  Powered by <a href="https://lvtao.net" target="_blank">LVTAO</a> | <a class="rss" href="https://www.lvtao.net/atom.xml" target="_blank">RSS</a>
+</div>
+<script 
+async
+defer
+src="https://ask.lvtao.net/api/application/embed?protocol=https&host=ask.lvtao.net&token=e193b47f92f1b41e">
+</script>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

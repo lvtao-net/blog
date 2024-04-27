@@ -1,0 +1,237 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>在Debian10中使用Maddy搭建个人邮件服务系统 | 吕滔博客</title>
+<meta name="description" content="">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://www.lvtao.net/favicon.ico?v=1714210602511">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://www.lvtao.net/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://www.lvtao.net">
+        <img class="avatar" src="https://www.lvtao.net/images/avatar.png?v=1714210602511" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://www.lvtao.net">
+        <h1 class="site-title">吕滔博客</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+        
+          <a href="https://medoo.lvtao.net" class="menu purple-link">
+            MeDoo中文手册
+          </a>
+        
+      
+        
+          <a href="https://tool.lvtao.net" class="menu purple-link">
+            工具箱
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">在Debian10中使用Maddy搭建个人邮件服务系统</h2>
+          <div class="post-info post-detail-info">
+            
+              <span>
+                <i class="icon-pricetags-outline"></i>
+                
+                  <a href="https://www.lvtao.net/tag/email/">
+                    email
+                    
+                  </a>
+                
+              </span>
+            
+             <div style="margin-top:5px;"><a href="https://app.cloudcone.com/?ref=9519" target="_blank">海外无需备案主机推荐，支持25端口邮件发送，无端口限制，支持支付宝、Paypal、信用卡等支付...</a></div>
+          </div>
+          <div class="post-content" v-pre>
+            <p>Maddy是一款用Go语言开发的邮件服务器，它实现了运行电子邮件服务器所需的所有功能。<br>
+Maddy用一个具有统一配置和最低维护成本的守护进程取代了Postfix、Dovecot.OpenDkIM、OpenSPF、OpenDMARC等程序。</p>
+<p>第一步：<code>需要且一定要开放端口 25,465,587,993,143</code> 有的云主机商为防止垃圾邮件不允许25端口，所以在操作之前，需要确认主机商没有屏蔽25端口。 这儿为大家推荐海外主机商 <a href="https://app.cloudcone.com/?ref=9519">cloudcone</a></p>
+<pre><code class="language-sh">lsof -i:25,465,587,993,143
+</code></pre>
+<p>确认端口未被占用，然后域名解析到主机IP，同时需要确认你的主机防火墙放开对应端口<br>
+域名解析记录包括</p>
+<pre><code>A记录(mail.lvtao.net -&gt; IP)
+MX(lvtao.net -&gt; mail.lvtao.net)
+TXT(_dmarc -&gt; v=DMARC1; p=none; rua=mailto:t@lvtao.net)
+TXT (xx.xx -&gt; v=spf1 mx ip4:x.x.x.x/32 -all)
+</code></pre>
+<p>第二步：配置邮件服务</p>
+<pre><code class="language-sh">apt -y update
+apt -y install acl zstd wget certbot
+wget https://github.com/foxcpp/maddy/releases/download/v0.6.3/maddy-0.6.3-x86_64-linux-musl.tar.zst
+unzstd maddy-0.6.3-x86_64-linux-musl.tar.zst
+tar -xvf maddy-0.6.3-x86_64-linux-musl.tar
+cd maddy-0.6.3-x86_64-linux-musl
+
+# 还是用默认的/etc/maddy比较好，不然要找默认命令来修改
+mkdir /etc/maddy
+cp maddy.conf /etc/maddy
+cp maddy maddyctl /usr/bin
+cp systemd/*.service /etc/systemd/system
+
+# maddy不能直接运行在root用户下，务必创建一个单独的用户：
+useradd -mrU -s /sbin/nologin -d /var/lib/maddy -c &quot;maddy mail server&quot; maddy
+
+
+# (可选) 用certbot申请一个ssl证书
+# maddy是没有web客户端的，如果自建web客户端，比如rainloop这类，则需要ssl
+# 实际上可以直接用本地的客户端，比如thunderbird、foxmail这些。
+### 如果没装nginx
+certbot certonly --standalone --agree-tos --no-eff-email --email t@lvtao.net -d mail.lvtao.net
+### 如果你的机器上有nginx，安装certbot插件
+apt -y install python-certbot-nginx
+# 加一个单独站点的配置
+cat &gt; /etc/nginx/conf.d/maddy.conf &lt;&lt;EOF
+server {
+    listen       80;
+    server_name  mail.lvtao.net;
+}
+EOF
+# 申请
+certbot --nginx --agree-tos --no-eff-email --email t@lvtao.net
+
+
+# 配置acl，让maddy这个用户有权限读取证书
+setfacl -R -m u:maddy:rx /etc/letsencrypt/{live,archive}
+
+# 编辑配置文件
+vi /etc/maddy/maddy.conf
+# 修改下面列出的配置：
+$(hostname) = mail.lvtao.net
+$(primary_domain) = lvtao.net
+$(local_domains) = $(primary_domain)
+
+tls file /etc/letsencrypt/live/$(hostname)/fullchain.pem /etc/letsencrypt/live/$(hostname)/privkey.pem
+
+
+# 启动并设置自动开机
+systemctl enable --now maddy.service
+systemctl status maddy.service
+</code></pre>
+<p>第三步：补充设置dkim</p>
+<p>maddy在第一次启动的时候会生成一个dkim密钥，所以现在来补充配置一下dkim的dns解析</p>
+<pre><code class="language-sh">cat /var/lib/maddy/dkim_keys/lvtao.net_default.dns
+</code></pre>
+<p>然后dns解析记录添加txt记录<code>default._domainkey</code>Name，内容为以上<code>cat</code>数据</p>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://www.lvtao.net/post/vue-api-router-permission/">
+              <h3 class="post-title">
+                下一篇：vue通过api实现动态路由菜单，并实现权限管理
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <table>
+    <tr><td><a href="https://www.ioncube.com/?xp=TQLLZT"><img src="/media/ioncube.jpg" width="100%"/></a></td></tr>
+    <tr><td><a href="https://app.cloudcone.com/?ref=9519"><img src="/media/cloudcone.gif" width="100%"/></a></td></tr>
+  </table>
+  <div class="slogan"></div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  Powered by <a href="https://lvtao.net" target="_blank">LVTAO</a> | <a class="rss" href="https://www.lvtao.net/atom.xml" target="_blank">RSS</a>
+</div>
+<script 
+async
+defer
+src="https://ask.lvtao.net/api/application/embed?protocol=https&host=ask.lvtao.net&token=e193b47f92f1b41e">
+</script>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

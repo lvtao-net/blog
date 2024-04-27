@@ -1,0 +1,284 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>Springboot+druid在undertow容器下广告拦截无效处理办法 | 吕滔博客</title>
+<meta name="description" content="">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://www.lvtao.net/favicon.ico?v=1714210602511">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://www.lvtao.net/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://www.lvtao.net">
+        <img class="avatar" src="https://www.lvtao.net/images/avatar.png?v=1714210602511" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://www.lvtao.net">
+        <h1 class="site-title">吕滔博客</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+        
+          <a href="https://medoo.lvtao.net" class="menu purple-link">
+            MeDoo中文手册
+          </a>
+        
+      
+        
+          <a href="https://tool.lvtao.net" class="menu purple-link">
+            工具箱
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">Springboot+druid在undertow容器下广告拦截无效处理办法</h2>
+          <div class="post-info post-detail-info">
+            
+              <span>
+                <i class="icon-pricetags-outline"></i>
+                
+                  <a href="https://www.lvtao.net/tag/springboot/">
+                    springboot
+                    
+                      ，
+                    
+                  </a>
+                
+                  <a href="https://www.lvtao.net/tag/java/">
+                    java
+                    
+                  </a>
+                
+              </span>
+            
+             <div style="margin-top:5px;"><a href="https://app.cloudcone.com/?ref=9519" target="_blank">海外无需备案主机推荐，支持25端口邮件发送，无端口限制，支持支付宝、Paypal、信用卡等支付...</a></div>
+          </div>
+          <div class="post-content" v-pre>
+            <p>为了那所谓的效率，试用了一下undertow容器，之前在tomcat容器下可以正常拦截的广告代码，在undertow下居然无效了...<br>
+费话不多说，直接上代码<br>
+错误提示:</p>
+<pre><code class="language-log">ERROR io.undertow.request - [handleThrowable,80] - UT005023: Exception handling request to /druid/js/common.js
+java.lang.IllegalStateException: UT010019: Response already commited
+at io.undertow.servlet.spec.ServletOutputStreamImpl.resetBuffer(ServletOutputStreamImpl.java:748)
+at io.undertow.servlet.spec.HttpServletResponseImpl.resetBuffer(HttpServletResponseImpl.java:514)
+at javax.servlet.ServletResponseWrapper.resetBuffer(ServletResponseWrapper.java:190)
+at javax.servlet.ServletResponseWrapper.resetBuffer(ServletResponseWrapper.java:190)
+at com.dhecp.framework.config.DruidConfig$1.doFilter(DruidConfig.java:109)
+at io.undertow.servlet.core.ManagedFilter.doFilter(ManagedFilter.java:61)
+</code></pre>
+<p>tomcat下有效的代码</p>
+<pre><code class="language-java">  /**
+   * 去除监控页面底部的广告
+   */
+  @SuppressWarnings({ &quot;rawtypes&quot;, &quot;unchecked&quot; })
+  @Bean
+  @ConditionalOnProperty(name = &quot;spring.datasource.druid.statViewServlet.enabled&quot;, havingValue = &quot;true&quot;)
+public FilterRegistrationBean removeDruidFilterRegistrationBean(DruidStatProperties properties)
+{
+    // 获取web监控页面的参数
+    DruidStatProperties.StatViewServlet config = properties.getStatViewServlet();
+    // 提取common.js的配置路径
+    String pattern = config.getUrlPattern() != null ? config.getUrlPattern() : &quot;/druid/*&quot;;
+    String commonJsPattern = pattern.replaceAll(&quot;\\*&quot;, &quot;js/common.js&quot;);
+    final String filePath = &quot;support/http/resources/js/common.js&quot;;
+        // 创建filter进行过滤
+   Filter filter = new Filter()
+        {
+            @Override
+       public void init(javax.servlet.FilterConfig filterConfig) throws ServletException
+            {
+            }
+            @Override
+     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+                throws IOException, ServletException
+        {
+            chain.doFilter(request, response);
+            // 重置缓冲区，响应头不会被重置
+            response.resetBuffer();
+            // 获取common.js
+            String text = Utils.readFromResource(filePath);
+            // 正则替换banner, 除去底部的广告信息
+            text = text.replaceAll(&quot;&lt;a.*?banner\&quot;&gt;&lt;/a&gt;&lt;br/&gt;&quot;, &quot;&quot;);
+            text = text.replaceAll(&quot;powered.*?shrek.wang&lt;/a&gt;&quot;, &quot;&quot;);
+            response.getWriter().write(text);
+        }
+        @Override
+        public void destroy()
+        {
+        }
+    };
+    FilterRegistrationBean registrationBean = new FilterRegistrationBean();
+    registrationBean.setFilter(filter);
+    registrationBean.addUrlPatterns(commonJsPattern);
+    return registrationBean;
+}
+</code></pre>
+<p>Undertow下有效的方法</p>
+<pre><code class="language-java"> @Bean
+    @ConditionalOnProperty(name = &quot;spring.datasource.druid.statViewServlet.enabled&quot;, havingValue = &quot;true&quot;)
+    public FilterRegistrationBean&lt;DruidAdFilter&gt; druidAdFilterRegistration() {
+        FilterRegistrationBean&lt;DruidAdFilter&gt; registration = new FilterRegistrationBean&lt;&gt;();
+        registration.setFilter(new DruidAdFilter());
+        // 设置过滤器匹配的URL模式
+        registration.addUrlPatterns(&quot;/druid/js/common.js&quot;);
+        // 设置过滤器的顺序
+        registration.setOrder(Integer.MIN_VALUE);
+        return registration;
+    }
+
+    @WebFilter(filterName = &quot;druidWebStatFilter&quot;, urlPatterns = &quot;/druid/*&quot;)
+    public static class DruidAdFilter implements Filter {
+
+        private String processedJs;
+
+        @Override
+        public void init(javax.servlet.FilterConfig filterConfig) throws ServletException {
+            try {
+                // 在初始化时加载和处理JS文件，避免每次请求都进行读取和处理
+                ClassPathResource resource = new ClassPathResource(&quot;support/http/resources/js/common.js&quot;);
+                byte[] bytes = FileCopyUtils.copyToByteArray(resource.getInputStream());
+                String originalJs = new String(bytes);
+                //processedJs = originalJs.replaceAll(&quot;&lt;a.*?banner\&quot;&gt;&lt;/a&gt;&lt;br/&gt;&quot;, &quot;&quot;).replaceAll(&quot;powered.*?shrek.wang&lt;/a&gt;&quot;, &quot;&quot;);
+                // 定义要匹配的正则表达式
+                String pattern = &quot;&lt;footer class=\&quot;footer\&quot;&gt;([\\s\\S]*?)&lt;/footer&gt;&quot;;
+                // 编译正则表达式
+                processedJs = Pattern.compile(pattern).matcher(originalJs).replaceAll(&quot;&quot;);;
+            } catch (IOException e) {
+                throw new ServletException(&quot;Failed to load js/common.js&quot;, e);
+            }
+        }
+
+        @Override
+        public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+            // 使用自定义响应包装器捕获响应输出
+            chain.doFilter(request, response);
+            // 确保仅在需要替换JS内容时才重写响应
+            if (response.getContentType() != null &amp;&amp; response.getContentType().contains(&quot;javascript&quot;)) {
+                response.getWriter().write(processedJs);
+            }
+        }
+
+        @Override
+        public void destroy() {
+            // 销毁时清理资源，如果有必要
+        }
+    }
+</code></pre>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://www.lvtao.net/post/macos-dnsmasq/">
+              <h3 class="post-title">
+                下一篇：macOS安装dnsmasq
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <table>
+    <tr><td><a href="https://www.ioncube.com/?xp=TQLLZT"><img src="/media/ioncube.jpg" width="100%"/></a></td></tr>
+    <tr><td><a href="https://app.cloudcone.com/?ref=9519"><img src="/media/cloudcone.gif" width="100%"/></a></td></tr>
+  </table>
+  <div class="slogan"></div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  Powered by <a href="https://lvtao.net" target="_blank">LVTAO</a> | <a class="rss" href="https://www.lvtao.net/atom.xml" target="_blank">RSS</a>
+</div>
+<script 
+async
+defer
+src="https://ask.lvtao.net/api/application/embed?protocol=https&host=ask.lvtao.net&token=e193b47f92f1b41e">
+</script>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

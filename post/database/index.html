@@ -1,0 +1,2888 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>数据库知识 `事务`、`索引`、`锁`、`SQL优化` 等总结 | 吕滔博客</title>
+<meta name="description" content="">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://www.lvtao.net/favicon.ico?v=1714210602511">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://www.lvtao.net/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://www.lvtao.net">
+        <img class="avatar" src="https://www.lvtao.net/images/avatar.png?v=1714210602511" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://www.lvtao.net">
+        <h1 class="site-title">吕滔博客</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+        
+          <a href="https://medoo.lvtao.net" class="menu purple-link">
+            MeDoo中文手册
+          </a>
+        
+      
+        
+          <a href="https://tool.lvtao.net" class="menu purple-link">
+            工具箱
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">数据库知识 `事务`、`索引`、`锁`、`SQL优化` 等总结</h2>
+          <div class="post-info post-detail-info">
+            
+             <div style="margin-top:5px;"><a href="https://app.cloudcone.com/?ref=9519" target="_blank">海外无需备案主机推荐，支持25端口邮件发送，无端口限制，支持支付宝、Paypal、信用卡等支付...</a></div>
+          </div>
+          <div class="post-content" v-pre>
+            <h1 id="数据库范式">数据库范式</h1>
+<h2 id="第一范式1nf">第一范式(1NF)</h2>
+<p><strong>所有字段的值都是不可分解的原子值</strong>。即实体中的某个属性有多个值时，必须拆分为不同的属性。例如：</p>
+<p><strong>用户信息表</strong></p>
+<table>
+<thead>
+<tr>
+<th>编号</th>
+<th>姓名</th>
+<th>年龄</th>
+<th>地址</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>小王</td>
+<td>23</td>
+<td>浙江省杭州市拱墅区湖州街51号</td>
+</tr>
+</tbody>
+</table>
+<p>当实际需求对地址没有特定的要求下，这个用户信息表的每一列都是不可分割的。但是当实际需求对省份或者城市有特别要求时，这个用户信息表中的地址就是可以分割的，改为：</p>
+<p><strong>用户信息表</strong></p>
+<table>
+<thead>
+<tr>
+<th>编号</th>
+<th>姓名</th>
+<th>年龄</th>
+<th>省份</th>
+<th>城市</th>
+<th>区县</th>
+<th>详细地址</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>小王</td>
+<td>23</td>
+<td>浙江省</td>
+<td>杭州市</td>
+<td>拱墅区</td>
+<td>湖州街51号</td>
+</tr>
+</tbody>
+</table>
+<p><strong>好处</strong></p>
+<ul>
+<li>表结构相对清晰</li>
+<li>易于查询</li>
+</ul>
+<h2 id="第二范式2nf">第二范式(2NF)</h2>
+<p><strong>所有非主键列必须全部依赖于全部主键</strong>。符合与不符合的场景如下：</p>
+<figure data-type="image" tabindex="1"><img src="/images/Database/2NF.png" alt="img" loading="lazy"></figure>
+<p>案例如下：</p>
+<p><strong>学生课程表</strong></p>
+<table>
+<thead>
+<tr>
+<th>学生编号</th>
+<th>课程编号</th>
+<th>学生名称</th>
+<th>课程名称</th>
+<th>所在班级</th>
+<th>班主任</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>S1</td>
+<td>C1</td>
+<td>小王</td>
+<td>计算机导论</td>
+<td>计算机3班</td>
+<td>陈老师</td>
+</tr>
+<tr>
+<td>S1</td>
+<td>C2</td>
+<td>小王</td>
+<td>数据结构</td>
+<td>计算机3班</td>
+<td>陈老师</td>
+</tr>
+<tr>
+<td>S2</td>
+<td>C1</td>
+<td>小马</td>
+<td>计算机导论</td>
+<td>软件1班</td>
+<td>李老师</td>
+</tr>
+</tbody>
+</table>
+<p>将学生编号和课程编号作为主键，能确定唯一一条数据，但是学生名称只跟学生编号有关，跟课程编号无关，即不满足完全函数依赖，改为：</p>
+<p><strong>学生表</strong></p>
+<table>
+<thead>
+<tr>
+<th>学生编号</th>
+<th>学生名称</th>
+<th>所在班级</th>
+<th>班主任</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>S1</td>
+<td>小王</td>
+<td>计算机3班</td>
+<td>陈老师</td>
+</tr>
+<tr>
+<td>S2</td>
+<td>小马</td>
+<td>软件1班</td>
+<td>李老师</td>
+</tr>
+</tbody>
+</table>
+<p><strong>课程表</strong></p>
+<table>
+<thead>
+<tr>
+<th>课程编号</th>
+<th>课程名称</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>C1</td>
+<td>计算机导论</td>
+</tr>
+<tr>
+<td>C2</td>
+<td>数据结构</td>
+</tr>
+</tbody>
+</table>
+<p><strong>学生课程关系表</strong></p>
+<table>
+<thead>
+<tr>
+<th>学生编号</th>
+<th>课程编号</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>S1</td>
+<td>C1</td>
+</tr>
+<tr>
+<td>S1</td>
+<td>C2</td>
+</tr>
+<tr>
+<td>S2</td>
+<td>C1</td>
+</tr>
+</tbody>
+</table>
+<p><strong>好处</strong></p>
+<ul>
+<li>相对节约空间，当学生表和课程表属性越多，效果越明显</li>
+<li>解决插入异常，当新增一门课程时，原表因为没有学生选课，导致无法插入数据</li>
+<li>解决更新繁琐，当更改一门课程名称时，原表要更改多条数据</li>
+<li>解决删除异常，当学生学完一门课，原表若要清空学生上课信息，课程编号与课程名称的关系可能会丢失</li>
+</ul>
+<h2 id="第三范式3nf">第三范式(3NF)</h2>
+<p><strong>在满足1NF和2NF的前提下，非主键列之间不存在间接依赖关系</strong>（消除传递函数依赖）。</p>
+<figure data-type="image" tabindex="2"><img src="/images/Database/3NF.png" alt="img" loading="lazy"></figure>
+<p>案例如下：</p>
+<p><strong>学生表</strong></p>
+<table>
+<thead>
+<tr>
+<th>学生编号</th>
+<th>学生名称</th>
+<th>班级编号</th>
+<th>班级名字</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>S1</td>
+<td>小王</td>
+<td>001</td>
+<td>计算机1班</td>
+</tr>
+<tr>
+<td>S2</td>
+<td>小马</td>
+<td>003</td>
+<td>计算机3班</td>
+</tr>
+</tbody>
+</table>
+<p>学生编号作为主键满足第二范式（2NF）。通过学生编号 ⇒⇒ 班级编号 ⇒⇒ 班级名字，所以班级编号和班级名字之间存在依赖关系，改为：</p>
+<p><strong>学生表</strong></p>
+<table>
+<thead>
+<tr>
+<th>学生编号</th>
+<th>学生名称</th>
+<th>班级编号</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>S1</td>
+<td>小王</td>
+<td>001</td>
+</tr>
+<tr>
+<td>S2</td>
+<td>小马</td>
+<td>003</td>
+</tr>
+</tbody>
+</table>
+<p><strong>班级表</strong></p>
+<table>
+<thead>
+<tr>
+<th>班级编号</th>
+<th>班级名称</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>001</td>
+<td>计算机1班</td>
+</tr>
+<tr>
+<td>003</td>
+<td>计算机3班</td>
+</tr>
+</tbody>
+</table>
+<p><strong>好处</strong></p>
+<ul>
+<li>相对节约空间</li>
+<li>解决更新繁琐</li>
+<li>解决插入异常，当班级分配了老师，还没分配学生的时候，原表将不可插入数据</li>
+<li>解决删除异常，当学生毕业后，若要清空学生信息，班级和老师的关系可能会丢失</li>
+</ul>
+<h2 id="巴斯-科德范式bcnf">巴斯-科德范式（BCNF）</h2>
+<p>在3NF基础上，<strong>主属性之间不存在部分或传递依赖</strong>。例如：</p>
+<p><strong>配件表</strong></p>
+<table>
+<thead>
+<tr>
+<th>仓库号</th>
+<th>配件号</th>
+<th>职工号</th>
+<th>配件数量</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>W1</td>
+<td>P1</td>
+<td>E1</td>
+<td>10</td>
+</tr>
+<tr>
+<td>W1</td>
+<td>P2</td>
+<td>E1</td>
+<td>10</td>
+</tr>
+<tr>
+<td>W2</td>
+<td>P1</td>
+<td>E2</td>
+<td>20</td>
+</tr>
+</tbody>
+</table>
+<p>有以下约束：</p>
+<ul>
+<li>一个仓库有多个职工</li>
+<li>一个职工只在一个仓库</li>
+<li>一种配件可以放多个仓库</li>
+<li>一个仓库，一个职工管理多个配件，一种配件由唯一一个职工管理</li>
+</ul>
+<p>由此，将（仓库号，配件号）作为主键，满足 3NF，但是（仓库号，配件号）⇒⇒ 职工号 ⇒⇒ 仓库号，造成传递函数依赖，改为：</p>
+<p><strong>仓库表</strong></p>
+<table>
+<thead>
+<tr>
+<th>仓库号</th>
+<th>职工号</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>W1</td>
+<td>E1</td>
+</tr>
+<tr>
+<td>W2</td>
+<td>E2</td>
+</tr>
+</tbody>
+</table>
+<p><strong>工作表</strong></p>
+<table>
+<thead>
+<tr>
+<th>职工号</th>
+<th>配件号</th>
+<th>配件数量</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>E1</td>
+<td>P1</td>
+<td>10</td>
+</tr>
+<tr>
+<td>E1</td>
+<td>P2</td>
+<td>10</td>
+</tr>
+<tr>
+<td>E2</td>
+<td>P1</td>
+<td>20</td>
+</tr>
+</tbody>
+</table>
+<p><strong>好处</strong></p>
+<ul>
+<li>解决一些冗余和一些异常情况</li>
+</ul>
+<p><strong>不足</strong></p>
+<ul>
+<li>丢失一些函数依赖，如丢失（仓库号，配件号）⇒⇒ 职工号，无法通过单表来确定一个职工号</li>
+</ul>
+<h2 id="第四范式4nf">第四范式（4NF）</h2>
+<p>在BCNF基础上，<strong>需要消除多值依赖</strong>。</p>
+<p>例如：</p>
+<p><strong>客户联系方式</strong></p>
+<table>
+<thead>
+<tr>
+<th>客户编号</th>
+<th>固定电话</th>
+<th>移动电话</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>10</td>
+<td>88-123</td>
+<td>151xxxxxxxx</td>
+</tr>
+<tr>
+<td>10</td>
+<td>88-124</td>
+<td>183xxxxxxxx</td>
+</tr>
+</tbody>
+</table>
+<p>一个用户拥有多个固定电话和移动电话，给表的维护带来很多麻烦。比如增加一个固定电话，那么移动电话这一栏就较难维护，改为：</p>
+<p><strong>客户电话表</strong></p>
+<table>
+<thead>
+<tr>
+<th>客户编号</th>
+<th>电话号码</th>
+<th>电话类型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>10</td>
+<td>88-123</td>
+<td>固定电话</td>
+</tr>
+<tr>
+<td>10</td>
+<td>88-124</td>
+<td>固定电话</td>
+</tr>
+<tr>
+<td>10</td>
+<td>151xxxxxxxx</td>
+<td>移动电话</td>
+</tr>
+<tr>
+<td>10</td>
+<td>183xxxxxxxx</td>
+<td>移动电话</td>
+</tr>
+</tbody>
+</table>
+<p><strong>好处</strong></p>
+<ul>
+<li>解决一些异常，使表结构更加合理</li>
+</ul>
+<h2 id="第五范式5nf">第五范式（5NF）</h2>
+<p>在4NF基础上，<strong>消除传递依赖</strong>。</p>
+<p>例如：</p>
+<p><strong>销售表</strong></p>
+<table>
+<thead>
+<tr>
+<th>销售人员</th>
+<th>供应商</th>
+<th>产品</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>S1</td>
+<td>V1</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>S2</td>
+<td>V2</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>S1</td>
+<td>V1</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>S2</td>
+<td>V2</td>
+<td>P2</td>
+</tr>
+</tbody>
+</table>
+<p>要想找到某一条数据，必须以（销售人员，供应商，产品）为主键，改为：</p>
+<p><strong>销售人员_供应商表</strong></p>
+<table>
+<thead>
+<tr>
+<th>销售人员</th>
+<th>供应商</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>S1</td>
+<td>V1</td>
+</tr>
+<tr>
+<td>S2</td>
+<td>V2</td>
+</tr>
+</tbody>
+</table>
+<p><strong>销售人员_产品表</strong></p>
+<table>
+<thead>
+<tr>
+<th>销售人员</th>
+<th>产品</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>S1</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>S2</td>
+<td>P2</td>
+</tr>
+</tbody>
+</table>
+<p><strong>供应商_产品表</strong></p>
+<table>
+<thead>
+<tr>
+<th>供应商</th>
+<th>产品</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>V1</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>V2</td>
+<td>P2</td>
+</tr>
+</tbody>
+</table>
+<p><strong>好处</strong></p>
+<ul>
+<li>解决某些异常操作</li>
+</ul>
+<h1 id="连接方式">连接方式</h1>
+<h2 id="内连接inner-join">内连接（INNER JOIN）</h2>
+<p>INNER JOIN 一般被译作内连接。内连接查询能将左表（表 A）和右表（表 B）中能关联起来的数据连接后返回。</p>
+<p><strong>文氏图</strong></p>
+<figure data-type="image" tabindex="3"><img src="/images/Database/%E5%86%85%E8%BF%9E%E6%8E%A5(INNER-JOIN).png" alt="内连接(INNER-JOIN)" loading="lazy"></figure>
+<p><strong>示例查询</strong></p>
+<pre><code class="language-mysql">SELECT A.PK AS A_PK, B.PK AS B_PK,A.Value AS A_Value, B.Value AS B_Value
+FROM Table_A A
+INNER JOIN Table_B B
+ON A.PK = B.PK;
+</code></pre>
+<p><strong>查询结果</strong></p>
+<pre><code class="language-mysql">+------+------+---------+---------+
+| A_PK | B_PK | A_Value | B_Value |
++------+------+---------+---------+
+|    1 |    1 | both ab | both ab |
++------+------+---------+---------+
+1 row in set (0.00 sec)
+</code></pre>
+<p><strong>注意</strong>：其中A为Table_A的别名，B为Table_B的别名，下同。</p>
+<h2 id="左连接left-join">左连接（LEFT JOIN）</h2>
+<p>LEFT JOIN 一般被译作左连接，也写作 LEFT OUTER JOIN。左连接查询会返回左表（表 A）中所有记录，不管右表（表 B）中有没有关联的数据。在右表中找到的关联数据列也会被一起返回。</p>
+<p><strong>文氏图</strong></p>
+<figure data-type="image" tabindex="4"><img src="/images/Database/%E5%B7%A6%E8%BF%9E%E6%8E%A5(LEFT-JOIN).png" alt="左连接(LEFT-JOIN)" loading="lazy"></figure>
+<p><strong>示例查询</strong></p>
+<pre><code class="language-mysql">SELECT A.PK AS A_PK, B.PK AS B_PK,A.Value AS A_Value, B.Value AS B_Value
+FROM Table_A A
+LEFT JOIN Table_B B
+ON A.PK = B.PK;
+</code></pre>
+<p><strong>查询结果</strong></p>
+<pre><code class="language-mysql">+------+------+---------+---------+
+| A_PK | B_PK | A_Value | B_Value |
++------+------+---------+---------+
+|    1 |    1 | both ab | both ba |
+|    2 | NULL | only a  | NULL    |
++------+------+---------+---------+
+2 rows in set (0.00 sec)
+</code></pre>
+<h2 id="右连接right-join">右连接（RIGHT JOIN）</h2>
+<p>RIGHT JOIN 一般被译作右连接，也写作 RIGHT OUTER JOIN。右连接查询会返回右表（表 B）中所有记录，不管左表（表 A）中有没有关联的数据。在左表中找到的关联数据列也会被一起返回。</p>
+<p><strong>文氏图</strong></p>
+<figure data-type="image" tabindex="5"><img src="/images/Database/%E5%8F%B3%E8%BF%9E%E6%8E%A5(RIGHT-JOIN).png" alt="右连接(RIGHT-JOIN)" loading="lazy"></figure>
+<p><strong>示例查询</strong></p>
+<pre><code class="language-mysql">SELECT A.PK AS A_PK, B.PK AS B_PK,A.Value AS A_Value, B.Value AS B_Value
+FROM Table_A A
+RIGHT JOIN Table_B B
+ON A.PK = B.PK;
+</code></pre>
+<p><strong>查询结果</strong></p>
+<pre><code class="language-mysql">+------+------+---------+---------+
+| A_PK | B_PK | A_Value | B_Value |
++------+------+---------+---------+
+|    1 |    1 | both ab | both ba |
+| NULL |    3 | NULL    | only b  |
++------+------+---------+---------+
+2 rows in set (0.00 sec)
+</code></pre>
+<h2 id="全连接full-join">全连接（FULL JOIN）</h2>
+<p>FULL JOIN 一般被译作外连接、全连接，实际查询语句中可以写作 FULL OUTER JOIN 或 FULL JOIN。外连接查询能返回左右表里的所有记录，其中左右表里能关联起来的记录被连接后返回。（<strong>MySQL不支持FULL OUTER JOIN</strong>）</p>
+<p><strong>文氏图</strong></p>
+<figure data-type="image" tabindex="6"><img src="/images/Database/%E5%85%A8%E8%BF%9E%E6%8E%A5(FULL-OUTER-JOIN).png" alt="全连接(FULL-OUTER-JOIN)" loading="lazy"></figure>
+<p><strong>示例查询</strong></p>
+<pre><code class="language-mysql">SELECT A.PK AS A_PK, B.PK AS B_PK,A.Value AS A_Value, B.Value AS B_Value
+FROM Table_A A
+FULL OUTER JOIN Table_B B
+ON A.PK = B.PK;
+</code></pre>
+<p><strong>查询结果</strong></p>
+<pre><code class="language-mysql">ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'FULL OUTER JOIN Table_B B
+ON A.PK = B.PK' at line 4
+</code></pre>
+<p>注意：我当前示例使用的 MySQL 不支持FULL OUTER JOIN。应当返回的结果（使用UNION模拟）：</p>
+<pre><code class="language-mysql">mysql&gt; SELECT * 
+    -&gt; FROM Table_A
+    -&gt; LEFT JOIN Table_B 
+    -&gt; ON Table_A.PK = Table_B.PK
+    -&gt; UNION ALL
+    -&gt; SELECT *
+    -&gt; FROM Table_A
+    -&gt; RIGHT JOIN Table_B 
+    -&gt; ON Table_A.PK = Table_B.PK
+    -&gt; WHERE Table_A.PK IS NULL;
++------+---------+------+---------+
+| PK   | Value   | PK   | Value   |
++------+---------+------+---------+
+|    1 | both ab |    1 | both ba |
+|    2 | only a  | NULL | NULL    |
+| NULL | NULL    |    3 | only b  |
++------+---------+------+---------+
+3 rows in set (0.00 sec)
+</code></pre>
+<p><strong>SQL常见缩影</strong></p>
+<figure data-type="image" tabindex="7"><img src="/images/Database/SQL%E5%B8%B8%E7%94%A8JOIN.png" alt="SQL常用JOIN" loading="lazy"></figure>
+<h2 id="left-join-excluding-inner-join">LEFT JOIN EXCLUDING INNER JOIN</h2>
+<p><strong>左连接后排除内连接</strong>。返回左表有但右表没有关联数据的记录集。</p>
+<p><strong>文氏图</strong></p>
+<figure data-type="image" tabindex="8"><img src="/images/Database/LEFT-JOIN-EXCLUDING-INNER-JOIN.png" alt="LEFT-JOIN-EXCLUDING-INNER-JOIN" loading="lazy"></figure>
+<p><strong>示例查询</strong></p>
+<pre><code class="language-mysql">SELECT A.PK AS A_PK, B.PK AS B_PK,A.Value AS A_Value, B.Value AS B_Value
+FROM Table_A A
+LEFT JOIN Table_B B
+ON A.PK = B.PK
+WHERE B.PK IS NULL;
+</code></pre>
+<p><strong>查询结果</strong></p>
+<pre><code class="language-mysql">+------+------+---------+---------+
+| A_PK | B_PK | A_Value | B_Value |
++------+------+---------+---------+
+|    2 | NULL | only a  | NULL    |
++------+------+---------+---------+
+1 row in set (0.01 sec)
+</code></pre>
+<h2 id="right-join-excluding-inner-join">RIGHT JOIN EXCLUDING INNER JOIN</h2>
+<p><strong>右连接后排除内连接</strong>。返回右表有但左表没有关联数据的记录集。</p>
+<p><strong>文氏图</strong></p>
+<figure data-type="image" tabindex="9"><img src="/images/Database/RIGHT-JOIN-EXCLUDING-INNER-JOIN.png" alt="RIGHT-JOIN-EXCLUDING-INNER-JOIN" loading="lazy"></figure>
+<p><strong>示例查询</strong></p>
+<pre><code class="language-mysql">SELECT A.PK AS A_PK, B.PK AS B_PK,A.Value AS A_Value, B.Value AS B_Value
+FROM Table_A A
+RIGHT JOIN Table_B B
+ON A.PK = B.PK
+WHERE A.PK IS NULL;
+</code></pre>
+<p><strong>查询结果</strong></p>
+<pre><code class="language-mysql">+------+------+---------+---------+
+| A_PK | B_PK | A_Value | B_Value |
++------+------+---------+---------+
+| NULL |    3 | NULL    | only b  |
++------+------+---------+---------+
+1 row in set (0.00 sec)
+</code></pre>
+<h2 id="full-join-excluding-inner-join">FULL JOIN EXCLUDING INNER JOIN</h2>
+<p><strong>全连接后排除内连接</strong>。返回左表和右表里没有相互关联的记录集。</p>
+<p><strong>文氏图</strong></p>
+<figure data-type="image" tabindex="10"><img src="/images/Database/FULL-OUTER-JOIN-EXCLUDING-INNER-JOIN.png" alt="FULL-OUTER-JOIN-EXCLUDING-INNER-JOIN" loading="lazy"></figure>
+<p><strong>示例查询</strong></p>
+<pre><code class="language-mysql">SELECT A.PK AS A_PK, B.PK AS B_PK,A.Value AS A_Value, B.Value AS B_Value
+FROM Table_A A
+FULL OUTER JOIN Table_B B
+ON A.PK = B.PK
+WHERE A.PK IS NULL
+OR B.PK IS NULL;
+</code></pre>
+<p>因为使用到了 FULL OUTER JOIN，MySQL 在执行该查询时再次报错。</p>
+<pre><code class="language-mysql">ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'FULL OUTER JOIN Table_B B
+ON A.PK = B.PK
+WHERE A.PK IS NULL
+OR B.PK IS NULL' at line 4
+</code></pre>
+<p>应当返回的结果（用 UNION 模拟）：</p>
+<pre><code class="language-mysql">mysql&gt; SELECT * 
+    -&gt; FROM Table_A
+    -&gt; LEFT JOIN Table_B
+    -&gt; ON Table_A.PK = Table_B.PK
+    -&gt; WHERE Table_B.PK IS NULL
+    -&gt; UNION ALL
+    -&gt; SELECT *
+    -&gt; FROM Table_A
+    -&gt; RIGHT JOIN Table_B
+    -&gt; ON Table_A.PK = Table_B.PK
+    -&gt; WHERE Table_A.PK IS NULL;
++------+--------+------+--------+
+| PK   | Value  | PK   | Value  |
++------+--------+------+--------+
+|    2 | only a | NULL | NULL   |
+| NULL | NULL   |    3 | only b |
++------+--------+------+--------+
+2 rows in set (0.00 sec)
+</code></pre>
+<p><strong>SQL所有JOIN</strong></p>
+<figure data-type="image" tabindex="11"><img src="/images/Database/SQL%E6%89%80%E6%9C%89JOIN.png" alt="SQL所有JOIN" loading="lazy"></figure>
+<h2 id="cross-join">CROSS JOIN</h2>
+<p>返回左表与右表之间符合条件的记录的迪卡尔集。</p>
+<p><strong>图示</strong></p>
+<figure data-type="image" tabindex="12"><img src="/images/Database/CROSS-JOIN.png" alt="CROSS-JOIN" loading="lazy"></figure>
+<p><strong>示例查询</strong></p>
+<pre><code class="language-mysql">SELECT A.PK AS A_PK, B.PK AS B_PK,A.Value AS A_Value, B.Value AS B_Value
+FROM Table_A A
+CROSS JOIN Table_B B;
+</code></pre>
+<p><strong>查询结果</strong></p>
+<pre><code class="language-mysql">+------+------+---------+---------+
+| A_PK | B_PK | A_Value | B_Value |
++------+------+---------+---------+
+|    1 |    1 | both ab | both ba |
+|    2 |    1 | only a  | both ba |
+|    1 |    3 | both ab | only b  |
+|    2 |    3 | only a  | only b  |
++------+------+---------+---------+
+4 rows in set (0.00 sec)
+</code></pre>
+<p>上面讲过的几种 JOIN 查询的结果都可以用 CROSS JOIN 加条件模拟出来，比如 INNER JOIN 对应 CROSS JOIN ... WHERE A.PK = B.PK。</p>
+<h2 id="self-join">SELF JOIN</h2>
+<p>返回表与自己连接后符合条件的记录，一般用在表里有一个字段是用主键作为外键的情况。比如 Table_C 的结构与数据如下：</p>
+<pre><code class="language-mysql">+--------+----------+-------------+
+| EMP_ID | EMP_NAME | EMP_SUPV_ID |
++--------+----------+-------------+
+|   1001 | Ma       |        NULL |
+|   1002 | Zhuang   |        1001 |
++--------+----------+-------------+
+2 rows in set (0.00 sec)
+</code></pre>
+<p>EMP_ID 字段表示员工 ID，EMP_NAME 字段表示员工姓名，EMP_SUPV_ID 表示主管 ID。</p>
+<p><strong>示例查询</strong></p>
+<p>现在我们想查询所有有主管的员工及其对应的主管 ID 和姓名，就可以用 SELF JOIN 来实现。</p>
+<pre><code class="language-mysql">SELECT A.EMP_ID AS EMP_ID, A.EMP_NAME AS EMP_NAME, 
+    B.EMP_ID AS EMP_SUPV_ID, B.EMP_NAME AS EMP_SUPV_NAME
+FROM Table_C A, Table_C B
+WHERE A.EMP_SUPV_ID = B.EMP_ID;
+</code></pre>
+<p><strong>查询结果</strong></p>
+<pre><code class="language-mysql">+--------+----------+-------------+---------------+
+| EMP_ID | EMP_NAME | EMP_SUPV_ID | EMP_SUPV_NAME |
++--------+----------+-------------+---------------+
+|   1002 | Zhuang   |        1001 | Ma            |
++--------+----------+-------------+---------------+
+1 row in set (0.00 sec)
+</code></pre>
+<p><strong>补充说明</strong></p>
+<ul>
+<li>文中的图使用 Keynote 绘制</li>
+<li>个人的体会是 SQL 里的 JOIN 查询与数学里的求交集、并集等很像；SQLite 不支持 RIGHT JOIN 和 FULL OUTER JOIN，可以使用 LEFT JOIN 和 UNION 来达到相同的效果</li>
+<li>MySQL 不支持 FULL OUTER JOIN，可以使用 LEFT JOIN 和 UNION 来达到相同的效果</li>
+</ul>
+<h1 id="数据库锁">数据库锁</h1>
+<p>数据库锁可以按粒度、加锁算法、加锁策略、兼容性和其它等方面进行分类：</p>
+<ul>
+<li>
+<p><strong>锁粒度</strong></p>
+<ul>
+<li><strong>行锁</strong>
+<ul>
+<li>锁的是 <code>某⾏数据</code> 或 <code>⾏之间的间隙</code>。由某些<strong>存储引擎</strong>实现，如InnoDB</li>
+<li>开销大，加锁慢；会出现死锁；锁定粒度小，发生锁冲突的概率低，并发度高</li>
+</ul>
+</li>
+<li><strong>表锁</strong>
+<ul>
+<li>锁的是某个 <code>table</code>。由MySQL的<strong>SQL layer</strong>层实现的</li>
+<li>开销小，加锁快；不会出现死锁；锁定力度大，发生锁冲突概率高，并发度最低</li>
+</ul>
+</li>
+<li><strong>页锁</strong>
+<ul>
+<li>开销和加锁速度介于表锁和行锁之间；会出现死锁；锁定粒度介于表锁和行锁之间，并发度一般</li>
+</ul>
+</li>
+<li><strong>全局锁</strong>
+<ul>
+<li>锁的是整个 <code>database</code>。由MySQL的<strong>SQL layer</strong>层实现的</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>加锁算法</strong></p>
+<ul>
+<li><strong>Record Lock（记录锁）</strong></li>
+<li><strong>Gap Lock（间隙锁）</strong></li>
+<li><strong>Next-Key Lock（临键锁）</strong></li>
+</ul>
+</li>
+<li>
+<p><strong>加锁策略</strong></p>
+<ul>
+<li><strong>悲观锁</strong></li>
+<li><strong>乐观锁</strong></li>
+</ul>
+</li>
+<li>
+<p><strong>兼容性</strong></p>
+<ul>
+<li><strong>排它锁</strong></li>
+<li><strong>共享锁</strong></li>
+<li><strong>意向锁</strong></li>
+</ul>
+</li>
+<li>
+<p><strong>其它锁</strong></p>
+<ul>
+<li><strong>自增锁（AUTO-INC锁）</strong></li>
+</ul>
+</li>
+</ul>
+<p>根据不同的存储引擎，MySQL中锁的特性可以大致归纳如下：</p>
+<table>
+<thead>
+<tr>
+<th>存储引擎</th>
+<th>行锁</th>
+<th>表锁</th>
+<th>页锁</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>InnoDB</td>
+<td>√</td>
+<td>√</td>
+<td></td>
+</tr>
+<tr>
+<td>MyISAM</td>
+<td></td>
+<td>√</td>
+<td></td>
+</tr>
+<tr>
+<td>BDB</td>
+<td>√</td>
+<td>√</td>
+<td>√</td>
+</tr>
+</tbody>
+</table>
+<p>在 InnoDB 存储引擎中：</p>
+<ul>
+<li><code>SELECT</code> 操作的不可重复读问题通过 <code>MVCC</code> 得到了解决</li>
+<li><code>UPDATE</code>、<code>DELETE</code> 的不可重复读问题通过 <code>Record Lock</code> (记录锁)解决</li>
+<li><code>INSERT</code> 的不可重复读问题是通过 <code>Next-Key Lock</code> (临键锁)解决</li>
+</ul>
+<h2 id="全局锁global-level">全局锁(Global-Level)</h2>
+<p><strong>全局锁就是对整个数据库实例加锁</strong>。MySQL 提供了一个加全局读锁的方法，命令是<code>Flush tables with read lock (FTWRL)</code>。 当你需要让整个库处于只读状态的时候，可以使用这个命令，之后其他线程的以下语句会被阻塞：</p>
+<ul>
+<li><strong>数据更新语句</strong>（数据的增删改）</li>
+<li><strong>数据定义语句</strong>（包括建表、修改表结构等）</li>
+<li><strong>更新类事务的提交语句</strong></li>
+</ul>
+<p><strong>使用场景</strong></p>
+<ul>
+<li>典型使用场景是做<strong>全库逻辑备份（mysqldump）</strong></li>
+</ul>
+<p><strong>数据库只读状态的危险性</strong></p>
+<ul>
+<li>如果你在主库上备份，那么在备份期间都不能执行更新，业务基本上就能停止</li>
+<li>如果你在从库上备份，那么备份期间从库不能执行主库同步过来的binlog，会导致主从延迟</li>
+</ul>
+<p>全局锁两种方法：</p>
+<ul>
+<li><strong>FLUSH TABLES WRITE READ LOCK（<code>FTWRL</code>）</strong></li>
+<li><strong>set global readonly=true</strong></li>
+</ul>
+<p>一般建议使用 <code>FTWRL</code> 方式，因为：</p>
+<ul>
+<li>有些系统中 readonly 的值会被用来做其它逻辑。如判断一个库是主库或备库。因此修改 global 变量的方式影响面更大</li>
+<li>异常处理机制上有差异：
+<ul>
+<li>如果执行<code>FTWRL</code>后由于客户端发生异常断开，则MySQL会自动释放这个全局锁，整个库回到可正常更新状态</li>
+<li>将库设置为<code>readonly</code>后，若客户端发生异常，则数据库会一直保持<code>readonly</code>状态，导致整库长时间处于不可写状态</li>
+<li>readonly 对super用户权限无效</li>
+</ul>
+</li>
+</ul>
+<h3 id="全局读锁ftwrl">全局读锁(FTWRL)</h3>
+<p><strong>为什么需要全局读锁(FTWRL)？</strong></p>
+<p>当 <code>mysqldump</code> 使用参数 <code>--single-transaction</code> 的时候，导数据之前就会启动一个事务，来确保拿到一致性快照视图。而由于 MVCC 的支持，这个过程中数据是可以正常更新的。所以，<strong>single-transaction 方法只适用于所有的表使用事务引擎的库</strong>。如果有的表使用了不支持事务的引擎，那么备份就只能通过 FTWRL 方法。这往往是 DBA 要求业务开发人员使用 InnoDB 替代 MyISAM 的原因之一。</p>
+<p>要使用全局锁，则要执行这条命：</p>
+<pre><code class="language-sql">flush tables with read lock
+</code></pre>
+<p>执行后，<strong>整个数据库就处于只读状态了</strong>，这时其他线程执行以下操作，都会被阻塞：</p>
+<ul>
+<li>对数据的增删查改操作，比如 insert、delete、update等语句；</li>
+<li>对表结构的更改操作，比如 alter table、drop table 等语句。</li>
+</ul>
+<p>如果要释放全局锁，则要执行这条命令：</p>
+<pre><code class="language-sql">unlock tables
+</code></pre>
+<p>当然，当会话断开了，全局锁会被自动释放。</p>
+<h3 id="set-global-readonlytrue">set global readonly=true</h3>
+<h2 id="表级锁table-level">表级锁(Table-Level)</h2>
+<p>表级锁是MySQL中锁定粒度最大的一种锁，表示对当前操作的整张表加锁，它实现简单，资源消耗较少，被大部分MySQL引擎支持。最常使用的MyISAM与InnoDB都支持表级锁定。表级锁分为：</p>
+<ul>
+<li><strong>表共享读锁（共享锁）</strong></li>
+<li><strong>表独占写锁（排他锁）</strong></li>
+</ul>
+<p><strong>特点：开销小、加锁快、不会出现死锁、发生锁冲突的概率最高、并发度也最低。</strong></p>
+<h3 id="表锁">表锁</h3>
+<p><strong>表锁除了会限制别的线程的读写外，也会限制本线程接下来的读写操作</strong>。</p>
+<p>如果我们想对学生表（t_student）加表锁，可以使用下面的命令：</p>
+<pre><code class="language-sql">-- 表级别的共享锁，也就是读锁
+lock tables t_student read;
+-- 表级别的独占锁，也就是写锁
+lock tables t_stuent wirte;
+</code></pre>
+<p>不过尽量避免在使用 InnoDB 引擎的表使用表锁，因为表锁的颗粒度太大，会影响并发性能，<strong>InnoDB 的优势在于实现了颗粒度更细的行级锁</strong>。要释放表锁，可以使用下面这条命令，会释放当前会话的所有表锁：</p>
+<pre><code class="language-sql">unlock tables
+</code></pre>
+<h3 id="元数据锁mdl">元数据锁(MDL)</h3>
+<p><strong>MDL作用是防止DDL和DML并发的冲突，保证读写的正确性</strong>。元数据锁是为了保证当用户对表执行 CRUD 操作时，防止其它线程对这个表结构做了变更。不需要显示的使用 MDL，因为当我们对数据库表进行操作时，会自动给这个表加上 MDL。</p>
+<ul>
+<li>
+<p>对一张表进行 CRUD 操作时，加的是 <strong>MDL 读锁</strong></p>
+<p>当有线程在执行 select 语句（ 加 MDL 读锁）的期间，如果有其他线程要更改该表的结构（ 申请 MDL 写锁），那么将会被阻塞，直到执行完 select 语句（ 释放 MDL 读锁）。</p>
+</li>
+<li>
+<p>对一张表做结构变更操作的时候，加的是 <strong>MDL 写锁</strong></p>
+<p>当有线程对表结构进行变更（ 加 MDL 写锁）的期间，如果有其他线程执行了 CRUD 操作（ 申请 MDL 读锁），那么就会被阻塞，直到表结构变更完成（ 释放 MDL 写锁）。</p>
+</li>
+</ul>
+<p>MDL 是在事务提交后才会释放，这意味着<strong>事务执行期间，MDL是一直持有的</strong>。申请 MDL 锁的操作会形成一个队列，队列中<strong>写锁获取优先级高于读锁</strong>，一旦出现 MDL 写锁等待，会阻塞后续该表的所有 CRUD 操作。</p>
+<h3 id="意向锁intention-lock">意向锁(Intention Lock)</h3>
+<p><strong>意向锁是表级锁，是InnoDB主动加的，不需要手动处理。其目的是为了快速判断表里是否有记录被加锁。</strong></p>
+<ul>
+<li>如果没有<strong>意向锁</strong>，那么加<strong>独占表锁</strong>时，就需要遍历表里所有记录，查看是否有记录存在独占锁，这样效率会很慢</li>
+<li>如果有了<strong>意向锁</strong>，在对记录加独占锁前，先会加上表级的意向独占锁，那么在加<strong>独占表锁</strong>时，直接查该表是否有意向独占锁，如果有就意味着表里已经有记录被加了独占锁，这样就不用去遍历表里的记录</li>
+</ul>
+<p>对于insert、update、delete，InnoDB会自动给涉及的数据加排他锁（X）；对于一般的Select语句，InnoDB不会加任何锁，事务可以通过以下语句给显示加共享锁或排他锁。</p>
+<ul>
+<li>共享锁：<code>SELECT ... LOCK IN SHARE MODE;</code></li>
+<li>排他锁：<code>SELECT ... FOR UPDATE;</code></li>
+</ul>
+<h4 id="意向共享锁intention-shared-lock">意向共享锁（Intention Shared Lock）</h4>
+<p><strong>意向共享锁（IS锁）是指当事务准备在某行记录上加共享锁（S锁）时，需要先在表级别加一个IS锁。</strong></p>
+<p><strong>作用</strong>：通知数据库接下来需要施加什么锁并对表加锁。如果需要对记录A加共享锁，那么此时innodb会先找到这张表，对该表加意向共享锁之后，再对记录A添加共享锁。</p>
+<h4 id="意向排他锁intention-exclusive-lock">意向排他锁（Intention Exclusive Lock）</h4>
+<p><strong>意向排他锁（IX锁）是指当事务准备在某行记录上加排他锁（X锁）时，需要先在表级别加一个IX锁</strong></p>
+<p><strong>作用</strong>：通知数据库接下来需要施加什么锁并对表加锁。如果需要对记录A加排他锁，那么此时innodb会先找到这张表，对该表加意向排他锁之后，再对记录A添加排他锁。</p>
+<h3 id="auto-inc锁自增长锁">AUTO-INC锁(自增长锁)</h3>
+<p>在为某个字段声明 <code>AUTO_INCREMENT</code> 属性时，之后可以在插入数据时，可以不指定该字段的值，数据库会自动给该字段赋值递增的值，这主要是通过 <code>AUTO-INC</code> 锁实现的。</p>
+<p><code>AUTO-INC</code> 锁是特殊的表锁机制，锁<strong>不是在一个事务提交后才释放，而是在执行完插入语句后就会立即释放</strong>。<strong>在插入数据时，会加一个表级别的 <code>AUTO-INC</code> 锁</strong>，然后为被 <code>AUTO_INCREMENT</code> 修饰的字段赋值递增的值，等插入语句执行完成后，才会把 <code>AUTO-INC</code> 锁释放掉。</p>
+<p><code>AUTO-INC</code> 锁在对大量数据进行插入的时候，会影响插入性能，因为另一个事务中的插入会被阻塞。因此， 在 MySQL 5.1.22 版本开始，InnoDB 存储引擎提供了一种<strong>轻量级的锁</strong>来实现自增。一样也是在插入数据的时候，会为被 <code>AUTO_INCREMENT</code> 修饰的字段加上轻量级锁，<strong>然后给该字段赋值一个自增的值，就把这个轻量级锁释放了，而不需要等待整个插入语句执行完后才释放锁</strong>。</p>
+<p>InnoDB 存储引擎提供了个<code>innodb_autoinc_lock_mode</code>的系统变量，是用来控制选择用 <code>AUTO-INC</code> 锁，还是<strong>轻量级</strong>的锁。</p>
+<ul>
+<li>innodb_autoinc_lock_mode=0：<strong>采用<code>AUTO-INC</code>锁</strong></li>
+<li>innodb_autoinc_lock_mode=2：<strong>采用轻量级锁</strong>。性能最高，但自增长值可能不是连续的，在主从复制场景中是不安全的</li>
+<li>innodb_autoinc_lock_mode=1：默认值，两种锁混着用
+<ul>
+<li>如果能够确定插入记录的数量就采用<strong>轻量级</strong>锁</li>
+<li>不确定时就采用 <code>AUTO-INC</code> 锁</li>
+</ul>
+</li>
+</ul>
+<h2 id="页级锁page-level">页级锁(Page-Level)</h2>
+<p>页级锁是 MySQL 中锁定粒度介于行级锁和表级锁中间的一种锁。表级锁速度快，但冲突多，行级冲突少，但速度慢。因此，采取了折中的页级锁，<strong>一次锁定相邻的一组记录</strong>。BDB 支持页级锁。</p>
+<p><strong>特点：开销和加锁时间界于表锁和行锁之间、会出现死锁、锁定粒度界于表锁和行锁之间、并发度一般。</strong></p>
+<h2 id="行级锁row-level">行级锁(Row-Level)</h2>
+<p>行级锁是MySQL中锁定粒度最细的一种锁。表示只针对当前操作的行进行加锁。行级锁能大大减少数据库操作的冲突，其加锁粒度最小，但加锁的开销也最大。行级锁分为：</p>
+<ul>
+<li><strong>共享锁</strong></li>
+<li><strong>排他锁</strong></li>
+</ul>
+<p><strong>特点：开销大、加锁慢、会出现死锁、发生锁冲突的概率最低、并发度也最高。</strong></p>
+<p>在 <code>InnoDB</code> 事务中，行锁通过给索引上的<strong>索引项加锁</strong>来实现。只有通过索引条件检索数据，才使用行级锁，否则将使用表锁。行级锁定同样分为两种类型：<code>共享锁</code> 和 <code>排他锁</code>，以及加锁前需要先获得的 <code>意向共享锁</code> 和 <code>意向排他锁</code>。行锁是在需要的时候才加上的，但并不是不需要了就立刻释放，而是要等到事务结束时才释放。这个就是<strong>两阶段锁协议</strong>。</p>
+<p>行锁实现算法(<strong>3种锁都是排它锁(X锁)</strong>)：</p>
+<ul>
+<li><strong>Record Lock(记录锁)</strong></li>
+<li><strong>Gap Lock(间隙锁)</strong></li>
+<li><strong>Next-Key Lock(临键锁)</strong></li>
+</ul>
+<h3 id="属性锁">属性锁</h3>
+<p>按照锁的共享策略来分：</p>
+<ul>
+<li><strong>共享锁（S锁，Shared Locks）</strong></li>
+<li><strong>排它锁（X锁，Exclusive Locks）</strong></li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>请求锁模式是否兼容当前锁模式</th>
+<th>X锁</th>
+<th>IX锁</th>
+<th>S锁</th>
+<th>IS锁</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>X锁</td>
+<td><code>冲突</code></td>
+<td><code>冲突</code></td>
+<td><code>冲突</code></td>
+<td><code>冲突</code></td>
+</tr>
+<tr>
+<td>IX锁</td>
+<td><code>冲突</code></td>
+<td>兼容</td>
+<td><code>冲突</code></td>
+<td>兼容</td>
+</tr>
+<tr>
+<td>S锁</td>
+<td><code>冲突</code></td>
+<td><code>冲突</code></td>
+<td>兼容</td>
+<td>兼容</td>
+</tr>
+<tr>
+<td>IS锁</td>
+<td><code>冲突</code></td>
+<td>兼容</td>
+<td>兼容</td>
+<td>兼容</td>
+</tr>
+</tbody>
+</table>
+<p>若一个事务请求锁模式与当前锁兼容，InnoDB就将请求锁授予该事务；反之，两者不兼容，该事务就要等待锁释放。</p>
+<h4 id="共享锁shared-locks">共享锁(Shared Locks)</h4>
+<p><strong>共享锁（ <code>S锁 </code> 或 <code>读锁</code>）是指针对同一份数据，多个读操作可以同时进行而不会互相影响。<strong>若事务T对数据对象A加上</strong>S锁</strong>，则事务T只能读A；其它事务只能再对A加<strong>S锁</strong>，而不能加X锁，直到T释放A上的S锁。加锁方式：</p>
+<ul>
+<li><code>select ... lock in share mode</code></li>
+</ul>
+<p><strong>注意</strong>：</p>
+<ul>
+<li>共享锁都是行锁</li>
+</ul>
+<h4 id="排它锁exclusive-locks">排它锁(Exclusive Locks)</h4>
+<p>**排它锁（ <code>X锁</code> 或 <code>写锁</code>）是指当前写操作没有完成前，它会阻断其它写锁和读锁。**若事务T对数据对象A加上X锁，则只允许T读取和修改A，其它事务都不能再对A加任何类型的锁，直到T释放A上的锁。加锁方式：</p>
+<ul>
+<li><code>insert</code></li>
+<li><code>update</code></li>
+<li><code>delete</code></li>
+<li><code>select ... for update</code></li>
+</ul>
+<p><strong>注意</strong></p>
+<ul>
+<li>
+<p>在更新操作(INSERT、UPDATE 或 DELETE)过程中始终应用排它锁</p>
+</li>
+<li>
+<p>排它锁可以是<strong>行锁</strong>也可以是<strong>表锁</strong></p>
+<pre><code class="language-sql">-- 当username是主键时，锁定的是行锁；当username不是主键时，是表锁
+SELECT count(*) as total FROM test WHERE username = &quot;zhangsan&quot; FOR UPDATE
+</code></pre>
+</li>
+</ul>
+<h3 id="锁实现方式">锁实现方式</h3>
+<h4 id="record-lock记录锁">Record Lock(记录锁)</h4>
+<p><strong>为单个行记录上的锁，总是会去锁住索引记录</strong>。</p>
+<pre><code class="language-sql">-- id 列为主键列或唯一索引列
+SELECT * FROM t_user WHERE id = 1 FOR UPDATE;
+</code></pre>
+<p>id 为 1 的记录行会被锁住。需要注意：</p>
+<ul>
+<li><code>id</code> 列必须为<code>唯一索引列</code>或<code>主键列</code>，否则上述语句加的锁就会变成<code>临键锁</code></li>
+<li>同时查询语句必须为<code>精准匹配</code>（<code>=</code>），不能为 <code>&gt;</code>、<code>&lt;</code>、<code>like</code>等，否则也会退化成<code>临键锁</code></li>
+</ul>
+<p>也可以在通过 <code>主键索引</code> 与 <code>唯一索引</code> 对数据行进行 UPDATE 操作时，也会对该行数据加<code>记录锁</code>：</p>
+<pre><code class="language-sql">-- id 列为主键列或唯一索引列
+UPDATE t_user SET age = 50 WHERE id = 1;
+</code></pre>
+<p><strong>注意</strong>：在MySQL中，<strong>行级锁</strong>并不是直接锁记录，而是<strong>锁索引</strong>。索引分为<strong>主键索引</strong>和<strong>非主键索引</strong>两种：</p>
+<ul>
+<li>如果一条sql语句操作了<strong>主键索引</strong>，MySQL就会<strong>锁定这条主键索引</strong></li>
+<li>如果一条语句操作了<strong>非主键索引</strong>，MySQL会<strong>先锁定该非主键索引</strong>，<strong>再锁定相关的主键索引</strong></li>
+</ul>
+<h4 id="gap-lock间隙锁">Gap Lock(间隙锁)</h4>
+<p>间隙锁，想一下幻读的原因，其实就是行锁只能锁住行，但新插入记录这个动作，要更新的是记录之间的“间隙”。<strong>所以加入间隙锁来解决幻读。</strong></p>
+<p><strong>间隙锁</strong>基于<code>非唯一索引</code>，它<code>锁定一段范围内的索引记录</code>。<strong>间隙锁</strong>基于下面将会提到的<code>Next-Key Locking</code> 算法，请务必牢记：<strong>使用间隙锁锁住的是一个区间，而不仅仅是这个区间中的每一条数据</strong>。</p>
+<pre><code class="language-sql">SELECT * FROM t_user WHERE id BETWEN 1 AND 10 FOR UPDATE;
+-- 或
+SELECT * FROM t_user WHERE id &gt; 1 AND id &lt; 10 FOR UPDATE;
+</code></pre>
+<p>即所有在<code>（1，10）</code>区间内的记录行都会被锁住，所有id 为 2、3、4、5、6、7、8、9 的数据行的插入会被阻塞，但是 1 和 10 两条记录行并不会被锁住。除了手动加锁外，在执行完某些 <code>SQL</code>后，<code>InnoDB</code>也会自动加<strong>间隙锁</strong>。</p>
+<p><strong>幻读原因</strong>：因为行锁只能锁住行，但新插入记录这个动作，要更新的是记录之间的“<code>间隙</code>”。所以加入间隙锁来解决幻读。</p>
+<p><strong>间隙锁的目的</strong></p>
+<ol>
+<li>防止幻读，以满足相关隔离级别的要求</li>
+<li>满足恢复和复制的需要</li>
+</ol>
+<p><strong>产生间隙锁的条件（RR事务隔离级别下）</strong></p>
+<ol>
+<li>使用普通索引锁定</li>
+<li>使用多列唯一索引</li>
+<li>使用唯一索引锁定多行记录</li>
+</ol>
+<h4 id="next-key-lock临键锁">Next-Key Lock(临键锁)</h4>
+<p><strong>Next-Key Lock(Record Lock + Gap Lock)锁定的是一个范围，并且锁定记录本身，MySql 防止幻读就是使用此锁实现。</strong></p>
+<p>临键锁是一种特殊的<strong>间隙锁</strong>，也可以理解为一种特殊的<strong>算法</strong>。通过<strong>临建锁</strong>可以解决<code>幻读</code>的问题。每个数据行上的<code>非唯一索引列</code>上都会存在一把<strong>临键锁</strong>，当某个事务持有该数据行的<strong>临键锁</strong>时，会锁住一段<strong>左开右闭区间</strong>的数据。需要强调的一点是，<code>InnoDB</code> 中<code>行级锁</code>是基于索引实现的，<strong>临键锁</strong>只与<code>非唯一索引列</code>有关，在<code>唯一索引列</code>（包括<code>主键列</code>）上不存在<strong>临键锁</strong>。</p>
+<p>比如：表信息 <code>t_user(id PK, age KEY, name)</code></p>
+<figure data-type="image" tabindex="13"><img src="/images/Database/Next-Key-Locks.jpg" alt="Next-Key-Locks" loading="lazy"></figure>
+<p>该表中 <code>age</code> 列潜在的<code>临键锁</code>有：</p>
+<figure data-type="image" tabindex="14"><img src="/images/Database/Next-Key-Locks-%E4%B8%B4%E9%94%AE%E9%94%81.jpg" alt="Next-Key-Locks-临键锁" loading="lazy"></figure>
+<p>在<code>事务 A</code> 中执行如下命令：</p>
+<pre><code class="language-sql">-- 根据非唯一索引列 UPDATE 某条记录
+UPDATE t_user SET name = Vladimir WHERE age = 24;
+-- 或根据非唯一索引列 锁住某条记录
+SELECT * FROM t_user WHERE age = 24 FOR UPDATE;
+</code></pre>
+<p>不管执行了上述 <code>SQL</code> 中的哪一句，之后如果在<code>事务 B</code> 中执行以下命令，则该命令会被阻塞：</p>
+<pre><code class="language-sql">INSERT INTO t_user VALUES(100, 26, 'tian');
+</code></pre>
+<p>很明显，<code>事务 A</code> 在对 <code>age</code> 为 24 的列进行 UPDATE 操作的同时，也获取了 <code>(24, 32]</code> 这个区间内的临键锁。</p>
+<p>不仅如此，在执行以下 SQL 时，也会陷入阻塞等待：</p>
+<pre><code class="language-sql">INSERT INTO table VALUES(100, 30, 'zhang');
+</code></pre>
+<p>那最终我们就可以得知，在根据<code>非唯一索引</code> 对记录行进行 <code>UPDATE</code>、<code>FOR UPDATE</code>、<code>LOCK IN SHARE MODE</code> 操作时，InnoDB 会获取该记录行的 <code>临键锁</code> ，并同时获取该记录行下一个区间的<code>间隙锁</code>。即<code>事务 A</code>在执行了上述的 SQL 后，最终被锁住的记录区间为 <code>(10, 32)</code>。</p>
+<h2 id="加锁机制">加锁机制</h2>
+<h3 id="乐观锁optimistic-lock">乐观锁(Optimistic Lock)</h3>
+<p>乐观锁的特点先进行业务操作，不到万不得已不去拿锁。即“乐观”的认为拿锁多半是会成功的，因此在进行完业务操作需要实际更新数据的最后一步再去拿一下锁就好。</p>
+<p>乐观锁在数据库上的实现完全是逻辑的，不需要数据库提供特殊的支持。一般的做法是在需要锁的数据上增加一个版本号或时间戳。乐观锁的两种实现方式：</p>
+<ul>
+<li>
+<p><strong>使用数据版本（version）记录对比机制</strong></p>
+<p>当读取数据时，将version字段的值一同读出，数据每更新一次，对此version值加一。</p>
+</li>
+<li>
+<p><strong>使用时间戳（timestamp）记录对比机制</strong></p>
+<p>在更新提交时检查当前数据库中数据的时间戳和自己更新前取到的时间戳进行对比，一致则OK，否则为版本冲突。</p>
+</li>
+</ul>
+<h3 id="悲观锁pessimistic-lock">悲观锁(Pessimistic Lock)</h3>
+<p>悲观锁（<strong>一锁二查三更新</strong>）的特点是先获取锁，再进行业务操作，即“悲观”的认为获取锁是非常有可能失败的，因此要先确保获取锁成功再进行业务操作。<strong>在数据库上的悲观锁需要数据库本身提供支持，即通过常用的 <code>select … for update</code> 操作来实现悲观锁。</strong></p>
+<p>MySQL还有个问题是 <code>select... for update</code> 语句执行中，如果数据表没有添加索引或主键，所有扫描过的行都会被锁上，这一点很容易造成问题。因此如果在MySQL中用悲观锁务必要确定走了索引，而不是全表扫描。</p>
+<h2 id="锁问题">锁问题</h2>
+<h3 id="死锁">死锁</h3>
+<p><strong>MyISAM中是不会产生死锁的，因为MyISAM总是一次性获得所需的全部锁，要么全部满足，要么全部等待。而在InnoDB中，锁是逐步获得的，就造成了死锁的可能。</strong></p>
+<p>当两个及以上的事务，双方都在等待对方释放已经持有的锁或因为加锁顺序不一致造成循环等待锁资源，就会出现“死锁”。常见的报错信息为 ” <code>Deadlock found when trying to get lock...</code>”。</p>
+<h4 id="避免死锁">避免死锁</h4>
+<p>三种常见的避免死锁方式：</p>
+<ul>
+<li>如果不同程序会并发存取多个表，尽量<strong>约定以相同的顺序访问表</strong>，可以大大降低死锁机会</li>
+<li>在同一个事务中，尽可能做到<strong>一次锁定所需要的所有资源</strong>，减少死锁产生概率</li>
+<li>对于非常容易产生死锁的业务部分，可以尝试使用<strong>升级锁定颗粒度</strong>，通过表级锁定来减少死锁产生的概率</li>
+</ul>
+<h4 id="预防死锁">预防死锁</h4>
+<ul>
+<li>
+<p><code>innodb_lock_wait_timeout</code> <strong>等待锁超时回滚事务</strong></p>
+<p>直观方法是在两个事务相互等待时，当一个等待时间超过设置的某一阀值时，对其中一个事务进行回滚，另一个事务就能继续执行。</p>
+</li>
+<li>
+<p><code>wait-for graph</code><strong>算法来主动进行死锁检测</strong></p>
+<p>每当加锁请求无法立即满足需要并进入等待时，wait-for graph算法都会被触发。wait-for graph要求数据库保存以下两种信息：</p>
+<ul>
+<li>锁的信息链表</li>
+<li>事务等待链表</li>
+</ul>
+</li>
+</ul>
+<h4 id="解决死锁">解决死锁</h4>
+<ul>
+<li><strong>等待事务超时，主动回滚</strong></li>
+<li><strong>进行死锁检查，主动回滚某条事务，让别的事务能继续走下去</strong></li>
+</ul>
+<p>下面提供一种方法，解决死锁的状态:</p>
+<pre><code class="language-sql">-- 查看正在被锁的事务
+SELECT * FROM INFORMATION_SCHEMA.INNODB_TRX;
+</code></pre>
+<figure data-type="image" tabindex="15"><img src="/images/Database/%E8%A7%A3%E5%86%B3%E6%AD%BB%E9%94%81.jpg" alt="解决死锁" loading="lazy"></figure>
+<pre><code class="language-sql">--上图trx_mysql_thread_id列的值
+kill trx_mysql_thread_id;
+</code></pre>
+<h3 id="脏读">脏读</h3>
+<p><strong>脏读指的是不同事务下，当前事务可以读取到另外事务未提交的数据</strong>。</p>
+<p>例如：T1 修改一个数据，T2 随后读取这个数据。如果 T1 撤销了这次修改，那么 T2 读取的数据是脏数据。</p>
+<figure data-type="image" tabindex="16"><img src="/images/Database/007S8ZIlly1gjjfxu6baej30j30kijsr.jpg" alt="img" loading="lazy"></figure>
+<h3 id="不可重复读">不可重复读</h3>
+<p><strong>不可重复读指的是同一事务内多次读取同一数据集合，读取到的数据是不一样的情况</strong>。</p>
+<p>例如：T2 读取一个数据，T1 对该数据做了修改。如果 T2 再次读取这个数据，此时读取的结果和第一次读取的结果不同。</p>
+<figure data-type="image" tabindex="17"><img src="/images/Database/007S8ZIlly1gjjfxx1pw3j30i90j0myc.jpg" alt="img" loading="lazy"></figure>
+<p>在 InnoDB 存储引擎中：</p>
+<ul>
+<li><code>SELECT</code>：操作的不可重复读问题通过 MVCC 得到了解决的</li>
+<li><code>UPDATE/DELETE</code>：操作的不可重复读问题是通过 Record Lock 解决的</li>
+<li><code>INSERT</code>：操作的不可重复读问题是通过 Next-Key Lock（Record Lock + Gap Lock）解决的</li>
+</ul>
+<h3 id="幻读">幻读</h3>
+<p><strong>幻读是指在同一事务下，连续执行两次同样的 sql 语句可能返回不同的结果，第二次的 sql 语句可能会返回之前不存在的行</strong>。幻影读是一种特殊的不可重复读问题。</p>
+<h3 id="丢失更新">丢失更新</h3>
+<p><strong>一个事务的更新操作会被另一个事务的更新操作所覆盖</strong>。</p>
+<p>例如：T1 和 T2 两个事务都对一个数据进行修改，T1 先修改，T2 随后修改，T2 的修改覆盖了 T1 的修改。</p>
+<figure data-type="image" tabindex="18"><img src="/images/Database/007S8ZIlly1gjjfxzqa84j30h30eowfd.jpg" alt="img" loading="lazy"></figure>
+<p>这类型问题可以通过给 SELECT 操作加上排他锁来解决，不过这可能会引入性能问题，具体使用要视业务场景而定。</p>
+<h1 id="数据库事务">数据库事务</h1>
+<p><strong>什么叫事务?</strong></p>
+<p>事务是一系列对系统中数据进行访问与更新的操作组成的一个程序逻辑单元。即不可分割的许多基础数据库操作。</p>
+<h2 id="事务特性acid">事务特性(ACID)</h2>
+<h3 id="原子性atomicity">原子性(Atomicity)</h3>
+<p><strong>原子性是指一个事务（事务是最小的执行单位）是一个不可分割的工作单元，其中的操作要么都做，要么都不做</strong>。如果事务中一个sql语句执行失败，则已执行的语句也必须回滚，数据库退回到事务前的状态。</p>
+<p><strong>实现原理</strong></p>
+<p><strong>① 回滚日志（undo log）</strong></p>
+<p>InnoDB实现回滚靠的是undo log。当事务对数据库进行修改时，InnoDB会生成对应的undo log。如果事务执行失败或调用了rollback，导致事务需要回滚，便可利用undo log中的信息将数据回滚到修改前。</p>
+<ul>
+<li>对于每个<code>insert</code>，回滚时会执行<code>delete</code></li>
+<li>对于每个 <code>delete</code>，回滚时会执行<code>insert</code></li>
+<li>对于每个 <code>update</code>，回滚时会执行一个相反的 <code>update</code>，把数据改回去</li>
+</ul>
+<h3 id="一致性consistency">一致性(Consistency)</h3>
+<p><strong>一致性是指事务执行结束后，数据库的完整性约束没有被破坏，事务执行的前后都是合法的数据状态。</strong></p>
+<p>数据库的完整性约束包括但不限于：实体完整性（如行的主键存在且唯一）、列完整性（如字段的类型、大小、长度要符合要求）、外键约束、用户自定义完整性（如转账前后，两个账户余额的和应该不变）。假如A账户给B账户转10块钱，不管成功与否，A和B的总金额是不变的。</p>
+<p><strong>实现原理</strong></p>
+<p>一致性是事务追求的最终目标。前面提到的<strong>原子性、持久性和隔离性</strong>，都是为了保证数据库状态的一致性。此外，除了数据库层面的保障，一致性的实现也需要应用层面进行保障。实现一致性的措施包括：</p>
+<p><strong>① 保证原子性、持久性和隔离性</strong>。如果这些特性无法保证，事务的一致性也无法保证</p>
+<p><strong>② 数据库本身提供保障</strong>。如不允许向整型列插入字符串值、字符串长度不能超过列的限制等</p>
+<p><strong>③ 应用层面进行保障</strong>。如转账操作只扣除转账者余额，而未增加接收者余额</p>
+<h3 id="隔离性isolation">隔离性(Isolation)</h3>
+<p>**隔离性是指事务内部的操作与其它事务是隔离的，并发执行的各个事务之间不能互相干扰。**严格的隔离性，对应了事务隔离级别中的Serializable (可串行化)，但实际应用中出于性能方面的考虑很少会使用可串行化。</p>
+<p><strong>实现原理</strong></p>
+<p>隔离性追求的是并发情形下事务之间互不干扰。主要分为两个方面：</p>
+<p><strong>① 加锁机制保证隔离性</strong>：(一个事务)写操作对(另一个事务)写操作的影响</p>
+<p>事务在修改数据之前，需要先获得相应的锁；获得锁之后，事务便可以修改数据；该事务操作期间，这部分数据是锁定的，其它事务如果需要修改数据，需要等待当前事务提交或回滚后释放锁。</p>
+<p><strong>② MVCC(多版本并发控制)保证隔离性</strong>：(一个事务)写操作对(另一个事务)读操作的影响</p>
+<p>MVCC全称Multi-Version Concurrency Control，即多版本的并发控制协议。最大优点是读不加锁，因此读写不冲突，并发性能好。InnoDB的MVCC实现了多个版本的数据可共存，主要基于以下技术及数据结构：</p>
+<ul>
+<li><strong>隐藏列</strong>：在Innodb引擎中每行数据都会有两个隐藏列（实际是三个列）
+<ul>
+<li><strong>隐藏id</strong>（<code>id</code>，如果建表时没有显式指定，则会生成这个隐藏id作为主键，实际和mvcc没有关系）</li>
+<li><strong>创建版本号</strong>（<code>data_trx_id</code>，事务id）：用来标识最近对本行记录做修改的事务 id</li>
+<li><strong>回滚指针</strong>（<code>data_roll_pointer</code>，指向undo log的指针）</li>
+</ul>
+</li>
+<li><strong>基于undo log版本链</strong>：每条undo log也会指向更早版本的undo log，从而形成一条版本链</li>
+<li><strong>ReadView</strong>：**通过隐藏列和版本链可以将数据恢复到指定版本，但具体要恢复到哪个版本，则需要根据ReadView来确定。**当进行查询操作时，事务会生成一个ReadView（是一个事务快照），准确来说是当前时间点系统内活跃的事务列表，也就是说系统内所有未提交的事务，都会记录在这个Readview内，事务就根据它来判断哪些数据是可见的，哪些是不可见的。在每一条 SQL 开始的时候被创建，有几个重要属性：
+<ul>
+<li><strong>trx_ids:</strong> 当前系统活跃(未提交)事务版本号集合</li>
+<li><strong>low_limit_id:</strong> 创建当前 read view 时“当前系统最大<strong>事务版本号</strong>+1”</li>
+<li><strong>up_limit_id:</strong> 创建当前read view 时“系统正处于<strong>活跃事务</strong>最小版本号”</li>
+<li><strong>creator_trx_id:</strong> 创建当前read view的事务版本号</li>
+</ul>
+</li>
+</ul>
+<p><strong>MVCC查询流程</strong></p>
+<p>现在开始查询，一个 select 过来了，找到了一行数据。</p>
+<ul>
+<li><strong>data_trx_id &lt; up_limit_id</strong>：说明数据在当前事务之前就存在了，显示</li>
+<li><strong>data_trx_id &gt;= low_limit_id</strong>：说明该数据是在当前read view 创建后才产生的，数据不显示。不显示怎么办，根据 data_roll_pointer 从 undo log 中找到历史版本，找不到就空</li>
+<li><strong>up_limit_id &lt; data_trx_id &lt; low_limit_id</strong>：就要看隔离级别了</li>
+</ul>
+<p><strong>MVCC应用场景</strong></p>
+<p>在Mysql的InnoDB引擎中，只有<strong>已提交读</strong>和<strong>可重复读</strong>这两种隔离级别的事务采用了MVCC机制：</p>
+<ul>
+<li><strong>已提交读(READ COMMITTD)</strong>：事务中的每次读操作都会生成一个新的ReadView，也就是说如果这期间某个事务提交了，那么它就会从ReadView中移除。这样确保事务每次读操作都能读到相对比较新的数据</li>
+<li><strong>可重复读(REPEATABLE READ)</strong>：事务只有在第一次进行读操作时才会生成一个ReadView，后续的读操作都会重复使用这个ReadView。也就是说如果在此期间有其他事务提交了，那么对于可重复读来说也是不可见的，因为对它来说，事务活跃状态在第一次进行读操作时就已经确定下来，后面不会修改了</li>
+</ul>
+<h3 id="持久性durability">持久性(Durability)</h3>
+<p><strong>持久性是指事务一旦提交，它对数据库的改变就应该是永久性的，即使数据库发生故障也不受影响。</strong></p>
+<p><strong>实现原理</strong></p>
+<p><strong>① redo log</strong></p>
+<p>当数据修改时，除了修改Buffer Pool中的数据，还会在redo log记录这次操作；当事务提交时，会调用fsync接口对redo log进行刷盘（刷脏页）。如果MySQL宕机，重启时可以读取redo log中的数据，对数据库进行恢复。redo log采用的是WAL（Write-ahead logging，预写式日志），所有修改先写入日志，再更新到Buffer Pool，保证了数据不会因MySQL宕机而丢失，从而满足了持久性要求。</p>
+<p><strong>为什么redo log写入磁盘比直接将Buffer Pool中修改数据写入磁盘（刷脏）快？</strong></p>
+<ul>
+<li>刷脏是随机I/O，因为每次修改的数据位置随机，但写redo log是追加操作，属于顺序I/O</li>
+<li>刷脏是以数据页（Page）为单位的，MySQL默认页大小是16KB，一个Page上一个小修改都要整页写入；而redo log中只包含真正需要写入的部分，无效I/O大大减少</li>
+</ul>
+<h2 id="隔离级别">隔离级别</h2>
+<p><strong>事务并发问题</strong></p>
+<p>在事务的并发操作中，不做隔离操作则可能会出现 <strong>脏读、不可重复读、幻读</strong> 问题：</p>
+<ul>
+<li>
+<p><strong>脏读</strong>：<strong>指一个事务读取到了另一个未提交事务修改过的数据</strong></p>
+<p>事务A中读到了事务B中未提交的更新数据内容，然后B回滚操作，那么A读取到的数据是脏数据。</p>
+</li>
+<li>
+<p><strong>不可重复读</strong>：<strong>同一个事务内，前后多次读取，读取到的数据内容不一致</strong></p>
+<p>事务A读到事务B已经提交后的数据，即事务A多次读取同一数据时，返回结果不一致。</p>
+</li>
+<li>
+<p><strong>幻读</strong>：<strong>指一个事务先根据某些搜索条件查询出一些记录，在该事务未提交时，另一个事务写入了一些符合那些搜索条件的记录（如insert、delete、update），再次查询出的结果则出现不一致</strong></p>
+<p>事物A执行select后，事物B增或删了一条数据，事务A再执行同一条SQL后发现多或少了一条数据。</p>
+</li>
+<li>
+<p><strong>第一类丢失更新：</strong> A事务撤销事务时，覆盖了B事务提交的事务（现代关系型数据库中已经不会发生）</p>
+</li>
+<li>
+<p><strong>第二类丢失更新：</strong> A事务提交事务时，覆盖了B事务提交的事务（是不可重复读的特殊情况）</p>
+</li>
+</ul>
+<p><strong>小结</strong>：不可重复读的和幻读很容易混淆，<strong>不可重复读</strong>侧重于<strong>修改</strong>，<strong>幻读</strong>侧重于<strong>新增或删除</strong>。解决不可重复读的问题只需锁住满足条件的行，解决幻读需要锁表。查看 <code>mysql</code> 事务隔离级别：<code>show variables like 'tx_iso%';</code>。</p>
+<p><strong>InnoDB存储引擎下</strong>的四种隔离级别发生问题的可能性如下：</p>
+<table>
+<thead>
+<tr>
+<th>隔离级别</th>
+<th>第一类丢失更新</th>
+<th>第二类丢失更新</th>
+<th>脏读</th>
+<th>不可重复读</th>
+<th>幻读</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Read Uncommitted(读未提交)</td>
+<td>不可能</td>
+<td><strong>可能</strong></td>
+<td><strong>可能</strong></td>
+<td><strong>可能</strong></td>
+<td><strong>可能</strong></td>
+</tr>
+<tr>
+<td>Read Committed(读已提交)</td>
+<td>不可能</td>
+<td><strong>可能</strong></td>
+<td>不可能</td>
+<td><strong>可能</strong></td>
+<td><strong>可能</strong></td>
+</tr>
+<tr>
+<td>Repeatable Read(可重复读)</td>
+<td>不可能</td>
+<td>不可能</td>
+<td>不可能</td>
+<td>不可能</td>
+<td><strong>可能</strong></td>
+</tr>
+<tr>
+<td>Serializable(串行化)</td>
+<td>不可能</td>
+<td>不可能</td>
+<td>不可能</td>
+<td>不可能</td>
+<td>不可能</td>
+</tr>
+</tbody>
+</table>
+<h3 id="read-uncommitted读未提交">Read Uncommitted(读未提交)</h3>
+<p>只限制了两个数据<strong>不能同时修改</strong>，但即使事务未提交也会<strong>读取到其它事务未提交的内容(可能会被回滚)</strong>。会有<strong>脏读、重复读、幻读</strong>的问题，读取未提交的数据，也被称之为<strong>脏读（Dirty Read）</strong>。</p>
+<p><strong>特点</strong>：最低级别，任何情况都无法保证</p>
+<p><strong>数据库锁情况</strong></p>
+<ul>
+<li>读取数据：<strong>未加锁，每次都读到最新数据，性能最好</strong></li>
+<li>写入数据：<strong>只对数据增加行级共享锁，写完释放</strong></li>
+</ul>
+<h3 id="read-committed读已提交">Read Committed(读已提交)</h3>
+<p>当前事务只能读取到其它事务<strong>已提交</strong>的数据。因同一事务的其它实例在该实例处理期间可能会有新的commit，所以同一select可能返回不同结果，这就是所谓的<strong>不可重复读（Nonrepeatable Read）</strong>。该隔离级别<strong>解决了脏读</strong>问题，但还是会存在<strong>重复读、幻读</strong>问题。</p>
+<p><strong>特点</strong>：避免脏读</p>
+<p><strong>脏读解决方案</strong>：基于乐观锁理论的MVCC（多版本并发控）实现</p>
+<p><strong>数据库锁情况</strong></p>
+<ul>
+<li>读取数据：<strong>加行级共享锁（读到时才加锁），读完后立即释放</strong></li>
+<li>写入数据：<strong>在更新时的瞬间对其加行级排它锁，直到事务结束才释放</strong></li>
+</ul>
+<h3 id="repeatable-read可重复读">Repeatable Read(可重复读)</h3>
+<p>限制了读取数据时<strong>不可以进行修改</strong>，所以<strong>解决了不能重复读</strong>的问题。但是读取范围数据的时候，是可以插入或删除数据，所以还会存在**幻读（Phantom Read）**问题。</p>
+<p><strong>幻读</strong> 是户读取某一范围的数据行时，另一个事务又在该范围内插入了新行，当该用户再读取该范围的数据行时，会发现有新的“幻影” 行。</p>
+<p><strong>特点</strong>：避免脏读、不可重复读。MySQL默认事务隔离级别</p>
+<p><strong>不可重复读解决方案</strong>：基于乐观锁理论的MVCC（多版本并发控）实现</p>
+<p><strong>数据库锁情况</strong></p>
+<ul>
+<li>读取数据：<strong>开始读取的瞬间对其增加行级共享锁，直到事务结束才释放</strong></li>
+<li>写入数据：<strong>开始更新的瞬间对其增加行级排他锁，直到事务结束才释放</strong></li>
+</ul>
+<h3 id="serializable可串行化">Serializable(可串行化)</h3>
+<p>所有事务都是进行<strong>串行化顺序</strong>执行的。可以避免<strong>脏读</strong>、<strong>不可重复读</strong>与<strong>幻读</strong>所有并发问题。但该事务隔离级别下，事务执行很耗性能。</p>
+<p><strong>特点</strong>：避免脏读、不可重复读、幻读</p>
+<p><strong>数据库锁情况</strong></p>
+<ul>
+<li>读取数据：<strong>先对其加表级共享锁 ，直到事务结束才释放</strong></li>
+<li>写入数据：<strong>先对其加表级排他锁 ，直到事务结束才释放</strong></li>
+</ul>
+<h2 id="spring事务机制">Spring事务机制</h2>
+<h3 id="实现方式">实现方式</h3>
+<p>在Spring中事务有两种实现方式：</p>
+<ul>
+<li><strong>编程式事务管理</strong>： 编程式事务管理使用<code>TransactionTemplate</code>或直接使用底层的<code>PlatformTransactionManager</code></li>
+<li><strong>声明式事务管理</strong>： 建立在<code>AOP</code>之上的。其本质是对方法前后进行拦截，然后在目标方法开始之前创建或者加入一个事务，在执行完目标方法之后根据执行情况提交或者回滚事务。声明式事务管理不需要入侵代码，通过<code>@Transactional</code>就可以进行事务操作，更快捷而且简单</li>
+</ul>
+<h3 id="提交方式">提交方式</h3>
+<p><strong>默认情况下，数据库处于自动提交模式</strong>。每一条语句处于一个单独的事务中，在这条语句执行完毕时，如果执行成功则隐式的提交事务，如果执行失败则隐式的回滚事务。<br>
+对于正常的事务管理，是一组相关的操作处于一个事务之中，因此必须关闭数据库的自动提交模式。不过，这个我们不用担心，Spring会将底层连接的自动提交特性设置为false。也就是在使用Spring进行事物管理的时候，Spring会将是否自动提交设置为false，等价于JDBC中的 <code>connection.setAutoCommit(false);</code>，在执行完之后在进行提交，<code>connection.commit();</code> 。</p>
+<h3 id="事务隔离级别">事务隔离级别</h3>
+<p>隔离级别是指若干个并发的事务之间的隔离程度。</p>
+<pre><code class="language-java">@Transactional(isolation = Isolation.READ_UNCOMMITTED)
+public void addGoods(){
+	......
+}
+</code></pre>
+<p>枚举类Isolation中定义了五种隔离级别：</p>
+<ul>
+<li><code>DEFAULT</code>：默认值。表示使用底层数据库的默认隔离级别。对大部分数据库，通常这值就是<strong>READ_COMMITTED</strong></li>
+<li><code>READ_UNCOMMITTED</code>：该隔离级别表示一个事务可以读取另一个事务修改但还没有提交的数据。该级别不能防止脏读，不可重复读和幻读，因此很少使用该隔离级别</li>
+<li><code>READ_COMMITTED</code>：该隔离级别表示一个事务只能读取另一个事务已经提交的数据。该级别可以防止脏读，这也是大多数情况下的推荐值</li>
+<li><code>REPEATABLE_READ</code>：该隔离级别表示一个事务在整个过程中可以多次重复执行某个查询，并且每次返回的记录都相同。该级别可以防止脏读和不可重复读</li>
+<li><code>SERIALIZABLE</code>：所有的事务依次逐个执行，这样事务之间就完全不可能产生干扰，也就是说，该级别可以防止脏读、不可重复读以及幻读。但是这将严重影响程序的性能。通常情况下也不会用到该级别</li>
+</ul>
+<h3 id="事务传播行为">事务传播行为</h3>
+<p>事务的传播性一般用在事务嵌套的场景，如一个事务方法里面调用了另外一个事务方法，那两个方法是各自作为独立的方法提交还是内层事务合并到外层事务一起提交，这就需要事务传播机制配置来确定怎么样执行。</p>
+<pre><code class="language-java">@Transactional(propagation=Propagation.REQUIRED)
+public void addGoods(){
+	......
+}
+</code></pre>
+<p>枚举类Propagation中定义了七种事务传播机制如下：</p>
+<ul>
+<li><code>REQUIRED</code>（required，要求，Spring默认）：<strong>当前存在事务，则加入该事务；当前没有事务，则创建一个新的事务</strong></li>
+<li><code>REQUIRES_NEW</code>（requires_new，要求新的）：<strong>创建一个新事务，如果存在当前事务，则挂起该事务</strong></li>
+<li><code>SUPPORTS</code>（supports，支持）：<strong>如果当前存在事务，则加入当前事务；如果当前没有事务，就以非事务方法执行</strong></li>
+<li><code>NOT_SUPPORTED</code>（not_supported，不支持）：<strong>始终以非事务方式执行，如果当前存在事务，则挂起当前事务</strong></li>
+<li><code>NEVER</code>（never，都不）：<strong>不使用事务，如果当前事务存在，则抛出异常</strong></li>
+<li><code>MANDATORY</code>（mandatory，强制）：<strong>如果当前存在事务，则加入当前事务；如果当前事务不存在，则抛出异常</strong></li>
+<li><code>NESTED</code>（nested，嵌套）<strong>如果当前事务存在，则在嵌套事务中执行，否则REQUIRED的操作一样（开启一个事务）</strong></li>
+</ul>
+<h3 id="事务回滚规则">事务回滚规则</h3>
+<p>指示Spring事务管理器回滚一个事务的推荐方法是在当前事务的上下文内抛出异常。Spring事务管理器会捕捉任何未处理的异常，然后依据规则决定是否回滚抛出异常的事务。<br>
+默认配置下，Spring只有在抛出的异常为运行时unchecked异常时才回滚该事务，也就是抛出的异常为RuntimeException的子类(Errors也会导致事务回滚)，而抛出checked异常则不会导致事务回滚。<br>
+可以明确的配置在抛出那些异常时回滚事务，包括checked异常。也可以明确定义那些异常抛出时不回滚事务。</p>
+<h3 id="事务常用配置">事务常用配置</h3>
+<ul>
+<li>
+<p><strong>readOnly</strong></p>
+<p>该属性用于设置当前事务是否为只读事务，设置为true表示只读，false则表示可读写，默认值为false。例如：@Transactional(readOnly=true)</p>
+</li>
+<li>
+<p><strong>rollbackFor</strong></p>
+<p>该属性用于设置需要进行回滚的异常类数组，当方法中抛出指定异常数组中的异常时，则进行事务回滚。例如：指定单一异常类：@Transactional(rollbackFor=RuntimeException.class)指定多个异常类：@Transactional(rollbackFor={RuntimeException.class, Exception.class})</p>
+</li>
+<li>
+<p><strong>rollbackForClassName</strong></p>
+<p>该属性用于设置需要进行回滚的异常类名称数组，当方法中抛出指定异常名称数组中的异常时，则进行事务回滚。例如：指定单一异常类名称@Transactional(rollbackForClassName=”RuntimeException”)指定多个异常类名称：@Transactional(rollbackForClassName={“RuntimeException”,”Exception”})</p>
+</li>
+<li>
+<p><strong>noRollbackFor</strong></p>
+<p>该属性用于设置不需要进行回滚的异常类数组，当方法中抛出指定异常数组中的异常时，不进行事务回滚。例如：指定单一异常类：@Transactional(noRollbackFor=RuntimeException.class)指定多个异常类：@Transactional(noRollbackFor={RuntimeException.class, Exception.class})</p>
+</li>
+<li>
+<p><strong>noRollbackForClassName</strong></p>
+<p>该属性用于设置不需要进行回滚的异常类名称数组，当方法中抛出指定异常名称数组中的异常时，不进行事务回滚。例如：指定单一异常类名称：@Transactional(noRollbackForClassName=”RuntimeException”)指定多个异常类名称：@Transactional(noRollbackForClassName={“RuntimeException”,”Exception”})</p>
+</li>
+<li>
+<p><strong>propagation</strong></p>
+<p>该属性用于设置事务的传播行为。例如：@Transactional(propagation=Propagation.NOT_SUPPORTED,readOnly=true)</p>
+</li>
+<li>
+<p><strong>isolation</strong></p>
+<p>该属性用于设置底层数据库的事务隔离级别，事务隔离级别用于处理多事务并发的情况，通常使用数据库的默认隔离级别即可，基本不需要进行设置</p>
+</li>
+<li>
+<p><strong>timeout</strong></p>
+<p>该属性用于设置事务的超时秒数，默认值为-1表示永不超时</p>
+</li>
+</ul>
+<h3 id="失效场景">失效场景</h3>
+<ul>
+<li><strong>@Transactional 应用在非 public 修饰的方法上</strong></li>
+<li><strong>数据库引擎要不支持事务</strong></li>
+<li><strong>由于propagation 设置错误，导致注解失效</strong></li>
+<li><strong>rollbackFor 设置错误，@Transactional 注解失效</strong></li>
+<li><strong>方法之间的互相调用也会导致@Transactional失效</strong></li>
+<li><strong>异常被你的 catch“吃了”导致@Transactional失效</strong></li>
+</ul>
+<h1 id="innodb引擎">InnoDB引擎</h1>
+<h2 id="线程模型">线程模型</h2>
+<p>InnoDB存储引擎是多线程的模型，所以犹太有多个不同的后台线程，负责处理不同的任务，主要有：<code>Master Thread</code>、<code>I/O Thread</code>、<code>Purge Thread</code>、<code>Page Cleaner Thread</code> 四种。</p>
+<h3 id="master-thread">Master Thread</h3>
+<p><strong>核心后台线程，主要负责将缓冲池中的数据异步刷新到磁盘，保证数据的一致性，包括脏页的刷新、合并插入缓冲(Insert Buffer)、回滚页（UNDO PAGE）的回收等。</strong></p>
+<h3 id="io-thread">I/O Thread</h3>
+<p>**在InnoDB存储引擎中大量使用AIO来处理IO请求，而I/O Thread主要负责处理这些 I/O 请求的回调(call back)处理。**这里共有四类I/O线程，分别是：<code>insert buffer thread</code>、<code>log thread</code>、<code>read thread</code>、<code>write thread</code>。</p>
+<pre><code class="language-sql">mysql&gt; show variables like &quot;%innodb%io_threads%&quot;;
++-------------------------+-------+
+| Variable_name           | Value |
++-------------------------+-------+
+| innodb_read_io_threads  | 4     |
+| innodb_write_io_threads | 4     |
++-------------------------+-------+
+</code></pre>
+<h3 id="purge-thread">Purge Thread</h3>
+<p><strong>purge thread线程用来回收事务提交后其被分配的undo页，默认是开启的，可以通过修改配置文件来配置多个Purge Thread线程。</strong></p>
+<pre><code class="language-sql">mysql&gt; show variables like &quot;%purge_threads%&quot;;
++----------------------+-------+
+| Variable_name        | Value |
++----------------------+-------+
+| innodb_purge_threads | 4     |
++----------------------+-------+
+1 row in set (0.00 sec)
+</code></pre>
+<p>在提交了一个事务给数据库时，为了保证事务能够回滚，会在内存中缓存下该事务未执行时的状态（undo 日志），如果事务执行不成功，那么就恢复之前的状态；如果执行成功，undo日志就用不着了，要把它删除以腾出空间。Purge 线程就是做这个删除工作的。默认有4个线程。</p>
+<h3 id="page-cleaner-thread">Page Cleaner Thread</h3>
+<p><strong>用于多版本控制功能中回收delete和update操作产生的脏页，用来执行将脏页刷新到磁盘。</strong></p>
+<p>MySQL 5.7 版本以后，支持设置多个刷脏页线程，提高脏页处理性能。设置命令，比如：</p>
+<p><code>SET GLOBAL innodb_page_cleaner = 3</code></p>
+<h2 id="数据页">数据页</h2>
+<p>数据页主要是用来存储表中记录的，它在磁盘中是用双向链表相连的，方便查找，能够非常快速得从一个数据页，定位到另一个数据页。通常情况下，单个数据页默认的大小是<code>16kb</code>。当然也可以通过参数 <code>innodb_page_size</code> 来重新设置大小。不过，一般情况下，用它的默认值就够了。单个数据页包含内容如下：</p>
+<figure data-type="image" tabindex="19"><img src="/images/Database/InnoDB%E9%A1%B5%E7%BB%93%E6%9E%84%E7%A4%BA%E6%84%8F%E5%9B%BE.jpg" alt="InnoDB页结构示意图" loading="lazy"></figure>
+<figure data-type="image" tabindex="20"><img src="/images/Database/InnoDB%E9%A1%B5%E5%90%84%E7%BB%84%E6%88%90%E9%83%A8%E5%88%86%E7%AE%80%E5%8D%95%E6%8F%8F%E8%BF%B0.jpg" alt="InnoDB页各组成部分简单描述" loading="lazy"></figure>
+<h3 id="file-header文件头">File Header(文件头)</h3>
+<p><strong>用于记录页（Page）的信息</strong>，如页类型、上一页和下一页等，占固定的 <code>38byte</code>。重要字段结构如下：</p>
+<ul>
+<li>
+<p><code>FIL_PAGE_SPACE_OR_CHKSUM</code>：<strong>校验和</strong>。为了快速比较、保证数据的完整性防止遭到破坏等</p>
+</li>
+<li>
+<p><code>FIL_PAGE_OFFSET</code>：<strong>页号</strong>。InnoDB通过页号来可以唯一定位一个页</p>
+</li>
+<li>
+<p><code>FIL_PAGE_TYPE</code>：<strong>页的类型</strong>。InnoDB为了不同的目的而把页分为不同的类型</p>
+</li>
+<li>
+<p><code>FIL_PAGE_PREV、FIL_PAGE_NEXT</code>：分别指向<strong>上一页</strong>和<strong>下一页</strong></p>
+</li>
+</ul>
+<h3 id="page-header页头">Page Header(页头)</h3>
+<p><strong>存储页内的一些状态和汇总信息</strong>，如本页有多少条记录等，占固定的 <code>56byte</code>。重要字段结构如下：</p>
+<ul>
+<li>
+<p><code>PAGE_N_DIR_SLOTS</code>：<strong>页内槽的个数</strong>，其占用<code>2byte</code>。新建空数据页初值为2，分别指向Infimum最小记录、Supremum最大记录</p>
+</li>
+<li>
+<p><code>PAGE_HEAP_TOP</code>：<strong>第一条记录地址</strong></p>
+</li>
+<li>
+<p><code>PAGE_N_HEAP</code>：<strong>页内记录数</strong>，含最大最小记录及标记删除的记录</p>
+</li>
+</ul>
+<h3 id="infimunsupremum-records">Infimun+Supremum Records</h3>
+<p><strong>为了快速找到最大或最小记录，在保存用户记录时，数据库会自动创建两条额外的记录，最大记录保存到Supremum记录中，最小记录保存在Infimum记录中</strong>。如下图所示：</p>
+<figure data-type="image" tabindex="21"><img src="/images/Database/InnoDB-%E6%9C%80%E5%A4%A7%E5%92%8C%E6%9C%80%E5%B0%8F%E8%AE%B0%E5%BD%95.jpg" alt="InnoDB-最大和最小记录" loading="lazy"></figure>
+<h3 id="user-records用户记录">User Records(用户记录)</h3>
+<p><strong>用来存储用户插入的数据记录</strong>。对于新申请的数据页，用户记录是空的。当插入数据时，Innodb会将一部分<code>空闲空间</code>分配给用户记录。我们平时保存到数据库中的数据，就存储在它里面。Innodb支持的数据行格式有四种：</p>
+<ul>
+<li>compact行格式</li>
+<li>redundant行格式</li>
+<li>dynamic行格式</li>
+<li>compressed行格式</li>
+</ul>
+<p>以compact行格式为例：</p>
+<figure data-type="image" tabindex="22"><img src="/images/Database/InnoDB-compact%E8%A1%8C%E6%A0%BC%E5%BC%8F.jpg" alt="InnoDB-compact行格式" loading="lazy"></figure>
+<p>一条用户记录主要包含三部分内容：</p>
+<ul>
+<li>
+<p><strong>记录额外信息</strong>：它包含了变长字段、null值列表和记录头信息</p>
+<p><strong>记录头信息</strong>用于描述一些特殊的属性。它主要包含：</p>
+<ul>
+<li>deleted_flag：即删除标记，用于标记该记录是否被删除了</li>
+<li>min_rec_flag：即最小目录标记，它是非叶子节点中的最小目录标记</li>
+<li>n_owned：即拥有的记录数，记录该组索引记录的条数</li>
+<li>heap_no：即堆上的位置，它表示当前记录在堆上的位置</li>
+<li>record_type：即记录类型，其中0表示普通记录，1表示非叶子节点，2表示Infrimum记录， 3表示Supremum记录</li>
+<li>next_record：即下一条记录的位置</li>
+</ul>
+</li>
+<li>
+<p><strong>隐藏列</strong>：它包含了行id(<code>db_row_id</code>)、事务id(<code>db_trx_id</code>)和回滚点(<code>db_roll_ptr</code>)</p>
+</li>
+<li>
+<p><strong>真正的数据列</strong>：包含真正的用户数据，可以有很多列</p>
+</li>
+</ul>
+<h3 id="free-space空闲空间">Free Space(空闲空间)</h3>
+<p><strong>为页面的剩余空间</strong>。User Records部分从上往下使用剩余空间，而Page Directory则从下往上使用剩余空间。</p>
+<figure data-type="image" tabindex="23"><img src="/images/Database/FreeSpace%E5%89%A9%E4%BD%99%E7%A9%BA%E9%97%B4.jpg" alt="FreeSpace剩余空间" loading="lazy"></figure>
+<h3 id="page-directory页目录">Page Directory(页目录)</h3>
+<p><strong>为了在单页中能快速查找到对应的记录（最坏情况为全页扫描），把一页用户记录分为若干组，每一组的最大记录都保存到<code>页目录</code>，每一组的最大记录叫做<code>槽</code>，然后就能通过二分查找进行快速定位记录</strong>。所下图所示：</p>
+<figure data-type="image" tabindex="24"><img src="/images/Database/InnoDB-%E9%A1%B5%E7%9B%AE%E5%BD%95.jpg" alt="InnoDB-页目录" loading="lazy"></figure>
+<h3 id="file-trailer文件结尾信息">File Trailer(文件结尾信息)</h3>
+<p>用于检验当前页的完整性，主要记录了页面的<code>校验和（checksum）</code>。具体地其占用 <code>8byte</code>，前<code>4byte</code>为校验和(checksum)，后<code>4byte</code>为页面被最后修改时相应的日志序列位置(LSN)。</p>
+<h2 id="行格式">行格式</h2>
+<h3 id="compact行格式">compact行格式</h3>
+<h3 id="redundant行格式">redundant行格式</h3>
+<h3 id="dynamic行格式">dynamic行格式</h3>
+<h3 id="compressed行格式">compressed行格式</h3>
+<h2 id="内存结构">内存结构</h2>
+<h3 id="buffer-pool">Buffer Pool</h3>
+<p><code>InnoDB </code>为了解决磁盘 <code>I/O</code> 频繁操作问题，<code>MySQL </code>需要申请一块内存空间，这块内存空间称为<code>Buffer Pool</code>。</p>
+<figure data-type="image" tabindex="25"><img src="/images/Database/Buffer-Pool-LRU%E9%93%BE%E8%A1%A8%E4%BC%98%E5%8C%96.png" alt="Buffer-Pool-LRU链表优化" loading="lazy"></figure>
+<h4 id="缓存页">缓存页</h4>
+<p><code>MySQL</code>数据是以页为单位，每页默认<code>16KB</code>，称为<strong>数据页</strong>。在<code>Buffer Pool</code>里面会划分出若干个<strong>缓存页</strong>与<strong>数据页</strong>对应。</p>
+<figure data-type="image" tabindex="26"><img src="/images/Database/Buffer-Pool-%E7%BC%93%E5%AD%98%E9%A1%B5.png" alt="Buffer-Pool-缓存页" loading="lazy"></figure>
+<h4 id="描述数据">描述数据</h4>
+<p>每个<strong>缓存页</strong>会有对应的一份<strong>描述数据</strong>（一一对应），里面存储了<strong>缓存页的元数据信息</strong>，包含一些所属表空间、数据页的编号、<code>Buffer Pool</code>中的地址等。可用于<strong>缓存页</strong>直接映射到对应的<strong>数据页</strong>。每个描述数据默认为 <code>800Byte</code>。</p>
+<figure data-type="image" tabindex="27"><img src="/images/Database/Buffer-Pool-%E6%8F%8F%E8%BF%B0%E6%95%B0%E6%8D%AE.png" alt="Buffer-Pool-描述数据" loading="lazy"></figure>
+<p>后续对数据的增删改查都是在<code>Buffer Pool</code>里操作</p>
+<ul>
+<li>查询：从磁盘加载到缓存，后续直接查缓存</li>
+<li>插入：直接写入缓存</li>
+<li>更新删除：缓存中存在直接更新，不存在加载数据页到缓存更新</li>
+</ul>
+<p>直接更新数据的缓存页称为<strong>脏页</strong>，缓存页刷盘后称为<strong>干净页</strong>。</p>
+<h4 id="缓存页哈希表">缓存页哈希表</h4>
+<p>查询数据时，如何在<code>Buffer Pool</code>里快速定位到对应的缓存页呢？难道需要一个<strong>非空闲的描述数据</strong>链表，再通过<strong>表空间号+数据页编号</strong>遍历查找吗？这样做也可以实现，但是效率不太高，时间复杂度是<code>O(N)</code>。</p>
+<figure data-type="image" tabindex="28"><img src="/images/Database/Buffer-Pool-%E7%BC%93%E5%AD%98%E9%A1%B5%E5%93%88%E5%B8%8C%E8%A1%A8.png" alt="Buffer-Pool-缓存页哈希表" loading="lazy"></figure>
+<p>所以我们可以换一个结构，使用哈希表来缓存它们间的映射关系，时间复杂度是<code>O(1)</code>。</p>
+<figure data-type="image" tabindex="29"><img src="/images/Database/Buffer-Pool-%E7%BC%93%E5%AD%98%E9%A1%B5%E5%93%88%E5%B8%8C%E8%A1%A8-%E5%A4%8D%E6%9D%82%E5%BA%A6.png" alt="Buffer-Pool-缓存页哈希表-复杂度" loading="lazy"></figure>
+<p><strong>表空间号+数据页号</strong>，作为一个<code>key</code>，然后缓存页的地址作为<code>value</code>。每次加载数据页到空闲缓存页时，就写入一条映射关系到<strong>缓存页哈希表</strong>中。</p>
+<figure data-type="image" tabindex="30"><img src="/images/Database/Buffer-Pool-%E7%BC%93%E5%AD%98%E9%A1%B5%E5%93%88%E5%B8%8C%E8%A1%A8-%E6%98%A0%E5%B0%84%E5%85%B3%E7%B3%BB.png" alt="Buffer-Pool-缓存页哈希表-映射关系" loading="lazy"></figure>
+<p>后续的查询，就可以通过<strong>缓存页哈希表</strong>路由定位了。</p>
+<h4 id="free链表">Free链表</h4>
+<p><strong>Free链表可以帮助我们快速找到空闲的缓存页</strong>。当执行增删改查时，需要从数据页加载数据，然后从free链表（双向链表）中找到空闲的缓存页。把数据页的表空间号和数据页号写入描述信息块，加载数据到缓存页后，会把缓存页对应的描述信息块从free链表中移除。<code>Free</code>链表设计：</p>
+<ul>
+<li>新增**<code>free</code>基础节点**</li>
+<li><strong>描述数据</strong>添加**<code>free</code>节点指针**</li>
+</ul>
+<figure data-type="image" tabindex="31"><img src="/images/Database/Buffer-Pool-Free%E9%93%BE%E8%A1%A8%E7%BB%84%E6%88%90.png" alt="Buffer-Pool-Free链表组成" loading="lazy"></figure>
+<h4 id="flush链表">Flush链表</h4>
+<p><strong>Free链表可以帮助我们快速找到脏页的缓存页</strong>。当空闲时会有异步线程做缓存页刷盘，保证数据的持久性与完整性。但不会每次把<code>Buffer Pool</code>里所有缓存页都刷入磁盘，因为磁盘<code>I/O</code>开销太大，应该把<strong>脏页</strong>刷入磁盘才对（更新过的缓存页）。可哪些缓存页是<strong>脏页</strong>？参照<code>free</code>链表设计<code>flush</code>链表，只要缓存页被更新，就将它的<strong>描述数据</strong>加入<code>flush</code>链表。<code>Flush</code>链表设计：</p>
+<ul>
+<li>新增**<code>flush</code>基础节点**</li>
+<li><strong>描述数据</strong>添加**<code>flush</code>节点指针**</li>
+</ul>
+<figure data-type="image" tabindex="32"><img src="/images/Database/Buffer-Pool-Flush%E9%93%BE%E8%A1%A8-%E7%BC%93%E5%AD%98%E9%A1%B5.png" alt="Buffer-Pool-Flush链表-缓存页" loading="lazy"></figure>
+<p>后续异步线程都从<code>flush</code>链表刷缓存页，当<code>Buffer Pool</code>内存不足时，也会优先刷<code>flush</code>链表里的缓存页。</p>
+<h4 id="lru链表">LRU链表</h4>
+<p><code>MySQL</code>数据库随着系统的运行会不停的把磁盘上的数据页加载到空闲的缓存页里去，因此<code>free</code>链表中的空闲缓存页会越来越少，直到没有，最后磁盘的数据页无法加载。为了解决该问题，需要淘汰缓存页，腾出空闲缓存页。这里借鉴<code>LRU</code>算法思想，把最近最少使用的缓存页淘汰（命中率低），提供<code>LRU</code>链表出来。<code>LRU</code>链表设计：</p>
+<ul>
+<li>新增**<code>LRU</code>基础节点**</li>
+<li><strong>描述数据</strong>添加**<code>LRU</code>节点指针**</li>
+</ul>
+<figure data-type="image" tabindex="33"><img src="/images/Database/LRU%E9%93%BE%E8%A1%A8%E8%AE%BE%E8%AE%A1%E6%80%9D%E8%B7%AF.png" alt="LRU链表设计思路" loading="lazy"></figure>
+<p>实现思路也很简单，只要是查询或修改过缓存页，就把该缓存页的描述数据放入链表头部，也就说近期访问的数据一定在链表头部。当<code>free</code>链表为空的时候，直接淘汰<code>LRU</code>链表尾部缓存页即可。</p>
+<p><strong>LRU链表优化</strong></p>
+<p>缓存页淘汰这里还有点问题，如果仅仅只是使用<code>LRU</code>链表的机制，有两个场景会让<strong>热点数据</strong>被淘汰：</p>
+<p><strong>① 预读机制</strong></p>
+<p>InnoDB使用两种预读算法来提高I/O性能：线性预读（linear read-ahead）和随机预读（randomread-ahead）。</p>
+<p>预读机制是指<code>MySQL</code>加载数据页时，可能会把它相邻的数据页一并加载进来（局部性原理）。这样会带来一个问题，预读进来的数据页，其实我们没有访问，但是它却排在前面。正常来说，淘汰缓存页时，应该把这个预读的淘汰，结果却把尾部的淘汰了，这是不合理的。</p>
+<figure data-type="image" tabindex="34"><img src="/images/Database/Buffer-Pool-LRU%E9%93%BE%E8%A1%A8%E4%BC%98%E5%8C%96-%E5%85%A8%E8%A1%A8%E6%89%AB%E6%8F%8F.png" alt="Buffer-Pool-LRU链表优化-全表扫描" loading="lazy"></figure>
+<p><strong>② 全表扫描</strong></p>
+<p>如果<strong>表数据量大</strong>，大量的数据页会把空闲缓存页用完。最终<code>LRU</code>链表前面都是全表扫描的数据，之前频繁访问的热点数据全部到队尾了，淘汰缓存页时就把<strong>热点数据页</strong>给淘汰了。</p>
+<figure data-type="image" tabindex="35"><img src="/images/Database/819dbbcd31605b3a692576932f25d325.png" alt="图片" loading="lazy"></figure>
+<p><strong>解决方案</strong></p>
+<p>为了解决上述的问题，我们需要给<code>LRU</code>链表做冷热数据分离设计，把<code>LRU</code>链表按一定比例，分为冷热区域，热区域称为<code>young</code>区域，冷区域称为<code>old</code>区域。<strong>以7:3为例，young区域70%，old区域30%</strong></p>
+<figure data-type="image" tabindex="36"><img src="/images/Database/0f2c2610773fb9fe304c374fc37af4ac.png" alt="图片" loading="lazy"></figure>
+<p>如上图所示，数据页第一次加载进缓存页的时候，是先放入冷数据区域的头部，如果1秒后再次访问缓存页，则会移动到热区域的头部。这样就保证了<strong>预读机制</strong>与<strong>全表扫描</strong>加载的数据都在链表队尾。</p>
+<ul>
+<li>
+<p><code>young</code>区域其实还可以做一个小优化，为了防止<code>young</code>区域节点频繁移动到表头</p>
+</li>
+<li>
+<p><code>young</code>区域前面<code>1/4</code>被访问不会移动到链表头部，只有后面的<code>3/4</code>被访问了才会</p>
+</li>
+</ul>
+<p>记住是按照某个比例将<code>LRU</code>链表分成两部分，不是某些节点固定是<code>young</code>区域的，某些节点固定是<code>old</code>区域的，随着程序的运行，某个节点所属的区域也可能发生变化。</p>
+<ul>
+<li>InnoDB在LRU列表中引入了midpoint参数。新读取的页并不会直接放在LRU列表的首部，而是放在LRU列表的midpoint位置，即 innodb_old_blocks_pct这个点的设置。默认是37%，最小是5，最大是95；如果内存比较大的话，可以将这个数值调低，通常会调成20，也就是说20%的是冷数据块。目的是为了保护热区数据不被刷出内存。</li>
+<li>InnoDB还引入了innodb_old_blocks_time参数，控制成为热数据的所需时间，默认是1000ms，也就是1s，也就是数据在1s内没有被刷走，就调入热区。</li>
+</ul>
+<h3 id="change-buffer">Change Buffer</h3>
+<p>**可变缓冲区（Change Buffer）**存在于内存中，当对辅助索引（secondary index） 进行DML操作时，Buffer Pool没有其相应的Page，会将这些变更缓存到Change Buffer中。当Change Buffer里的Page被read的时候，会被合并到Buffer Pool中。<strong>当脏页超过一定比例时，会将其flush磁盘中。</strong> Change Buffer的内存默认占Buffer Pool的25%。</p>
+<p>原本修改Buffer Pool不存在的Page需要先从磁盘读取（一次I/O操作）到内存，然后写redo log。引入Change Buffer后，会先缓存在Change Buffer，然后写redo log。<strong>由于Change Buffer的存在，避免了从磁盘读取辅助索引到缓冲池所需的大量随机访问I/O。</strong></p>
+<p><strong>应用场景</strong></p>
+<p><strong>① 适合写多读少场景</strong></p>
+<p>对于写多读少的业务来说，页面在写完以后马上被访问到的概率比较小，此时 Change Buffer 的使用效果最好。这种业务模型常见的就是账单类、日志类的系统。</p>
+<p><strong>② 不适合写后立即查询场景</strong></p>
+<p>写入之后马上会做查询，那么即使满足了条件，将更新先记录在 Change Buffer，但之后由于马上要访问这个数据页，会立即触发 merge 过程。这样随机访问 I/O 的次数不会减少，反而增加了 Change Buffer 的维护代价。所以，对于这种业务模式来说，Change Buffer 反而起到了副作用。</p>
+<h3 id="自适应哈希索引">自适应哈希索引</h3>
+<p><strong>自适应哈希索引(Adaptive Hash Index)<strong>对InnoDB在Buffer Pool的查询有很大的优化。针对Buffer Pool中</strong>热点页数据</strong>，构建索引（一般使用索引键的前缀构建哈希索引）。因为Hash索引的<strong>等值查询</strong>效率远高于B+Tree，所以当查询命中Hash，就能很快返回结果，不用再去遍历B+Tree。</p>
+<h3 id="log-buffer">Log Buffer</h3>
+<p><strong>日志缓冲区(Log Buffer)<strong>用来存储那些即将被</strong>刷入到磁盘</strong>文件中的日志(如RedoLog)。默认为16MB。参数设置如下：</p>
+<ul>
+<li><code>innodb_log_buffer_size</code>：设置大小</li>
+<li><code>innodb_flush_log_at_trx_commit</code>：控制如何将日志缓冲区的内容写入并刷新到磁盘
+<ul>
+<li><code>0</code>：日志每秒刷新到磁盘。 未刷新日志的事务会在mysql崩溃中丢失</li>
+<li><code>1</code>：为默认值。每次提交事务时，写入并刷新日志到磁盘</li>
+<li><code>2</code>：每次提交事务后写入日志，并每秒刷新一次磁盘。 未刷新日志的事务可能会在mysql崩溃中丢失</li>
+</ul>
+</li>
+<li><code>innodb_flush_log_at_timeout</code>：控制日志刷新频率。每几秒刷新日志，取值范围 [1,2700] (second)</li>
+</ul>
+<h2 id="磁盘结构">磁盘结构</h2>
+<h3 id="表空间tablespaces">表空间(Tablespaces)</h3>
+<h4 id="系统表空间">系统表空间</h4>
+<p><strong>系统表空间(The System Tablespace)是<code>数据字典</code>、<code>双写缓冲区(Doublewrite Buffer)</code>、<code>Change buffer</code>和<code>Undo Logs</code>的储存区域</strong>。该空间的数据文件通过参数<code>innodb_data_file_path</code>控制，默认值是<code>ibdata1:12M:autoextend</code>(文件名为ibdata1，大小略大于12MB，自动扩展)。8.0之后InnoDB将元数据存在该区域的数据字典中（data dictionary）。</p>
+<h4 id="独占表空间">独占表空间</h4>
+<p>**独占表空间(File-Per-Table Tablespaces)**默认开启，为每个表都独立建一个.ibd文件。 通过参数<code>innodb_file_per_tabl</code>  可以设置关闭，这样的话所有表数据是都存在The System Tablespace的ibdata。</p>
+<h4 id="通用表空间">通用表空间</h4>
+<p>**通用表空间(General Tablespaces)**是通过<code>CREATE TABLESPACE</code>创建的共享表空间。通用表空间可以创建于MySQL数据目录外的其他表空间，其可以容纳多张表，且其支持所有的行格式。</p>
+<h4 id="撤销表空间">撤销表空间</h4>
+<p>**撤销表空间(Undo Log Tablespaces)**保存的是undo log ，用于回滚事务。undo log（撤销日志或回滚日志）记录了事务发生之前的数据状态（不包括select） 。用来保证在必要时实现回滚，如果另一个事务需要在一致性读操作中查看原始数据，则从undo日志记录中检索未修改的数据，也就是说MVCC机制也依赖于undo log来实现。在执行 undo 的时候，仅仅是将数据从逻辑上恢复至事务之前的状态，而不是从物理页面上操作实现的，属于逻辑格式的日志。</p>
+<h4 id="临时表空间">临时表空间</h4>
+<p>**临时表空间(Temporary Tablespaces)**存储临时表的数据，包括用户创建的临时表和磁盘的内部临时表。对应数据目录下的ibtmp1文件。当数据服务器正常关闭时，该表空间被删除，下次重新产生。</p>
+<h3 id="数据字典data-dictionary">数据字典(Data Dictionary)</h3>
+<p><strong>Data Dictironary(DD，数据字典)是有关数据库对象的合集</strong>，例如表、视图、索引等，可以看做是数据库的元信息。换句话说，数据字典存储了有关表结构的信息，每个表具有的列，表的索引等</p>
+<p>InnoDB数据字典由内部系统表组成，这些表包含用于<strong>查找表、索引和表字段</strong>等对象的元数据。元数据物理上位于InnoDB系统表空间中。由于历史原因，数据字典元数据在一定程度上与InnoDB表元数据文件（.frm文件）中存储的信息重叠。</p>
+<h3 id="双写缓冲区doublewrite-buffer">双写缓冲区(Doublewrite Buffer)</h3>
+<p><strong>Doublewrite Buffer机制极大的保障了Innodb引擎的数据安全性。尽管出现了宕机坏页的状况，也能够从Doublewrite Buffer读取正常页来恢复</strong>。Doublewrite缓冲区是一个存储区域，InnoDB在将页面写入InnoDB数据文件中的适当位置以前，会在其中写入从缓冲池中刷新的页面。若是在页面写入过程当中发生操做系统，存储子系统或mysqld进程崩溃，则InnoDB能够在崩溃恢复期间从Doublewrite缓冲区中找到该页面的良好副本。</p>
+<p>在MySQL 8.0.20以前，Doublewrite缓冲区存储区位于InnoDB系统表空间中。从MySQL 8.0.20开始，Doublewrite缓冲区存储区位于Doublewrite文件中。从MySQL 8.0.20开始，默认会建立2个Doublewrite Buffer文件。</p>
+<p><strong>为何有了redo，还要Doublewrite Buffer机制？数据库双写的好处是什么？</strong><br>
+Doublewrite Buffer机制主要是更大的保障了数据页的可靠性。**主要是解决部分写失效的问题。**好比16KB的页，只写了前面4KB，以后就发生宕机了，这种状况被称为部分写失效。针对部分写失效的问题，redo重作日志也不能解决这个问题。</p>
+<h3 id="重做日志redo-log">重做日志(Redo Log)</h3>
+<p>重作日志是基于磁盘的数据结构，主要做用是在崩溃恢复期间用于纠正不完整事务写入的数据。在正常操做期间，重作日志对更改表数据的请求进行编码记录，这些请求是由SQL语句或低级API调用引发的。在初始化期间以及接受链接以前，会自动重播未完成意外关闭以前未完成更新数据文件的修改。默认状况下，redo log会自动生成2个文件：<code>ib_logfile0</code>和<code>ib_logfile1</code> 。</p>
+<p><strong>WAL机制</strong><br>
+WAL 的全称是 Write-Ahead Logging，中文称<strong>预写式日志</strong>，是一种数据安全写入机制。就是<strong>先写日志，而后在写入磁盘，这样保证数据的安全性</strong>。Mysql中的Redo Log就是采用WAL机制。(这里的写日志因为是顺序写，因此不会成为性能瓶颈。)</p>
+<p><strong>WAL做用</strong><br>
+Mysql中若是为了保证数据的持久性，在每提交一个事务就将日志刷新到磁盘上，这样效率就过低了，严重影响性能，因此就有了Write-Ahead 。<br>
+<strong>Write-Ahead工作机制</strong><br>
+先在内存中提交事务，而后写日志(在InnoDB中就是Redo Log，日志是为了防止宕机致使内存数据丢失)，而后再后台任务中把内存中的数据异步刷到磁盘。</p>
+<h3 id="撤销日志undo-logs">撤销日志(Undo Logs)</h3>
+<p>回滚日志主要是为了支持事务回滚功能。默认会生成2个回滚日志，保存在undo tablespaces，默认状况下就在数据目录下：<code>undo_001</code>和<code>undo_002</code>。</p>
+<p>一个事务最多能够分配四个撤消日志，如下每种操做类型均可以分配一个：</p>
+<ul>
+<li>对用户自定义表执行插入操做</li>
+<li>对用户自定义表执行删除和更新操做</li>
+<li>对用户自定义的临时表执行插入操做</li>
+<li>对用户自定义的临时表执行删除和更新操做</li>
+</ul>
+<h2 id="存储索引">存储索引</h2>
+<p><code>InnoDB</code>支持<code>3</code>种常见索引：</p>
+<ul>
+<li><code>B+ </code>树索引</li>
+<li>全文索引</li>
+<li>哈希索引</li>
+</ul>
+<h3 id="b树索引">B+树索引</h3>
+<p><strong>B+树是为磁盘或其它直接存取辅助设备涉及的一种近似平衡的查找树</strong>。在InnoDB存储引擎中，B+树索引<strong>根据键值类型</strong>可以分为<strong>聚集索引</strong>和<strong>非聚集索引</strong>。</p>
+<h4 id="聚集索引主键索引">聚集索引(主键索引)</h4>
+<p><strong>聚集索引(Clustered index)<strong>的</strong>非叶子节点</strong>存放<strong>索引页</strong>，<strong>叶子节点</strong>存放<strong>数据页</strong>，数据页中的所有的行记录都是按照键值递增方式顺序的存放在同一层的叶子结点上，各叶子结点通过前驱后继两个指针串联成一个双向循环链表(数据页本身就是聚集索引的一部分)。<br>
+<img src="/images/Database/Innodb-%E8%81%9A%E9%9B%86%E7%B4%A2%E5%BC%95.png" alt="Innodb-聚集索引" loading="lazy"></p>
+<p>InnoDB存储引擎在创建表的过程中就会根据主键自动构造一棵B+树索引，其高度一般是2<sub>4层，故需要2</sub>4次的查询才能找到对应的数据页。聚集索引使用时，根据主键在B+树中依次比较，直到找到底层对应的数据页（叶子节点），然后通过<strong>二分查找</strong>的方式在数据页中<strong>定位到目标行</strong>，故其对针对主键的排序查找和范围查找的速度是特别快的。</p>
+<h4 id="非聚集索引辅助索引">非聚集索引(辅助索引)</h4>
+<p><strong>非聚集索引</strong>的<strong>非叶子节点</strong>包含对应的<strong>辅助索引键值</strong>，叶子节点不同于聚集索引，不含行数据，而是包含了一个聚集索引键（主键），通过查找非聚集索引B+树找到其叶子节点上的主键，然后再去聚集索引B+树上去查找对应的行数据。其树高一般也是2~4层，故查询次数较聚集索引多了一倍。</p>
+<figure data-type="image" tabindex="37"><img src="/images/Database/Innodb-%E9%9D%9E%E8%81%9A%E9%9B%86%E7%B4%A2%E5%BC%95.png" alt="Innodb-非聚集索引" loading="lazy"></figure>
+<h3 id="全文索引fulltext">全文索引(FULLTEXT)</h3>
+<p>B+树索引的特点是可以通过索引字段等值查询（where a = “xxx”）或者进行前缀匹配（where a like “xxx%”）查找，然而如果数据库中存储的数据为blog或weibo之类的长篇文本，用户一般希望以模糊匹配（where a like “%xxx%”）的方式来查询，由于条件的前缀并不是固定的值，所以没法利用B+树索引进行比较查找，故而效率会很低，为了解决这类问题，引入了全文索引。<br>
+全文索引（Full-Text Search）是将数据库中某段文字（或词语）快速查找出来的技术。其本质是一种映射表结构，在表中存储了单词与单词所在文档的位置的映射关系（其key是对应的数据（单词），value是数据的位置），相对于B+树索引的key-val来讲，顺序是倒过来的，所以也叫倒排索引。这个索引表，也叫做辅助表。<br>
+<img src="/images/Database/Innodb-%E5%85%A8%E6%96%87%E7%B4%A2%E5%BC%95.png" alt="Innodb-全文索引" loading="lazy"></p>
+<p>InnoDB存储引擎生成了6张辅助表以提高全文检索的并发性能，同时该表是持久化的保存在磁盘上的，在服务起来后，动态将其加载到内存里。辅助表在内存中并不是表结构（能想来表的查询效率并不高），其在内存中的格式是一棵红黑树，根据（text,documents）来进行排序，该缓存也被起个响亮的名字——全文检索索引缓存。<br>
+参数innodb_ft_cache_size用来控制全文索引缓存的大小，默认一般是32M。缓存满时，会将其中的（text,documents）映射信息保存到磁盘中去。若缓存设置过小，可能会导致频繁换页引起索引效率下降。</p>
+<p>另外值得一提的是，InnoDB存储引擎的全文索引只支持如英文这类的有单词分界符的语言，像中文这样的语言是不支持的</p>
+<h3 id="自适应哈希索引-2">自适应哈希索引</h3>
+<p>B+树索引树高一般是2<sub>4层，故需要2</sub>4次的查询才能找到对应的数据页，而哈希索引是一种非常快的查找方法，通常情况下它的时间复杂度是O(1)的。InnDB存储引擎一般会默认开启自适应哈希索引的开关，通过如下命令可以查看：</p>
+<pre><code class="language-sql">show variables like '%adaptive_hash%';
+</code></pre>
+<p>开启后，引擎会自动监控对表上各个索引页的查询，如果观察到建立哈希索引可以带来一定的效率提升，则会自动构建哈希索引，所以称之为自适应哈希索引（Adaptive Hash Index）。AHI是通过缓冲池中的B+树索引页构造而来，无需访问磁盘，故而创建速度是很快的。同样的，因为是自适应的，所以无法主动的去构造AHI，我们只能控制它的开启或关闭：</p>
+<pre><code class="language-sql">set global innodb_adaptive_hash_index=off/on
+</code></pre>
+<p>该引擎根据访问的频率以及查询条件来为某些热点页建立AHI：</p>
+<ul>
+<li>查询条件必须是指定的值而不是范围：如where a=xxx and b=xxx</li>
+<li>以该模式的查询条件连续访问100次以上（或查询次数达到了页中记录的1/16）</li>
+</ul>
+<figure data-type="image" tabindex="38"><img src="/images/Database/%E8%87%AA%E9%80%82%E5%BA%94%E5%93%88%E5%B8%8C%E7%B4%A2%E5%BC%95.png" alt="自适应哈希索引" loading="lazy"></figure>
+<p>InnoDB存储引擎官方提供的性能数据显示，开启AHI后，读取和写入性能可以提高2倍，辅助索引的连接操作性能可以提高5倍，显然，一般情况下开启AHI还是很有必要且值得的。另外，我们还可以通过命令来查看当前AHI的使用情况：</p>
+<pre><code class="language-sql">
+mysql&gt; show engine innodb status \G
+-------------------------------------
+INSERT BUFFER AND ADAPTIVE HASH INDEX
+-------------------------------------
+Ibuf: size 1, free list len 0, seg size 2, 0 merges
+merged operations:
+ insert 0, delete mark 0, delete 0
+discarded operations:
+ insert 0, delete mark 0, delete 0
+Hash table size 553229, node heap has 17 buffer(s)
+0.00 hash searches/s, 0.00 non-hash searches/s
+</code></pre>
+<p>其中包括AHI的大小、使用情况、每秒使用AHI搜索的情况。通过hash searches/non-hash searches可以大概的了解AHI的调用频率。根据频率的大小，我们可以考虑是否需要调整它的开关状态。</p>
+<h1 id="mysql日志">MySQL日志</h1>
+<p><strong>重做日志（redo log）、二进制日志（bin log）、回滚日志（undo log）、错误日志（error log）、慢查询日志（slow query log）、一般查询日志（general log）、中继日志（relay log）。</strong></p>
+<h2 id="二进制日志bin-log">二进制日志(bin log)</h2>
+<p><code>binlog</code> 用于记录数据库执行的写入性操作(不包括查询)信息，以二进制的形式保存在磁盘中。<code>binlog</code> 是 <code>mysql</code>的逻辑日志(即SQL语句)，并且由 <code>Server</code> 层进行记录，使用任何存储引擎的 <code>mysql</code> 数据库都会记录 <code>binlog</code> 日志。<code>binlog</code> 是通过追加的方式进行写入的，可以通过<code>max_binlog_size</code> 参数设置每个 <code>binlog</code>文件的大小，当文件大小达到给定值之后，会生成新的文件来保存日志。</p>
+<p><strong>binlog使用场景</strong></p>
+<p>在实际应用中， <code>binlog</code> 的主要使用场景有两个，分别是 <strong>主从复制</strong> 和 <strong>数据恢复</strong>。</p>
+<ul>
+<li><strong>主从复制</strong>：在 <code>Master</code> 端开启 <code>binlog</code> ，然后将 <code>binlog</code>发送到各个 <code>Slave</code> 端， <code>Slave</code> 端重放 <code>binlog</code> 从而达到主从数据同步</li>
+<li><strong>数据恢复</strong>：通过使用<code>mysqlbinlog</code>工具来实现数据库基于时间点的还原</li>
+</ul>
+<h3 id="刷盘时机">刷盘时机</h3>
+<p>对于 <code>InnoDB</code> 存储引擎而言，只有在事务提交时才会记录<code>biglog</code> ，此时记录还在内存中，那么 <code>biglog</code>是什么时候刷到磁盘中的呢？<code>mysql</code> 通过 <code>sync_binlog</code> 参数控制 <code>biglog</code> 的刷盘时机，取值范围是 <code>0-N</code>：</p>
+<ul>
+<li><code>sync_binlog=0</code>：不去强制要求，由系统自行判断何时写入磁盘</li>
+<li><code>sync_binlog=1</code>：每次 <code>commit</code> 的时候都要将 <code>binlog</code> 写入磁盘</li>
+<li><code>sync_binlog=N(N&gt;1)</code>：每N个事务，才会将 <code>binlog</code> 写入磁盘</li>
+</ul>
+<p>从上面可以看出， <code>sync_binlog</code> 最安全的是设置是 <code>1</code> ，这也是<code>MySQL 5.7.7</code>之后版本的默认值。但是设置一个大一些的值可以提升数据库性能，因此实际情况下也可以将值适当调大，牺牲一定的一致性来获取更好的性能。</p>
+<h3 id="日志格式">日志格式</h3>
+<p><code>binlog</code> 日志有三种格式，日志格式通过 <code>binlog-format</code> 指定。在 <code>MySQL 5.7.7</code> 之前，默认的格式是 <code>STATEMENT</code> ， <code>MySQL 5.7.7</code> 之后，默认值是 <code>ROW</code>。</p>
+<ul>
+<li><code>STATMENT</code>：基于<code>SQL</code>语句复制(<code>statement-based replication, SBR</code>)，每一条会修改数据的sql语句会记录到<code>binlog</code>中
+<ul>
+<li><strong>优点</strong>：不需要记录每一行的变化，减少了binlog日志量，节约了IO，从而提高了性能</li>
+<li><strong>缺点</strong>：在某些情况下会导致主从数据不一致，比如执行sysdate()、slepp() 等</li>
+</ul>
+</li>
+<li><code>ROW</code>：基于行复制(<code>row-based replication, RBR</code> )，不记录每条sql语句的上下文信息，仅需记录哪条数据被修改了。
+<ul>
+<li><strong>优点</strong>：不会出现某些特定情况下的存储过程、或function、或trigger的调用和触发无法被正确复制的问题</li>
+<li><strong>缺点</strong>：会产生大量的日志，尤其是<code>alter table</code> 的时候会让日志暴涨</li>
+</ul>
+</li>
+<li><code>MIXED</code>：基于<code>STATMENT</code> 和 <code>ROW</code> 两种模式的混合复制(<code>mixed-based replication, MBR</code> )，一般的复制使用<code>STATEMENT</code> 模式保存 <code>binlog</code> ，对于 <code>STATEMENT</code> 模式无法复制的操作使用 <code>ROW</code> 模式保存 <code>binlog</code></li>
+</ul>
+<h2 id="重做日志redo-log-2">重做日志(redo log)</h2>
+<p>**重做日志是InnoDB引擎层日志，用来记录事务操作引起数据变化，记录的是数据页的物理修改。**包括两部分：</p>
+<ul>
+<li><strong>内存中的日志缓冲(redo log buffer)</strong></li>
+<li><strong>磁盘上的日志文件(redo logfile)</strong></li>
+</ul>
+<p>MySQL 每执行一条 DML 语句，先将记录写入 redo log buffer，后续某个时间点再一次性将多个操作记录写到 redo log file，种先写日志再写磁盘的技术就是 WAL(Write-Ahead Logging) 技术。之后MySQL会在合适的时候将操作记录 flush 到磁盘上面，flush 的条件可能是系统比较空闲，或 redo log 空间不足时。redo log 文件的大小是固定的，如可以是由4个1GB文件组成的集合。</p>
+<p><strong>WAL(Write-Ahead Logging)</strong></p>
+<p>WAL（Write-Ahead Logging，预写式日志）是一种数据安全写入机制，即<strong>先写日志，再写磁盘</strong>，这样保证数据的安全性。先在内存中提交事务，然后写日志(在InnoDB中就是Redo Log，日志是为了防止宕机导致内存数据丢失)，然后再后台任务中把内存中的数据异步刷到磁盘。</p>
+<p><strong>作用</strong></p>
+<ul>
+<li><strong>确保事务的持久性</strong></li>
+<li><strong>防止发生故障时，尚有脏页未写入磁盘</strong>。在重启mysql服务时，根据redo log进行重做，从而达到事务的持久性特性</li>
+</ul>
+<h3 id="写入流程">写入流程</h3>
+<p>为了控制 <code>redo log</code> 的写入策略，<code>innodb_flush_log_at_trx_commit</code> 会有下面 3 中取值：</p>
+<ul>
+<li><code>0</code>：<strong>每次提交事务只写在 <code>redo log buffer</code> 中</strong></li>
+<li><code>1</code>：<strong>每次提交事务持久化到磁盘</strong></li>
+<li><code>2</code>：<strong>每次提交事务写到 文件系统的 <code>page cache</code> 中</strong></li>
+</ul>
+<h3 id="刷盘场景">刷盘场景</h3>
+<p>redo log 实际的触发 fsync 操作写盘包含以下几个场景：</p>
+<ul>
+<li><strong>后台每隔 1 秒钟的线程轮询</strong></li>
+<li><strong>innodb_flush_log_at_trx_commit 设置成 1 时，事务提交时触发</strong></li>
+<li><strong>innodb_log_buffer_size 是设置 redo log 大小的参数</strong>。当 redo log buffer 达到 innodb_log_buffer_size / 2 时，也会触发一次 fsync</li>
+</ul>
+<h2 id="回滚日志undo-log">回滚日志(undo log)</h2>
+<p>回滚日志（undo log）主要存储的是数据的逻辑变化日志，用于回滚操作。比如我们要 insert 一条数据，那么 undo log 就会生成一条对应的 delete 日志。所以当需要回滚时，只需要利用undo log 就可以恢复都修改前的数据。</p>
+<p><strong>作用</strong></p>
+<ul>
+<li><strong>提供回滚操作</strong>。undo log实现事务的原子性，保存了事务发生之前的数据的一个版本，可以用于回滚</li>
+<li><strong>提供多版本并发控制（MVCC）下的读</strong>。也即非锁定读</li>
+</ul>
+<h1 id="索引机制">索引机制</h1>
+<p>索引是为了加速对表中数据行的检索而创建的一种分散存储的（不连续的）数据结构，硬盘级的。</p>
+<p><strong>索引意义</strong>：索引能极大的减少存储引擎需要扫描的数据量，索引可以把随机IO变成顺序IO。索引可以帮助我们在进行分组、排序等操作时，避免使用临时表。正确的创建合适的索引是提升数据库查询性能的基础。</p>
+<p><strong>优势</strong></p>
+<ul>
+<li><strong>大大减少服务器需要扫描的数据量</strong></li>
+<li><strong>可以提高数据检索的效率（将随机I/O变成顺序I/O），降低数据库的I/O成本</strong></li>
+<li><strong>通过索引列对数据进行排序，降低数据排序的成本，降低了CPU的消耗</strong></li>
+</ul>
+<p><strong>劣势</strong></p>
+<ul>
+<li><strong>索引会占据磁盘空间</strong></li>
+<li><strong>索引虽然会提高查询效率，但是会降低更新表的效率</strong>。比如每次对表进行增删改操作，MySQL不仅要保存数据，还有保存或者更新对应的索引文件</li>
+</ul>
+<h2 id="数据结构">数据结构</h2>
+<h3 id="hash索引">Hash索引</h3>
+<p><strong>原理</strong>是先将索引通过hash算法后得到的hash值(即磁盘文件指针）存到hash表中。在进行查询时，将索引通过hash算法，得到hash值，与hash表中的hash值比对。通过磁盘文件指针，只要<strong>一次磁盘IO</strong>就能找到要的值。</p>
+<figure data-type="image" tabindex="39"><img src="/images/Database/Hash%E7%B4%A2%E5%BC%95.png" alt="Hash索引" loading="lazy"></figure>
+<p><strong>优点</strong></p>
+<ul>
+<li><strong>快速查询</strong>。参与索引的字段只要进行Hash运算之后就可以快速定位到该记录，时间复杂度约为1</li>
+</ul>
+<p><strong>缺点</strong></p>
+<ul>
+<li>哈希索引只包含哈希值和行指针，所以不能用索引中的值来避免读取行</li>
+<li>哈希索引数据并不是按照索引值顺序存储的，所以也就无法用于排序和范围查询</li>
+<li>哈希索引也不支持部分索引列查询，因为哈希索引始终是使用索引列的全部数据进行哈希计算的</li>
+<li>哈希索引只支持等值比较查询，如=，IN()，&lt;=&gt;操作</li>
+<li>如果哈希冲突较多，一些索引的维护操作的代价也会更高</li>
+</ul>
+<h3 id="b-tree索引">B-Tree索引</h3>
+<p><strong>背景</strong>：二叉查找树查询的时间复杂度是O(logN)，查找速度最快和比较次数较少。但用于数据库索引，当数据量过大，不可能将所有索引加载进内存，使用二叉树会导致磁盘I/O过于频繁，最坏的情况下磁盘I/O的次数由树的高度来决定。</p>
+<p><strong>B-Tree(平衡多路查找树)<strong>对二叉树进行了横向扩展，能很好</strong>解决红黑树中遗留的高度问题</strong>，使树结构更加<strong>矮胖</strong>，使得一次I/O能加载更多关键字，对比在内存中完成，减少了磁盘I/O次数，更适用于大型数据库，但是为了保持自平衡，插入或者删除元素都会导致节点发生裂变反应，有时候会非常麻烦。</p>
+<figure data-type="image" tabindex="40"><img src="/images/Database/%E7%B4%A2%E5%BC%95-B%E6%A0%91%E7%BB%93%E6%9E%84.png" alt="索引-B树结构" loading="lazy"></figure>
+<p><strong>存在问题</strong></p>
+<ul>
+<li><strong>不支持范围查询的快速查找</strong>。可以用B+Tree解决</li>
+<li><strong>每行数据量很大时，会导致B-Tree深度较大，进而影响查询效率</strong>。可以用B+Tree解决</li>
+</ul>
+<p><strong>案例分析</strong>：模拟下查找key为10的data的过程</p>
+<figure data-type="image" tabindex="41"><img src="/images/Database/B-Tree%E6%A1%88%E4%BE%8B%E5%88%86%E6%9E%90.png" alt="B-Tree案例分析" loading="lazy"></figure>
+<ul>
+<li>根据根结点指针读取文件目录的根磁盘块1。【磁盘IO操作第<strong>1次</strong>】</li>
+<li>磁盘块1存储15，45和三个指针数据。我们发现10&lt;15，因此我们找到指针p1</li>
+<li>根据p1指针，我们定位并读取磁盘块2。【磁盘IO操作<strong>2次</strong>】</li>
+<li>磁盘块2存储7，12和三个指针数据。我们发现7&lt;10&lt;12，因此我们找到指针p2</li>
+<li>根据p2指针，我们定位并读取磁盘块6。【磁盘IO操作<strong>3次</strong>】</li>
+<li>磁盘块6中存储8，10。我们找到10，获取10所对应的数据data</li>
+</ul>
+<h3 id="btree索引">B+Tree索引</h3>
+<p>B+树是B-树的变体，也是一种多路搜索树。其定义基本与B-树相同，与B-Tree相比B+Tree有以下不同点：</p>
+<ul>
+<li><strong>非叶子结点的子树指针与关键字个数相同</strong></li>
+<li><strong>非叶子结点的子树指针P[i]，指向关键字值属于[K[i], K[i+1])的子树（B-树是开区间）</strong></li>
+<li><strong>为所有叶子结点增加一个链指针</strong></li>
+<li><strong>所有关键字都在叶子结点出现</strong></li>
+<li><strong>内节点不存储data，只存储key</strong></li>
+</ul>
+<figure data-type="image" tabindex="42"><img src="/images/Database/%E7%B4%A2%E5%BC%95-B+Tree%E7%BB%93%E6%9E%84.png" alt="索引-B+Tree结构" loading="lazy"></figure>
+<p><strong>优点</strong></p>
+<ul>
+<li>单次请求涉及的磁盘IO次数少（出度d大，且非叶子节点不包含表数据，树的高度小）</li>
+<li>查询效率稳定（任何关键字的查询必须走从根结点到叶子结点，查询路径长度相同）</li>
+<li>遍历效率高（从符合条件的某个叶子节点开始遍历即可）</li>
+</ul>
+<p><strong>缺点</strong></p>
+<p>B+树最大的性能问题在于会产生大量的随机IO，主要存在以下两种情况：</p>
+<ul>
+<li>主键不是有序递增的，导致每次插入数据产生大量的数据迁移和空间碎片</li>
+<li>即使主键是有序递增的，大量写请求的分布仍是随机的</li>
+</ul>
+<p><strong>案例分析：等值查询</strong></p>
+<p>假如我们查询值等于9的数据。查询路径磁盘块1-&gt;磁盘块2-&gt;磁盘块6。</p>
+<figure data-type="image" tabindex="43"><img src="/images/Database/B+%E6%A0%91%E7%B4%A2%E5%BC%95-%E7%AD%89%E5%80%BC%E6%9F%A5%E8%AF%A2.png" alt="B+树索引-等值查询" loading="lazy"></figure>
+<ul>
+<li>第一次磁盘IO：将磁盘块1加载到内存中，在内存中从头遍历比较，9&lt;15，走左路，到磁盘寻址磁盘块2</li>
+<li>第二次磁盘IO：将磁盘块2加载到内存中，在内存中从头遍历比较，7&lt;9&lt;12，到磁盘中寻址定位到磁盘块6</li>
+<li>第三次磁盘IO：将磁盘块6加载到内存中，在内存中从头遍历比较，在第三个索引中找到9，取出data，如果data存储的行记录，取出data，查询结束。如果存储的是磁盘地址，还需要根据磁盘地址到磁盘中取出数据，查询终止。（这里需要区分的是在InnoDB中Data存储的为行数据，而MyIsam中存储的是磁盘地址。）</li>
+</ul>
+<p><strong>案例分析：范围查询</strong><br>
+假如我们想要查找9和26之间的数据。查找路径是磁盘块1-&gt;磁盘块2-&gt;磁盘块6-&gt;磁盘块7。</p>
+<figure data-type="image" tabindex="44"><img src="/images/Database/%E6%A1%88%E4%BE%8B%E5%88%86%E6%9E%90-B+%E6%A0%91-%E8%8C%83%E5%9B%B4%E6%9F%A5%E8%AF%A2.png" alt="案例分析-B+树-范围查询" loading="lazy"></figure>
+<ul>
+<li>首先查找值等于9的数据，将值等于9的数据缓存到结果集。这一步和前面等值查询流程一样，发生了三次磁盘IO</li>
+<li>查找到15之后，底层的叶子节点是一个有序列表，我们从磁盘块6，键值9开始向后遍历筛选所有符合筛选条件的数据</li>
+<li>第四次磁盘IO：根据磁盘6后继指针到磁盘中寻址定位到磁盘块7，将磁盘7加载到内存中，在内存中从头遍历比较，9&lt;25&lt;26，9&lt;26&lt;=26，将data缓存到结果集。</li>
+<li>主键具备唯一性（后面不会有&lt;=26的数据），不需再向后查找，查询终止。将结果集返回给用户</li>
+</ul>
+<h3 id="btree">B*Tree</h3>
+<p>是B+树的变体，<strong>在B+树的非根和非叶子结点再增加指向兄弟的指针</strong>。</p>
+<figure data-type="image" tabindex="45"><img src="/images/Database/%E7%B4%A2%E5%BC%95%E6%9C%BA%E5%88%B6-B%E6%98%9F%E6%A0%91.jpg" alt="索引机制-B星树" loading="lazy"></figure>
+<p>B*树定义了非叶子结点关键字个数至少为(2/3)M，即块的最低使用率为2/3（代替B+树的1/2）。</p>
+<p><strong>B+树的分裂</strong></p>
+<p>当一个结点满时，分配一个新的结点，并将原结点中1/2的数据复制到新结点，最后在父结点中增加新结点的指针；B+树的分裂只影响原结点和父结点，而不会影响兄弟结点，所以它不需要指向兄弟的指针。</p>
+<p><strong>B*树的分裂</strong></p>
+<p>当一个结点满时，如果它的下一个兄弟结点未满，那么将一部分数据移到兄弟结点中，再在原结点插入关键字，最后修改父结点中兄弟结点的关键字（因为兄弟结点的关键字范围改变了）；如果兄弟也满了，则在原结点与兄弟结点之间增加新结点，并各复制1/3的数据到新结点，最后在父结点增加新结点的指针；所以，B*树分配新结点的概率比B+树要低，空间使用率更高。</p>
+<h3 id="r-tree索引">R-Tree索引</h3>
+<p>空间数据索引（R-Tree），MyISAM支持空间索引，可以用作地理数据存储。</p>
+<h2 id="索引类型">索引类型</h2>
+<h3 id="普通索引">普通索引</h3>
+<p>基本的索引类型，值可以为空，没有唯一性的限制。</p>
+<pre><code class="language-sql">-- 直接创建索引
+CREATE INDEX index_name ON table_name(col_name);
+-- 修改表结构的方式添加索引
+ALTER TABLE table_name ADD INDEX index_name(col_name);
+
+-- 创建表的时候同时创建索引
+CREATE TABLE `news` (
+    `id` int(11) NOT NULL AUTO_INCREMENT ,
+    `title` varchar(255)  NOT NULL ,
+    `content` varchar(255)  NULL ,
+    `time` varchar(20) NULL DEFAULT NULL ,
+    PRIMARY KEY (`id`),
+    INDEX index_name (title(255))
+)
+
+-- 删除索引
+DROP INDEX index_name ON table_name;
+--  或
+alter table `表名` drop index 索引名;
+</code></pre>
+<h3 id="唯一索引">唯一索引</h3>
+<p>索引列中的值必须是唯一的，但是允许为空值（只允许存在一条空值）。</p>
+<pre><code class="language-mysql">-- 创建单个索引
+CREATE UNIQUE INDEX index_name ON table_name(col_name);
+-- 创建多个索引
+CREATE UNIQUE INDEX index_name on table_name(col_name,...);
+
+-- 修改表结构
+-- 单个
+ALTER TABLE table_name ADD UNIQUE index index_name(col_name);
+-- 多个
+ALTER TABLE table_name ADD UNIQUE index index_name(col_name,...);
+</code></pre>
+<h3 id="主键索引">主键索引</h3>
+<p>主键是一种唯一性索引，但它必须指定为<code>PRIMARY KEY</code>，每个表只能有一个主键。</p>
+<pre><code class="language-sql">-- 主键索引(创建表时添加)
+CREATE TABLE `news` (
+    `id` int(11) NOT NULL AUTO_INCREMENT ,
+    `title` varchar(255)  NOT NULL ,
+    `content` varchar(255)  NULL ,
+    `time` varchar(20) NULL DEFAULT NULL ,
+    PRIMARY KEY (`id`)
+)
+
+-- 主键索引(创建表后添加)
+CREATE TABLE `order` (
+    `orderId` varchar(36) NOT NULL,
+    `productId` varchar(36)  NOT NULL ,
+    `time` varchar(20) NULL DEFAULT NULL
+)
+alter table `order` add primary key(`orderId`);
+</code></pre>
+<h3 id="组合索引">组合索引</h3>
+<p><strong>在多个字段上创建的索引</strong>。组合索引遵守“<strong>最左前缀</strong>”原则，即在查询条件中使用了复合索引的第一个字段，索引才会被使用。因此，在复合索引中索引列的顺序至关重要。</p>
+<pre><code class="language-sql">-- 创建一个复合索引
+create index index_name on table_name(col_name1,col_name2,...);
+
+-- 修改表结构的方式添加索引
+alter table table_name add index index_name(col_name,col_name2,...);
+</code></pre>
+<h3 id="全文索引">全文索引</h3>
+<p>全文索引的索引类型为<code>FULLTEXT</code>。全文索引可以在<code>varchar、char、text</code>类型的列上创建。可以通过<code>ALTER TABLE</code>或<code>CREATE INDEX</code>命令创建。对于大规模的数据集，通过<code>ALTER TABLE</code>（或<code>CREATE INDEX</code>）命令创建全文索引要比把记录插入带有全文索引的空表更快。<code>MyISAM</code>支持全文索引，<code>InnoDB</code>在mysql5.6之后支持了<code>全文索引</code>。    全文索引<code>不支持中文</code>需要借<code>sphinx(coreseek)</code>或<code>迅搜&lt;、code&gt;技术处理中文。</code></p>
+<pre><code class="language-mysql">-- 创建表的适合添加全文索引
+CREATE TABLE `news` (
+    `id` int(11) NOT NULL AUTO_INCREMENT ,
+    `title` varchar(255)  NOT NULL ,
+    `content` text  NOT NULL ,
+    `time` varchar(20) NULL DEFAULT NULL ,
+     PRIMARY KEY (`id`),
+    FULLTEXT (content)
+)
+
+-- 修改表结构添加全文索引
+ALTER TABLE table_name ADD FULLTEXT index_fulltext_content(col_name);
+</code></pre>
+<h2 id="索引实现">索引实现</h2>
+<h3 id="myisam索引">MyIsam索引</h3>
+<p>MyISAM的数据文件和索引文件是分开存储的。MyISAM使用B+树构建索引树时，叶子节点中存储的键值为索引列的值，数据为索引所在行的磁盘地址。</p>
+<h4 id="主键索引-2">主键索引</h4>
+<figure data-type="image" tabindex="46"><img src="/images/Database/20201024114325883.png" alt="在这里插入图片描述" loading="lazy"></figure>
+<p>表user的索引存储在索引文件<code>user.MYI</code>中，数据文件存储在数据文件 <code>user.MYD</code>中。简单分析下查询时的磁盘IO情况：</p>
+<p><strong>场景一：根据主键等值查询数据</strong><br>
+<img src="/images/Database/20201024114404727.png" alt="在这里插入图片描述" loading="lazy"></p>
+<ul>
+<li>先在主键树中从根节点开始检索，将根节点加载到内存，比较28&lt;75，走左路。（1次磁盘IO）</li>
+<li>将左子树节点加载到内存中，比较16&lt;28&lt;47，向下检索。（1次磁盘IO）</li>
+<li>检索到叶节点，将节点加载到内存中遍历，比较16&lt;28，18&lt;28，28=28。查找到值等于30的索引项。（1次磁盘IO）</li>
+<li>从索引项中获取磁盘地址，然后到数据文件user.MYD中获取对应整行记录。（1次磁盘IO）</li>
+<li>将记录返给客户端。</li>
+</ul>
+<p><strong>磁盘IO次数：3次索引检索+记录数据检索。</strong></p>
+<p><strong>场景二：根据主键范围查询数据</strong></p>
+<figure data-type="image" tabindex="47"><img src="/images/Database/20201024114510253.png" alt="在这里插入图片描述" loading="lazy"></figure>
+<ul>
+<li>
+<p>先在主键树中从根节点开始检索，将根节点加载到内存，比较28&lt;75，走左路。（1次磁盘IO）</p>
+</li>
+<li>
+<p>将左子树节点加载到内存中，比较16&lt;28&lt;47，向下检索。（1次磁盘IO）</p>
+</li>
+<li>
+<p>检索到叶节点，将节点加载到内存中遍历比较16&lt;28，18&lt;28，28=28&lt;47。查找到值等于28的索引项。</p>
+<ul>
+<li>根据磁盘地址从数据文件中获取行记录缓存到结果集中。（1次磁盘IO）</li>
+<li>我们的查询语句时范围查找，需要向后遍历底层叶子链表，直至到达最后一个不满足筛选条件。</li>
+</ul>
+</li>
+<li>
+<p>向后遍历底层叶子链表，将下一个节点加载到内存中，遍历比较，28&lt;47=47，根据磁盘地址从数据文件中获取行记录缓存到结果集中。（1次磁盘IO）</p>
+</li>
+<li>
+<p>最后得到两条符合筛选条件，将查询结果集返给客户端。</p>
+</li>
+</ul>
+<p><strong>磁盘IO次数：4次索引检索+记录数据检索。</strong></p>
+<p>**备注：**以上分析仅供参考，MyISAM在查询时，会将索引节点缓存在MySQL缓存中，而数据缓存依赖于操作系统自身的缓存，所以并不是每次都是走的磁盘，这里只是为了分析索引的使用过程。</p>
+<h4 id="辅助索引">辅助索引</h4>
+<p>在 MyISAM 中，辅助索引和主键索引的结构是一样的，没有任何区别，叶子节点的数据存储的都是行记录的磁盘地址。只是主键索引的键值是唯一的，而辅助索引的键值可以重复。查询数据时，由于辅助索引的键值不唯一，可能存在多个拥有相同的记录，所以即使是等值查询，也需要按照范围查询的方式在辅助索引树中检索数据。</p>
+<h3 id="innodb索引">InnoDB索引</h3>
+<h4 id="主键索引-3">主键索引</h4>
+<p>每个InnoDB表都有一个主键索引(聚簇索引) ，聚簇索引使用B+树构建，叶子节点存储的数据是整行记录。一般情况下，聚簇索引等同于主键索引，当一个表没有创建主键索引时，InnoDB会自动创建一个ROWID字段来构建聚簇索引。InnoDB创建索引的具体规则如下：</p>
+<ul>
+<li>在表上定义主键PRIMARY KEY，InnoDB将主键索引用作聚簇索引</li>
+<li>如果表没有定义主键，InnoDB会选择第一个不为NULL的唯一索引列用作聚簇索引</li>
+<li>如果以上两个都没有，InnoDB 会使用一个6 字节长整型的隐式字段 ROWID字段构建聚簇索引。该ROWID字段会在插入新行时自动递增</li>
+</ul>
+<p>除聚簇索引之外的所有索引都称为辅助索引。在中InnoDB，辅助索引中的叶子节点存储的数据是该行的主键值都。 在检索时，InnoDB使用此主键值在聚簇索引中搜索行记录。<br>
+主键索引的叶子节点会存储数据行，辅助索引只会存储主键值。</p>
+<figure data-type="image" tabindex="48"><img src="/images/Database/202010241146330.png" alt="在这里插入图片描述" loading="lazy"></figure>
+<p><strong>场景一：等值查询数据</strong></p>
+<ul>
+<li>先在主键树中从根节点开始检索，将根节点加载到内存，比较28&lt;75，走左路。（1次磁盘IO）</li>
+<li>将左子树节点加载到内存中，比较16&lt;28&lt;47，向下检索。（1次磁盘IO）</li>
+<li>检索到叶节点，将节点加载到内存中遍历，比较16&lt;28，18&lt;28，28=28。查找到值等于28的索引项，直接可以获取整行数据。将改记录返回给客户端。（1次磁盘IO）</li>
+</ul>
+<p><strong>磁盘IO数量：3次。</strong></p>
+<figure data-type="image" tabindex="49"><img src="/images/Database/20201024114716460.png" alt="在这里插入图片描述" loading="lazy"></figure>
+<h4 id="辅助索引-2">辅助索引</h4>
+<p>除聚簇索引之外的所有索引都称为辅助索引，InnoDB的辅助索引只会存储主键值而非磁盘地址。以表user_innodb的age列为例，age索引的索引结果如下图：</p>
+<figure data-type="image" tabindex="50"><img src="/images/Database/20201024114750255.png" alt="在这里插入图片描述" loading="lazy"></figure>
+<p>底层叶子节点的按照（age，id）的顺序排序，先按照age列从小到大排序，age列相同时按照id列从小到大排序。使用辅助索引需要检索两遍索引：首先检索辅助索引获得主键，然后使用主键到主索引中检索获得记录。</p>
+<p><strong>场景一：等值查询的情况</strong></p>
+<pre><code class="language-sql">select * from t_user_innodb where age=19;
+</code></pre>
+<figure data-type="image" tabindex="51"><img src="/images/Database/2020102411481097.png" alt="在这里插入图片描述" loading="lazy"></figure>
+<p>根据在辅助索引树中获取的主键id，到主键索引树检索数据的过程称为<strong>回表</strong>查询。</p>
+<p><strong>磁盘IO数：辅助索引3次+获取记录回表3次</strong></p>
+<h4 id="组合索引-2">组合索引</h4>
+<p>还是以自己创建的一个表为例：表 abc_innodb，id为主键索引，创建了一个联合索引idx_abc(a,b,c)。</p>
+<pre><code class="language-sql">CREATE TABLE `abc_innodb`
+(
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `a`  int(11)     DEFAULT NULL,
+  `b`  int(11)     DEFAULT NULL,
+  `c`  varchar(10) DEFAULT NULL,
+  `d`  varchar(10) DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  KEY `idx_abc` (`a`, `b`, `c`)
+) ENGINE = InnoDB;
+</code></pre>
+<p>组合索引的数据结构：</p>
+<figure data-type="image" tabindex="52"><img src="/images/Database/20201024114900213.png" alt="在这里插入图片描述" loading="lazy"></figure>
+<p><strong>组合索引的查询过程：</strong></p>
+<pre><code class="language-sql">select * from abc_innodb where a = 13 and b = 16 and c = 4;
+</code></pre>
+<figure data-type="image" tabindex="53"><img src="/images/Database/20201024115012887.png" alt="在这里插入图片描述" loading="lazy"></figure>
+<p><strong>最左匹配原则</strong></p>
+<p>最左前缀匹配原则和联合索引的索引存储结构和检索方式是有关系的。</p>
+<p>在组合索引树中，最底层的叶子节点按照第一列a列从左到右递增排列，但是b列和c列是无序的，b列只有在a列值相等的情况下小范围内递增有序，而c列只能在a，b两列相等的情况下小范围内递增有序。</p>
+<p>就像上面的查询，B+树会先比较a列来确定下一步应该搜索的方向，往左还是往右。如果a列相同再比较b列。但是如果查询条件没有a列，B+树就不知道第一步应该从哪个节点查起。</p>
+<p>可以说创建的idx_abc(a,b,c)索引，相当于创建了(a)、（a,b）（a,b,c）三个索引。、</p>
+<p>组合索引的最左前缀匹配原则：使用组合索引查询时，mysql会一直向右匹配直至遇到范围查询(&gt;、&lt;、between、like)就停止匹配。</p>
+<h4 id="覆盖索引">覆盖索引</h4>
+<p>覆盖索引并不是说是索引结构，覆盖索引是一种很常用的优化手段。因为在使用辅助索引的时候，我们只可以拿到主键值，相当于获取数据还需要再根据主键查询主键索引再获取到数据。但是试想下这么一种情况，在上面abc_innodb表中的组合索引查询时，如果我只需要abc字段的，那是不是意味着我们查询到组合索引的叶子节点就可以直接返回了，而不需要回表。这种情况就是覆盖索引。可以看一下执行计划：</p>
+<p><strong>覆盖索引的情况：</strong></p>
+<p><img src="/images/Database/20201024115203337.png" alt="在这里插入图片描述" loading="lazy"><strong>未使用到覆盖索引：</strong></p>
+<figure data-type="image" tabindex="54"><img src="/images/Database/20201024115218222.png" alt="在这里插入图片描述" loading="lazy"></figure>
+<h2 id="失效场景-2">失效场景</h2>
+<p><strong>场景一：where语句中包含or时，可能会导致索引失效</strong></p>
+<p>使用or并不是一定会使索引失效，你需要看or左右两边的查询列是否命中相同的索引。</p>
+<pre><code class="language-sql">-- 假设user表中的user_id列有索引，age列没有索引
+-- 能命中索引
+select * from user where user_id = 1 or user_id = 2;
+-- 无法命中索引
+select * from user where user_id = 1 or age = 20;
+-- 假设age列也有索引的话，依然是无法命中索引的
+select * from user where user_id = 1 or age = 20;
+</code></pre>
+<p>可以根据情况尽量使用union all或者in来代替，这两个语句的执行效率也比or好些。</p>
+<p><strong>场景二：where语句中索引列使用了负向查询，可能会导致索引失效</strong></p>
+<p>负向查询包括：NOT、!=、&lt;&gt;、!&lt;、!&gt;、NOT IN、NOT LIKE等。其实负向查询并不绝对会索引失效，这要看MySQL优化器的判断，全表扫描或者走索引哪个成本低了。</p>
+<p><strong>场景三：索引字段可以为null，使用is null或is not null时，可能会导致索引失效</strong></p>
+<p>其实单个索引字段，使用is null或is not null时，是可以命中索引的。</p>
+<p><strong>场景四：在索引列上使用内置函数，一定会导致索引失效</strong></p>
+<p>比如下面语句中索引列login_time上使用了函数，会索引失效：</p>
+<pre><code class="language-sql">select * from user where DATE_ADD(login_time, INTERVAL 1 DAY) = 7;
+</code></pre>
+<p><strong>场景五：隐式类型转换导致的索引失效</strong></p>
+<p>如下面语句中索引列user_id为varchar类型，不会命中索引：</p>
+<pre><code class="language-mysql">select * from user where user_id = 12;
+</code></pre>
+<p><strong>场景六：对索引列进行运算，一定会导致索引失效</strong></p>
+<p>运算如+，-，*，/等，如下：</p>
+<pre><code class="language-mysql">select * from user where age - 1 = 10;
+</code></pre>
+<p>优化的话，要把运算放在值上，或者在应用程序中直接算好，比如：</p>
+<pre><code class="language-sql">select * from user where age = 10 - 1;
+</code></pre>
+<p><strong>场景七：like通配符可能会导致索引失效</strong></p>
+<p>like查询以%开头时，会导致索引失效。解决办法有两种：</p>
+<ul>
+<li>将%移到后面，如：</li>
+</ul>
+<pre><code class="language-sql">select * from user where `name` like '李%';
+</code></pre>
+<ul>
+<li>利用覆盖索引来命中索引：</li>
+</ul>
+<pre><code class="language-sql">select name from user where `name` like '%李%';
+</code></pre>
+<p><strong>场景八：联合索引中，where中索引列违背最左匹配原则，一定会导致索引失效</strong></p>
+<p>当创建一个联合索引的时候，如(k1,k2,k3)，相当于创建了(k1)、(k1,k2)和(k1,k2,k3)三个索引，这就是最左匹配原则。比如下面的语句就不会命中索引：</p>
+<pre><code class="language-sql">select * from t where k2=2;
+select * from t where k3=3;
+select * from t where k2=2 and k3=3;
+</code></pre>
+<p>下面的语句只会命中索引(k1)：</p>
+<pre><code class="language-sql">select * from t where k1=1 and k3=3;
+</code></pre>
+<h1 id="数据切分">数据切分</h1>
+<h2 id="水平切分">水平切分</h2>
+<p>水平切分又称为 Sharding，它是将同一个表中的记录拆分到多个结构相同的表中。当一个表的数据不断增多时，Sharding 是必然的选择，它可以将数据分布到集群的不同节点上，从而缓存单个数据库的压力。</p>
+<figure data-type="image" tabindex="55"><img src="/images/Database/007S8ZIlly1gjjfy33yx2j30fm05zwg9.jpg" alt="img" loading="lazy"></figure>
+<h2 id="垂直切分">垂直切分</h2>
+<p>垂直切分是将一张表按列分成多个表，通常是按照列的关系密集程度进行切分，也可以利用垂直气氛将经常被使用的列喝不经常被使用的列切分到不同的表中。在数据库的层面使用垂直切分将按数据库中表的密集程度部署到不通的库中，例如将原来电商数据部署库垂直切分称商品数据库、用户数据库等。</p>
+<figure data-type="image" tabindex="56"><img src="/images/Database/007S8ZIlly1gjjfy5yoatj30cy09l776.jpg" alt="img" loading="lazy"></figure>
+<h2 id="sharding策略">Sharding策略</h2>
+<ul>
+<li>哈希取模：hash(key)%N</li>
+<li>范围：可以是 ID 范围也可以是时间范围</li>
+<li>映射表：使用单独的一个数据库来存储映射关系</li>
+</ul>
+<h2 id="sharding存在的问题">Sharding存在的问题</h2>
+<ul>
+<li>
+<p><strong>事务问题</strong>：使用分布式事务来解决，比如 XA 接口</p>
+</li>
+<li>
+<p><strong>连接</strong>：可以将原来的连接分解成多个单表查询，然后在用户程序中进行连接。</p>
+</li>
+<li>
+<p><strong>唯一性</strong></p>
+<ul>
+<li>使用全局唯一 ID （GUID）</li>
+<li>为每个分片指定一个 ID 范围</li>
+<li>分布式 ID 生成器（如 Twitter 的 Snowflake 算法）</li>
+</ul>
+</li>
+</ul>
+<h1 id="sql优化">SQL优化</h1>
+<h2 id="优化步骤">优化步骤</h2>
+<p><strong>第1步：通过慢查日志等定位那些执行效率较低的SQL语句</strong></p>
+<p><strong>第2步：explain分析SQL的执行计划</strong></p>
+<p>需要重点关注<code>type</code>、<code>rows</code>、<code>filtered</code>、<code>extra</code>。</p>
+<ul>
+<li>
+<p><code>type</code>：由上至下，效率越来越高</p>
+<ul>
+<li><code>ALL</code>：全表扫描</li>
+<li><code>index</code>：索引全扫描</li>
+<li><code>range</code>：索引范围扫描，常用语<code>&lt;</code>、<code>&lt;=</code>、<code>&gt;=</code>、<code>between</code>、<code>in</code>等操作</li>
+<li><code>ref</code>：使用非唯一索引扫描或唯一索引前缀扫描，返回单条记录，常出现在关联查询中</li>
+<li><code>eq_ref</code>：类似ref，区别在于使用的是唯一索引，使用主键的关联查询</li>
+<li><code>const/system</code>：单条记录，系统会把匹配行中的其他列作为常数处理，如主键或唯一索引查询</li>
+<li><code>null</code>：MySQL不访问任何表或索引，直接返回结果</li>
+</ul>
+<p>虽然上至下，效率越来越高，但是根据cost模型，假设有两个索引<code>idx1(a, b, c)</code>,<code>idx2(a, c)</code>，SQL为<code>select * from t where a = 1 and b in (1, 2) order by c;</code>如果走idx1，那么是type为range，如果走idx2，那么type是ref；当需要扫描的行数，使用idx2大约是idx1的5倍以上时，会用idx1，否则会用idx2</p>
+</li>
+<li>
+<p><code>Extra</code></p>
+<ul>
+<li><code>Using filesort</code>：MySQL需要额外的一次传递，以找出如何按排序顺序检索行。通过根据联接类型浏览所有行并为所有匹配WHERE子句的行保存排序关键字和行的指针来完成排序。然后关键字被排序，并按排序顺序检索行。</li>
+<li><code>Using temporary</code>：使用了临时表保存中间结果，性能特别差，需要重点优化</li>
+<li><code>Using index</code>：表示相应的 select 操作中使用了覆盖索引（Coveing Index）,避免访问了表的数据行，效率不错！如果同时出现 using where，意味着无法直接通过索引查找来查询到符合条件的数据。</li>
+<li><code>Using index condition</code>：MySQL5.6之后新增的ICP，using index condtion就是使用了ICP（索引下推），在存储引擎层进行数据过滤，而不是在服务层过滤，利用索引现有的数据减少回表的数据。</li>
+</ul>
+</li>
+</ul>
+<p><strong>第3步：show profile 分析</strong></p>
+<p>了解SQL执行的线程的状态及消耗的时间。默认是关闭的，开启语句“set profiling = 1;”</p>
+<pre><code class="language-mysql">SHOW PROFILES ;
+SHOW PROFILE FOR QUERY  #{id};
+</code></pre>
+<p><strong>第4步：trace</strong></p>
+<p>trace分析优化器如何选择执行计划，通过trace文件能够进一步了解为什么优惠券选择A执行计划而不选择B执行计划。</p>
+<pre><code class="language-mysql">set optimizer_trace=&quot;enabled=on&quot;;
+set optimizer_trace_max_mem_size=1000000;
+select * from information_schema.optimizer_trace;
+</code></pre>
+<p><strong>第5步：确定问题并采用相应的措施</strong></p>
+<ul>
+<li>优化索引</li>
+<li>优化SQL语句：修改SQL、IN 查询分段、时间查询分段、基于上一次数据过滤</li>
+<li>改用其他实现方式：ES、数仓等</li>
+<li>数据碎片处理</li>
+</ul>
+<h2 id="特殊需求">特殊需求</h2>
+<h3 id="批量去重插入">批量去重插入</h3>
+<p><strong>问题：MySQL批量插入，如何不插入重复数据？</strong></p>
+<p><strong>解决方案1：insert ignore into</strong></p>
+<p>当插入数据时，如出现错误时，如重复数据，将不返回错误，只以警告形式返回。所以使用ignore请确保语句本身没有问题，否则也会被忽略掉。例如：</p>
+<pre><code class="language-mysql">INSERT IGNORE INTO user (name) VALUES ('telami') 
+</code></pre>
+<p>这种方法很简便，但是有一种可能，就是插入不是因为重复数据报错，而是因为其他原因报错的，也同样被忽略了～</p>
+<p><strong>解决方案2：on duplicate key update</strong></p>
+<p>当primary或者unique重复时，则执行<code>update</code>语句，如<code>update</code>后为无用语句，如<code>id=id</code>，则同1功能相同，但错误不会被忽略掉。在公众号顶级架构师后台回复“架构整洁”，获取一份惊喜礼包。例如，为了实现name重复的数据插入不报错，可使用一下语句：</p>
+<pre><code class="language-mysql">INSERT INTO user (name) VALUES ('telami') ON duplicate KEY UPDATE id = id 
+</code></pre>
+<p>这种方法有个前提条件，就是，需要插入的约束，需要是主键或者唯一约束（在你的业务中那个要作为唯一的判断就将那个字段设置为唯一约束也就是<code>unique key</code>）。</p>
+<p><strong>解决方案3：insert … select … where not exist</strong></p>
+<p>根据select的条件判断是否插入，可以不光通过<code>primary</code>和<code>unique</code>来判断，也可通过其它条件。例如：</p>
+<pre><code class="language-mysql">INSERT INTO user (name) SELECT 'telami' FROM dual WHERE NOT EXISTS (SELECT id FROM user WHERE id = 1) 
+</code></pre>
+<p>这种方法其实就是使用了<code>MySQL</code>的一个临时表的方式，但是里面使用到了子查询，效率也会有一点点影响，如果能使用上面的就不使用这个。</p>
+<p><strong>解决方案4：replace into</strong></p>
+<p>如果存在<code>primary or unique</code>相同的记录，则先删除掉。再插入新记录。</p>
+<pre><code class="language-mysql">REPLACE INTO user SELECT 1, 'telami' FROM books 
+</code></pre>
+<p>这种方法就是不管原来有没有相同的记录，都会先删除掉然后再插入。选择的是第二种方式</p>
+<pre><code class="language-xml">&lt;insert id=&quot;batchSaveUser&quot; parameterType=&quot;list&quot;&gt;
+    insert into user (id,username,mobile_number)
+    values
+    &lt;foreach collection=&quot;list&quot; item=&quot;item&quot; index=&quot;index&quot; separator=&quot;,&quot;&gt;
+        (
+            #{item.id},
+            #{item.username},
+            #{item.mobileNumber}
+        )
+    &lt;/foreach&gt;
+    ON duplicate KEY UPDATE id = id
+&lt;/insert&gt;
+</code></pre>
+<p>这里用的是Mybatis，批量插入的一个操作，<code>mobile_number</code>已经加了唯一约束。这样在批量插入时，如果存在手机号相同的话，是不会再插入了的。</p>
+<h2 id="场景分析">场景分析</h2>
+<h3 id="案例1最左匹配">案例1：最左匹配</h3>
+<p><strong>索引</strong></p>
+<pre><code class="language-mysql">KEY `idx_shopid_orderno` (`shop_id`,`order_no`)
+</code></pre>
+<p><strong>SQL语句</strong></p>
+<pre><code class="language-mysql">select * from _t where orderno='xxx';
+</code></pre>
+<p>查询匹配从左往右匹配，要使用<code>order_no</code>走索引，必须查询条件携带<code>shop_id</code>或者索引(<code>shop_id</code>,<code>order_no</code>)调换前后顺序。</p>
+<h3 id="案例2隐式转换">案例2：隐式转换</h3>
+<p><strong>索引</strong></p>
+<pre><code class="language-mysql">KEY `idx_mobile` (`mobile`)
+</code></pre>
+<p><strong>SQL语句</strong></p>
+<pre><code class="language-mysql">select * from _user where mobile=12345678901;
+</code></pre>
+<p>隐式转换相当于在索引上做运算，会让索引失效。mobile是字符类型，使用了数字，应该使用字符串匹配，否则MySQL会用到隐式替换，导致索引失效。</p>
+<h3 id="案例3大分页">案例3：大分页</h3>
+<p><strong>索引</strong></p>
+<pre><code class="language-mysql">KEY `idx_a_b_c` (`a`, `b`, `c`)
+</code></pre>
+<p><strong>SQL语句</strong></p>
+<pre><code class="language-mysql">select * from _t where a = 1 and b = 2 order by c desc limit 10000, 10;
+</code></pre>
+<p>对于大分页的场景，可以优先让产品优化需求，如果没有优化的，有如下两种优化方式：</p>
+<ul>
+<li>把上一次的最后一条数据，也即上面的c传过来，然后做“c &lt; xxx”处理，但是这种一般需要改接口协议，并不一定可行</li>
+<li>采用延迟关联的方式进行处理，减少SQL回表，但是要记得索引需要完全覆盖才有效果，SQL改动如下</li>
+</ul>
+<pre><code class="language-mysql">SELECT t1.* FROM _t t1, (SELECT id FROM _t WHERE a=1 AND b=2 ORDER BY c DESC LIMIT 10000,10) t2  WHERE t1.id=t2.id;
+</code></pre>
+<h3 id="案例4inorder-by">案例4：in+order by</h3>
+<p><strong>索引</strong></p>
+<pre><code class="language-mysql">KEY `idx_shopid_status_created` (`shop_id`, `order_status`, `created_at`)
+</code></pre>
+<p><strong>SQL语句</strong></p>
+<pre><code class="language-mysql">SELECT * FROM _order WHERE shop_id = 1 AND order_status IN ( 1, 2, 3 ) ORDER BY created_at DESC LIMIT 10
+</code></pre>
+<p>in查询在MySQL底层是通过<code>n*m</code>的方式去搜索，类似union，但是效率比union高。in查询在进行cost代价计算时（<code>代价 = 元组数 * IO平均值</code>），是通过将in包含的数值，一条条去查询获取元组数的，因此这个计算过程会比较的慢，所以MySQL设置了个临界值(<code>eq_range_index_dive_limit</code>)，5.6之后超过这个临界值后该列的cost就不参与计算了。</p>
+<p>因此会导致执行计划选择不准确。默认是200，即in条件超过了200个数据，会导致in的代价计算存在问题，可能会导致Mysql选择的索引不准确。处理方式，可以(<code>order_status</code>, <code>created_at</code>)互换前后顺序，并且调整SQL为延迟关联。</p>
+<h3 id="案例5范围查询索引失效">案例5：范围查询索引失效</h3>
+<p>范围查询阻断，后续字段不能走索引。</p>
+<p><strong>索引</strong></p>
+<pre><code class="language-mysql">KEY `idx_shopid_created_status` (`shop_id`, `created_at`, `order_status`)
+</code></pre>
+<p><strong>SQL语句</strong></p>
+<pre><code class="language-mysql">SELECT * FROM _order WHERE shop_id=1 AND created_at &gt; '2021-01-01 00:00:00' AND order_status=10;
+</code></pre>
+<p>范围查询还有“IN、between”。</p>
+<h3 id="案例6避免使用非快速索引">案例6：避免使用非快速索引</h3>
+<p>不等于、不包含不能用到索引的快速搜索。</p>
+<pre><code class="language-mysql">select * from _order where shop_id=1 and order_status not in (1,2);
+select * from _order where shop_id=1 and order_status != 1;
+</code></pre>
+<p>在索引上，避免使用<code>NOT</code>、<code>!=</code>、<code>&lt;&gt;</code>、<code>!&lt;</code>、<code>!&gt;</code>、<code>NOT EXISTS</code>、<code>NOT IN</code>、<code>NOT LIKE</code>等。</p>
+<h3 id="案例7优化器选择索引失效">案例7：优化器选择索引失效</h3>
+<p>如果要求访问的数据量很小，则优化器还是会选择辅助索引，但是当访问的数据占整个表中数据的蛮大一部分时（一般是20%左右），优化器会选择通过聚集索引来查找数据。</p>
+<pre><code class="language-mysql">select * from _order where  order_status = 1
+</code></pre>
+<p>查询出所有未支付的订单，一般这种订单是很少的，即使建了索引，也没法使用索引。</p>
+<h3 id="案例8复杂查询">案例8：复杂查询</h3>
+<pre><code class="language-mysql">select sum(amt) from _t where a = 1 and b in (1, 2, 3) and c &gt; '2020-01-01';
+select * from _t where a = 1 and b in (1, 2, 3) and c &gt; '2020-01-01' limit 10;
+</code></pre>
+<p>如果是统计某些数据，可能改用数仓进行解决；如果是业务上就有那么复杂的查询，可能就不建议继续走SQL了，而是采用其他的方式进行解决，比如使用ES等进行解决。</p>
+<h3 id="案例9asc和desc混用">案例9：asc和desc混用</h3>
+<pre><code class="language-mysql">select * from _t where a=1 order by b desc, c asc
+</code></pre>
+<p>desc 和asc混用时会导致索引失效</p>
+<h3 id="案例10大数据">案例10：大数据</h3>
+<p>对于推送业务的数据存储，可能数据量会很大，如果在方案的选择上，最终选择存储在MySQL上，并且做7天等有效期的保存。那么需要注意，频繁的清理数据，会照成数据碎片，需要联系DBA进行数据碎片处理。</p>
+<h1 id="mysql原理">MySQL原理</h1>
+<h2 id="架构设计">架构设计</h2>
+<figure data-type="image" tabindex="57"><img src="/images/Database/MySQL%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1.jpg" alt="MySQL架构设计" loading="lazy"></figure>
+<p>从上面的示意图可以看出，MySQL从上到下包含了：<strong>客户端、Server层和存储引擎层</strong>。</p>
+<ul>
+<li><strong>客户端</strong>：可以是我们常用的MySQL命令行窗口，或者是Java的客户端程序等</li>
+<li><strong>Server层</strong>：连接器、查询缓存、分析器、优化器和执行器等。大部分MySQL对用户提供的功能都在这一层实现，包括了内置函数的实现，存储过程、触发器、视图等</li>
+<li><strong>存储层</strong>：存储引擎层负责数据的存储和提取，存储引擎的实现是插件式的。也就是说用户可以选择自己所需要的存储引擎，如InnoDB、MyISAM等</li>
+</ul>
+<h3 id="连接器">连接器</h3>
+<p>连接器是MySQL服务端对外的门户，当我们使用命令行黑窗口或者JDBC的Connection.connect()，连接到MySQL Server端时，会校验用户名和密码；然后会查询用户对应的权限列表。当连接建立后，后续的权限范围就在此时确定了，如果连接没有断开的情况下，更改了用户的权限，此时对于该连接也不生效。</p>
+<h3 id="查询缓存">查询缓存</h3>
+<p>当连接建立完成后，执行select 语句的时候，就会来到查询缓存。MySQL会将Select 语句为 KEY，将查询结果为VALUE 的形式保存在内存中。如果匹配到对应的 KEY 就会直接从内存中返回结果。</p>
+<p>但是常我们不会使用MySQL自身的查询缓存，因为当有一条Update 或 Insert 的改表语句时，就会清空对该表的所有查询缓存。缓存的粒度比较大，可以考虑类似 Redis 的分布式缓存做业务数据的缓存。在MySQL 8.0 中，查询缓存直接被移除了。</p>
+<h3 id="分析器">分析器</h3>
+<p>如果在查询缓存中没有查到数据，就要真正的开始执行SQL语句了。分析器首先会做“词法分析”。词法分析就是识别上面字符串，id、name 是表的字段名，T 是表的名称等等。之后就是语法分析，如果SQL有语法错误，在此时就会报错。</p>
+<h3 id="优化器">优化器</h3>
+<p>当分析器处理过之后，MySQL就知道SQL 要干什么了，但是此时还需要优化器对待执行的SQL 进行优化。当然MySQL 提供的优化器，相比其他几款商用收费的数据库来说还是比较弱的。当然MySQL 的优化器还是可以对 join 操作，表达式计算等等进行优化，本篇不做过多的介绍。</p>
+<h3 id="执行器">执行器</h3>
+<p>执行阶段，首先会检查当前用户有没有权限操作该 SQL 语句。如果有，则继续执行后续的操作。</p>
+<h2 id="存储引擎">存储引擎</h2>
+<p>InnoDB 和 MyISAM 的比较</p>
+<ul>
+<li>事务：InnoDB 是事务型的，可以使用 Commit 和 Rollback 语句。</li>
+<li>并发：MyISAM 只支持表级锁，而 InnoDB 还支持行级锁。</li>
+<li>外键：InnoDB 支持外键。</li>
+<li>备份：InnoDB 支持在线热备份。</li>
+<li>崩溃恢复：MyISAM 崩溃后发生损坏的概率比 InnoDB 高很多，而且恢复的速度也更慢。</li>
+<li>其它特性：MyISAM 支持压缩表和空间数据索引。</li>
+</ul>
+<h3 id="innodb引擎-2">InnoDB引擎</h3>
+<p>InnoDB 是一个事务安全的存储引擎，它具备提交、回滚以及崩溃恢复的功能以保护用户数据。InnoDB 的行级别锁定保证数据一致性提升了它的多用户并发数以及性能。InnoDB 将用户数据存储在聚集索引中以减少基于主键的普通查询所带来的 I/O 开销。为了保证数据的完整性，InnoDB 还支持外键约束。默认使用B+TREE数据结构存储索引。</p>
+<p><strong>特点</strong></p>
+<ul>
+<li>支持事务，支持4个事务隔离（ACID）级别</li>
+<li>行级锁定（更新时锁定当前行）</li>
+<li>读写阻塞与事务隔离级别相关</li>
+<li>既能缓存索引又能缓存数据</li>
+<li>支持外键</li>
+<li>InnoDB更消耗资源，读取速度没有MyISAM快</li>
+<li>在InnoDB中存在着缓冲管理，通过缓冲池，将索引和数据全部缓存起来，加快查询的速度；</li>
+<li>对于InnoDB类型的表，其数据的物理组织形式是聚簇表。所有的数据按照主键来组织。数据和索引放在一块，都位于B+数的叶子节点上</li>
+</ul>
+<p><strong>业务场景</strong></p>
+<ul>
+<li>需要支持事务的场景（银行转账之类）</li>
+<li>适合高并发，行级锁定对高并发有很好的适应能力，但需要确保查询是通过索引完成的</li>
+<li>数据修改较频繁的业务</li>
+</ul>
+<p><strong>InnoDB引擎调优</strong></p>
+<ul>
+<li>主键尽可能小，否则会给Secondary index带来负担</li>
+<li>避免全表扫描，这会造成锁表</li>
+<li>尽可能缓存所有的索引和数据，减少IO操作</li>
+<li>避免主键更新，这会造成大量的数据移动</li>
+</ul>
+<h3 id="myisam引擎">MyISAM引擎</h3>
+<p>MyISAM既不支持事务、也不支持外键、其优势是访问速度快，但是表级别的锁定限制了它在读写负载方面的性能，因此它经常应用于只读或者以读为主的数据场景。默认使用B+TREE数据结构存储索引。</p>
+<p><strong>特点</strong></p>
+<ul>
+<li>不支持事务</li>
+<li>表级锁定（更新时锁定整个表）</li>
+<li>读写互相阻塞（写入时阻塞读入、读时阻塞写入；但是读不会互相阻塞）</li>
+<li>只会缓存索引（通过key_buffer_size缓存索引，但是不会缓存数据）</li>
+<li>不支持外键</li>
+<li>读取速度快</li>
+</ul>
+<p><strong>业务场景</strong></p>
+<ul>
+<li>不需要支持事务的场景（像银行转账之类的不可行）</li>
+<li>一般读数据的较多的业务</li>
+<li>数据修改相对较少的业务</li>
+<li>数据一致性要求不是很高的业务</li>
+</ul>
+<p><strong>MyISAM引擎调优</strong></p>
+<ul>
+<li>设置合适索引</li>
+<li>启用延迟写入，尽量一次大批量写入，而非频繁写入</li>
+<li>尽量顺序insert数据，让数据写入到尾部，减少阻塞</li>
+<li>降低并发数，高并发使用排队机制</li>
+<li>MyISAM的count只有全表扫描比较高效，带有其它条件都需要进行实际数据访问</li>
+</ul>
+<h2 id="复制">复制</h2>
+<h3 id="主从复制">主从复制</h3>
+<p>主要涉及三个线程：</p>
+<ul>
+<li><strong>binlog 线程</strong>：负责将主服务器上的数据更改写入二进制日志（Binary log）中</li>
+<li><strong>I/O 线程</strong>：负责从主服务器上读取- 二进制日志，并写入从服务器的中继日志（Relay log）</li>
+<li><strong>SQL 线程</strong>：负责读取中继日志，解析出主服务器已经执行的数据更改并在从服务器中重放（Replay）</li>
+</ul>
+<figure data-type="image" tabindex="58"><img src="/images/Database/007S8ZIlly1gjjfy97e83j30jk09ltav.jpg" alt="img" loading="lazy"></figure>
+<h3 id="读写分离">读写分离</h3>
+<p>主服务器处理写操作以及实时性要求比较高的读操作，而从服务器处理读操作。读写分离能提高性能的原因在于：</p>
+<ul>
+<li>主从服务器负责各自的读和写，极大程度缓解了锁的争用</li>
+<li>从服务器可以使用 MyISAM，提升查询性能以及节约系统开销</li>
+<li>增加冗余，提高可用性</li>
+</ul>
+<p>读写分离常用代理方式来实现，代理服务器接收应用层传来的读写请求，然后决定转发到哪个服务器。</p>
+<figure data-type="image" tabindex="59"><img src="/images/Database/007S8ZIlly1gjjfycefayj313k0s20wl.jpg" alt="img" loading="lazy"></figure>
+<h2 id="查询过程">查询过程</h2>
+<figure data-type="image" tabindex="60"><img src="/images/Database/MySQL%E6%9F%A5%E8%AF%A2%E8%BF%87%E7%A8%8B.png" alt="MySQL查询过程" loading="lazy"></figure>
+<h2 id="mysql复制原理">mysql复制原理</h2>
+<h3 id="基于语句的复制">基于语句的复制</h3>
+<p>基于语句的复制模式下，主库会记录那些造成数据更改的查询，当备库读取并重放这些事件时，实际上只把主库上执行过的SQL再执行一遍。</p>
+<ul>
+<li>
+<p><strong>优点</strong></p>
+<p>最明显的好处是实现相当简单。理论上讲，简单地记录和执行这些语句，能够让备库保持同步。另外好处是binlog日志里的事件更加紧凑，所以相对而言，基于语句的模式不会使用太多带宽。一条更新好几兆数据的语句在二进制日志里可能只占用几十字节。</p>
+</li>
+<li>
+<p><strong>缺点</strong></p>
+<p>有些数据更新语句，可能依赖其他因素。例如，同一条sql在主库和备库上执行的时间可能稍微或很不相同，因此在传输的binlog日志中，除了查询语句，还包括一些元数据信息，如当前的时间戳。即便如此，还存在着一些无法被正确复制的SQL，例如，使用CURRENT_USER()函数语句。存储过程和触发器在使用基于语句的复制模式时也可能存在问题。另外一个问题是更新必须是串行的。这需要更多的锁。并且不是所有的存储引擎都支持这种复制模式。</p>
+</li>
+</ul>
+<h3 id="基于行的复制">基于行的复制</h3>
+<p>MySQL5.1开始支持基于行的复制，这种方式会将实际数据记录在二进制日志中，跟其他数据库的实现比较相像。</p>
+<ul>
+<li>
+<p><strong>优点</strong></p>
+<p>最大的好处是可以正确的复制每一行，一些语句可以呗更加有效地复制。由于无需重放更新主库数据的查询，使用基于行的复制模式能够更高效地复制数据。重放一些查询的代价会很高</p>
+</li>
+<li>
+<p><strong>缺点</strong></p>
+<p>全表更行，使用基于行复制开销会大很多，因为每一行数据都会呗记录到二进制日志中，这使得二进制日志时间非常庞大</p>
+</li>
+</ul>
+<h1 id="高可用方案">高可用方案</h1>
+<p>我们在考虑MySQL数据库的高可用架构时，主要考虑如下几方面：</p>
+<ul>
+<li>如果数据库发生了宕机或者意外中断等故障，能尽快恢复数据库的可用性，尽可能的减少停机时间，保证业务不会因为数据库的故障而中断</li>
+<li>用作备份、只读副本等功能的非主节点的数据应该和主节点的数据实时或者最终保持一致</li>
+<li>当业务发生数据库切换时，切换前后的数据库内容应当一致，不会因为数据缺失或者数据不一致而影响业务</li>
+</ul>
+<p>关于对高可用的分级我们暂不做详细的讨论，这里只讨论常用高可用方案的优缺点以及选型。</p>
+<p>随着人们对数据一致性要求不断的提高，越来越多的方法被尝试用来解决分布式数据一致性的问题，如MySQL自身的优化、MySQL集群架构的优化、Paxos、Raft、2PC算法的引入等。</p>
+<p>而使用分布式算法用来解决MySQL数据库数据一致性问题的方法，也越来越被人们所接受，一系列成熟的产品如PhxSQL、MariaDB Galera Cluster、Percona XtraDB Cluster等越来越多的被大规模使用。</p>
+<p>随着官方MySQL Group Replication的GA，使用分布式协议来解决数据一致性问题已经成为了主流的方向。期望越来越多优秀的解决方案被提出，MySQL高可用问题也可以被更好的解决。</p>
+<h2 id="主从或主主半同步复制">主从或主主半同步复制</h2>
+<p>使用双节点数据库，搭建单向或者双向的半同步复制。在5.7以后的版本中，由于lossless replication、logical多线程复制等一些列新特性的引入，使得MySQL原生半同步复制更加可靠。常见架构如下：</p>
+<figure data-type="image" tabindex="61"><img src="/images/Database/%E4%B8%BB%E4%BB%8E%E6%88%96%E4%B8%BB%E4%B8%BB%E5%8D%8A%E5%90%8C%E6%AD%A5%E5%A4%8D%E5%88%B6.jpg" alt="主从或主主半同步复制" loading="lazy"></figure>
+<p>通常会和Proxy、Keepalived等第三方软件同时使用，即可以用来监控数据库的健康，又可以执行一系列管理命令。如果主库发生故障，切换到备库后仍然可以继续使用数据库。</p>
+<p><strong>优点</strong></p>
+<ul>
+<li>架构比较简单，使用原生半同步复制作为数据同步的依据</li>
+<li>双节点，没有主机宕机后的选主问题，直接切换即可</li>
+<li>双节点，需求资源少，部署简单</li>
+</ul>
+<p><strong>缺点</strong></p>
+<ul>
+<li>完全依赖于半同步复制，如果半同步复制退化为异步复制，数据一致性无法得到保证</li>
+<li>需要额外考虑HAProxy、Keepalived的高可用机制</li>
+</ul>
+<h2 id="半同步复制优化">半同步复制优化</h2>
+<p>半同步复制机制是可靠的。如果半同步复制一直是生效的，那么可以认为数据是一致的。但是由于网络波动等一些客观原因，导致半同步复制发生超时而切换为异步复制，这时便不能保证数据的一致性。所以尽可能的保证半同步复制，就可以提高数据的一致性。</p>
+<p>该方案同样使用双节点架构，但是在原有半同复制的基础上做了功能上的优化，使半同步复制的机制变得更加可靠。可参考的优化方案如下：</p>
+<h3 id="双通道复制">双通道复制</h3>
+<figure data-type="image" tabindex="62"><img src="/images/Database/%E5%8F%8C%E9%80%9A%E9%81%93%E5%A4%8D%E5%88%B6.jpg" alt="双通道复制" loading="lazy"></figure>
+<p>半同步复制由于发生超时后，复制断开，当再次建立起复制时，同时建立两条通道，其中一条半同步复制通道从当前位置开始复制，保证从机知道当前主机执行的进度。另外一条异步复制通道开始追补从机落后的数据。当异步复制通道追赶到半同步复制的起始位置时，恢复半同步复制。</p>
+<h3 id="binlog文件服务器">binlog文件服务器</h3>
+<figure data-type="image" tabindex="63"><img src="/images/Database/binlog%E6%96%87%E4%BB%B6%E6%9C%8D%E5%8A%A1%E5%99%A8.jpg" alt="binlog文件服务器" loading="lazy"></figure>
+<p>搭建两条半同步复制通道，其中连接文件服务器的半同步通道正常情况下不启用，当主从的半同步复制发生网络问题退化后，启动与文件服务器的半同步复制通道。当主从半同步复制恢复后，关闭与文件服务器的半同步复制通道。</p>
+<p><strong>优点</strong></p>
+<ul>
+<li>双节点，需求资源少，部署简单</li>
+<li>架构简单，没有选主的问题，直接切换即可</li>
+<li>相比于原生复制，优化后的半同步复制更能保证数据的一致性</li>
+</ul>
+<p><strong>缺点</strong></p>
+<ul>
+<li>需要修改内核源码或者使用MySQL通信协议。需要对源码有一定的了解，并能做一定程度的二次开发</li>
+<li>依旧依赖于半同步复制，没有从根本上解决数据一致性问题</li>
+</ul>
+<h2 id="高可用架构优化">高可用架构优化</h2>
+<p>将双节点数据库扩展到多节点数据库，或者多节点数据库集群。可以根据自己的需要选择一主两从、一主多从或者多主多从的集群。由于半同步复制，存在接收到一个从机的成功应答即认为半同步复制成功的特性，所以多从半同步复制的可靠性要优于单从半同步复制的可靠性。并且多节点同时宕机的几率也要小于单节点宕机的几率，所以多节点架构在一定程度上可以认为高可用性是好于双节点架构。</p>
+<p>但由于数据库数量较多，所以需要数据库管理软件来保证数据库的可维护性。可以选择MMM、MHA或者各个版本的Proxy等等。常见方案如下：</p>
+<h3 id="mha多节点集群">MHA+多节点集群</h3>
+<figure data-type="image" tabindex="64"><img src="/images/Database/MHA+%E5%A4%9A%E8%8A%82%E7%82%B9%E9%9B%86%E7%BE%A4.jpg" alt="MHA+多节点集群" loading="lazy"></figure>
+<p>MHA Manager会定时探测集群中的master节点，当master出现故障时，它可以自动将最新数据的slave提升为新的master，然后将所有其他的slave重新指向新的master，整个故障转移过程对应用程序完全透明。MHA Node运行在每台MySQL服务器上，主要作用是切换时处理二进制日志，确保切换尽量少丢数据。MHA也可以扩展到如下的多节点集群：</p>
+<figure data-type="image" tabindex="65"><img src="/images/Database/MHA-Manager.jpg" alt="MHA-Manager" loading="lazy"></figure>
+<p><strong>优点</strong></p>
+<ul>
+<li>可以进行故障的自动检测和转移</li>
+<li>可扩展性较好，可以根据需要扩展MySQL的节点数量和结构</li>
+<li>相比于双节点的MySQL复制，三节点/多节点的MySQL发生不可用的概率更低</li>
+</ul>
+<p><strong>缺点</strong></p>
+<ul>
+<li>至少需要三节点，相对于双节点需要更多的资源</li>
+<li>逻辑较为复杂，发生故障后排查问题，定位问题更加困难</li>
+<li>数据一致性仍然靠原生半同步复制保证，仍然存在数据不一致的风险</li>
+<li>可能因为网络分区发生脑裂现象。</li>
+<li>在此我向大家推荐一个架构学习交流群。交流学习群号：575745314 里面会分享一些资深架构师录制的视频录像：有Spring，MyBatis，Netty源码分析，高并发、高性能、分布式、微服务架构的原理，JVM性能优化、分布式架构等这些成为架构师必备的知识体系。还能领取免费的学习资源，目前受益良多</li>
+</ul>
+<h3 id="zookeeperproxy">ZooKeeper+Proxy</h3>
+<p>ZooKeeper使用分布式算法保证集群数据的一致性，使用ZooKeeper可以有效的保证Proxy的高可用性，可以较好地避免网络分区现象的产生。</p>
+<figure data-type="image" tabindex="66"><img src="/images/Database/ZooKeeper+Proxy.jpg" alt="ZooKeeper+Proxy" loading="lazy"></figure>
+<p><strong>优点</strong></p>
+<ul>
+<li>较好的保证了整个系统的高可用性，包括Proxy、MySQL</li>
+<li>扩展性较好，可以扩展为大规模集群</li>
+</ul>
+<p><strong>缺点</strong></p>
+<ul>
+<li>数据一致性仍然依赖于原生的mysql半同步复制</li>
+<li>引入ZK，整个系统的逻辑变得更加复杂</li>
+</ul>
+<h2 id="共享存储">共享存储</h2>
+<p>共享存储实现了数据库服务器和存储设备的解耦，不同数据库之间的数据同步不再依赖于MySQL的原生复制功能，而是通过磁盘数据同步的手段，来保证数据的一致性。</p>
+<h3 id="san共享储存">SAN共享储存</h3>
+<p>SAN的概念是允许存储设备和处理器（服务器）之间建立直接的高速网络（与LAN相比）连接，通过这种连接实现数据的集中式存储。常用架构如下：</p>
+<figure data-type="image" tabindex="67"><img src="/images/Database/SAN%E5%85%B1%E4%BA%AB%E5%82%A8%E5%AD%98.jpg" alt="SAN共享储存" loading="lazy"></figure>
+<p>使用共享存储时，MySQL服务器能够正常挂载文件系统并操作，如果主库发生宕机，备库可以挂载相同的文件系统，保证主库和备库使用相同的数据。</p>
+<p><strong>优点</strong></p>
+<ul>
+<li>两节点即可，部署简单，切换逻辑简单</li>
+<li>很好的保证数据的强一致性</li>
+<li>不会因为MySQL的逻辑错误发生数据不一致的情况</li>
+</ul>
+<p><strong>缺点</strong></p>
+<ul>
+<li>需要考虑共享存储的高可用</li>
+<li>价格昂贵</li>
+</ul>
+<h3 id="drbd磁盘复制">DRBD磁盘复制</h3>
+<p>DRBD是一种基于软件、基于网络的块复制存储解决方案，主要用于对服务器之间的磁盘、分区、逻辑卷等进行数据镜像，当用户将数据写入本地磁盘时，还会将数据发送到网络中另一台主机的磁盘上，这样的本地主机(主节点)与远程主机(备节点)的数据就可以保证实时同步。常用架构如下：</p>
+<figure data-type="image" tabindex="68"><img src="/images/Database/DRBD%E7%A3%81%E7%9B%98%E5%A4%8D%E5%88%B6.jpg" alt="DRBD磁盘复制" loading="lazy"></figure>
+<p>当本地主机出现问题，远程主机上还保留着一份相同的数据，可以继续使用，保证了数据的安全。DRBD是Linux内核模块实现的快级别的同步复制技术，可以与SAN达到相同的共享存储效果。</p>
+<p><strong>优点</strong></p>
+<ul>
+<li>两节点即可，部署简单，切换逻辑简单</li>
+<li>相比于SAN储存网络，价格低廉</li>
+<li>保证数据的强一致性</li>
+</ul>
+<p><strong>缺点</strong></p>
+<ul>
+<li>对IO性能影响较大</li>
+<li>从库不提供读操作</li>
+</ul>
+<h2 id="分布式协议">分布式协议</h2>
+<p>分布式协议可以很好地解决数据一致性问题。比较常见的方案如下：</p>
+<h3 id="mysql-cluster">MySQL Cluster</h3>
+<p>MySQL Cluster是官方集群的部署方案，通过使用NDB存储引擎实时备份冗余数据，实现数据库的高可用性和数据一致性。</p>
+<figure data-type="image" tabindex="69"><img src="/images/Database/MySQL-Cluster.jpg" alt="MySQL-Cluster" loading="lazy"></figure>
+<p><strong>优点</strong></p>
+<ul>
+<li>全部使用官方组件，不依赖于第三方软件</li>
+<li>可以实现数据的强一致性</li>
+</ul>
+<p><strong>缺点</strong></p>
+<ul>
+<li>国内使用的较少</li>
+<li>配置较复杂，需要使用NDB储存引擎，与MySQL常规引擎存在一定差异</li>
+<li>至少三节点</li>
+</ul>
+<h3 id="galera">Galera</h3>
+<p>基于Galera的MySQL高可用集群， 是多主数据同步的MySQL集群解决方案，使用简单，没有单点故障，可用性高。常见架构如下：</p>
+<figure data-type="image" tabindex="70"><img src="/images/Database/MySQL-Galera.jpg" alt="MySQL-Galera" loading="lazy"></figure>
+<p><strong>优点</strong></p>
+<ul>
+<li>多主写入，无延迟复制，能保证数据强一致性</li>
+<li>有成熟的社区，有互联网公司在大规模的使用</li>
+<li>自动故障转移，自动添加、剔除节点</li>
+</ul>
+<p><strong>缺点</strong></p>
+<ul>
+<li>需要为原生MySQL节点打wsrep补丁</li>
+<li>只支持innodb储存引擎</li>
+<li>至少三节点</li>
+</ul>
+<h3 id="paxos">Paxos</h3>
+<p>Paxos算法解决的问题是一个分布式系统如何就某个值（决议）达成一致。这个算法被认为是同类算法中最有效的。Paxos与MySQL相结合可以实现在分布式的MySQL数据的强一致性。常见架构如下：</p>
+<figure data-type="image" tabindex="71"><img src="/images/Database/MySQL-Paxos.jpg" alt="MySQL-Paxos" loading="lazy"></figure>
+<p><strong>优点</strong></p>
+<ul>
+<li>多主写入，无延迟复制，能保证数据强一致性</li>
+<li>有成熟理论基础</li>
+<li>自动故障转移，自动添加、剔除节点</li>
+</ul>
+<p><strong>缺点</strong></p>
+<ul>
+<li>只支持InnoDB储存引擎</li>
+<li>至少三节点</li>
+<li>在此我向大家推荐一个架构学习交流群。交流学习群号：575745314 里面会分享一些资深架构师录制的视频录像：有Spring，MyBatis，Netty源码分析，高并发、高性能、分布式、微服务架构的原理，JVM性能优化、分布式架构等这些成为架构师必备的知识体系。还能领取免费的学习资源，目前受益良多</li>
+</ul>
+<h2 id="主从延迟">主从延迟</h2>
+<p>在实际的生产环境中，由单台MySQL作为独立的数据库是完全不能满足实际需求的，无论是在安全性，高可用性以及高并发等各个方面。因此，一般来说都是通过集群主从复制（Master-Slave）的方式来同步数据，再通过读写分离（MySQL-Proxy）来提升数据库的并发负载能力进行部署与实施。总结MySQL主从集群带来的作用是：</p>
+<ul>
+<li>提高数据库负载能力，主库执行读写任务（增删改），备库仅做查询</li>
+<li>提高系统读写性能、可扩展性和高可用性</li>
+<li>数据备份与容灾，备库在异地，主库不存在了，备库可以立即接管，无须恢复时间</li>
+</ul>
+<figure data-type="image" tabindex="72"><img src="/images/Database/MySQL%E4%B8%BB%E4%BB%8E%E9%9B%86%E7%BE%A4.jpg" alt="MySQL主从集群" loading="lazy"></figure>
+<h3 id="biglog">biglog</h3>
+<p><strong>binlog是什么？有什么作用？</strong></p>
+<p>用于记录数据库执行的写入性操作(不包括查询)信息，以二进制的形式保存在磁盘中。可以简单理解为记录的就是sql语句。binlog 是 mysql 的逻辑日志，并且由 <code>Server</code>层进行记录，使用任何存储引擎的 mysql 数据库都会记录 binlog 日志。在实际应用中， binlog 的主要使用场景有两个：</p>
+<ul>
+<li>用于主从复制，在主从结构中，binlog 作为操作记录从 master 被发送到 slave，slave服务器从 master 接收到的日志保存到 relay log 中</li>
+<li>用于数据备份，在数据库备份文件生成后，binlog保存了数据库备份后的详细信息，以便下一次备份能从备份点开始</li>
+</ul>
+<p><strong>日志格式</strong></p>
+<p>binlog日志有三种格式，分别为STATMENT 、 ROW 和 MIXED。在 MySQL 5.7.7 之前，默认的格式是 STATEMENT ， MySQL 5.7.7 之后，默认值是 ROW。日志格式通过 <code>binlog-format</code> 指定。</p>
+<ul>
+<li><strong>STATMENT</strong> ：基于 SQL 语句的复制，每一条会修改数据的sql语句会记录到 binlog 中</li>
+<li><strong>ROW</strong> ：基于行的复制</li>
+<li><strong>MIXED</strong> ：基于 STATMENT 和 ROW 两种模式的混合复制，比如一般的数据操作使用 row 格式保存，有些表结构的变更语句，使用 statement 来记录</li>
+</ul>
+<p>我们还可以通过mysql提供的查看工具mysqlbinlog查看文件中的内容，例如：</p>
+<pre><code class="language-mysql">mysqlbinlog mysql-bin.00001 | more
+</code></pre>
+<p>binlog文件大小和个数会不断的增加，后缀名会按序号递增，例如<code>mysql-bin.00002</code>等。</p>
+<h3 id="主从复制原理">主从复制原理</h3>
+<figure data-type="image" tabindex="73"><img src="/images/Database/%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E5%8E%9F%E7%90%86.jpg" alt="主从复制原理" loading="lazy"></figure>
+<p>可以看到mysql主从复制需要三个线程：<strong>master（binlog dump thread）、slave（I/O thread 、SQL thread）</strong></p>
+<ul>
+<li><strong>binlog dump线程：</strong> 主库中有数据更新时，根据设置的binlog格式，将更新的事件类型写入到主库的binlog文件中，并创建log dump线程通知slave有数据更新。当I/O线程请求日志内容时，将此时的binlog名称和当前更新的位置同时传给slave的I/O线程</li>
+<li><strong>I/O线程：</strong> 该线程会连接到master，向log dump线程请求一份指定binlog文件位置的副本，并将请求回来的binlog存到本地的relay log中</li>
+<li><strong>SQL线程：</strong> 该线程检测到relay log有更新后，会读取并在本地做redo操作，将发生在主库的事件在本地重新执行一遍，来保证主从数据同步</li>
+</ul>
+<p><strong>基本过程总结</strong></p>
+<ul>
+<li>主库写入数据并且生成binlog文件。该过程中MySQL将事务串行的写入二进制日志，即使事务中的语句都是交叉执行的</li>
+<li>在事件写入二进制日志完成后，master通知存储引擎提交事务</li>
+<li>从库服务器上的IO线程连接Master服务器，请求从执行binlog日志文件中的指定位置开始读取binlog至从库</li>
+<li>主库接收到从库IO线程请求后，其上复制的IO线程会根据Slave的请求信息分批读取binlog文件然后返回给从库的IO线程</li>
+<li>Slave服务器的IO线程获取到Master服务器上IO线程发送的日志内容、日志文件及位置点后，会将binlog日志内容依次写到Slave端自身的Relay Log（即中继日志）文件的最末端，并将新的binlog文件名和位置记录到<code>master-info</code>文件中，以便下一次读取master端新binlog日志时能告诉Master服务器从新binlog日志的指定文件及位置开始读取新的binlog日志内容</li>
+<li>从库服务器的SQL线程会实时监测到本地Relay Log中新增了日志内容，然后把RelayLog中的日志翻译成SQL并且按照顺序执行SQL来更新从库的数据</li>
+<li>从库在<code>relay-log.info</code>中记录当前应用中继日志的文件名和位置点以便下一次数据复制</li>
+</ul>
+<p><strong>并行复制</strong></p>
+<p>在MySQL 5.6版本之前，Slave服务器上有两个线程I/O线程和SQL线程。I/O线程负责接收二进制日志，SQL线程进行回放二进制日志。如果在MySQL 5.6版本开启并行复制功能，那么SQL线程就变为了coordinator线程，coordinator线程主要负责以前两部分的内容：</p>
+<figure data-type="image" tabindex="74"><img src="/images/Database/%E5%B9%B6%E8%A1%8C%E5%A4%8D%E5%88%B6.jpg" alt="并行复制" loading="lazy"></figure>
+<p><strong>上图的红色框框部分就是实现并行复制的关键所在</strong>。这意味着coordinator线程并不是仅将日志发送给worker线程，自己也可以回放日志，但是所有可以并行的操作交付由worker线程完成。coordinator线程与worker是典型的生产者与消费者模型。</p>
+<figure data-type="image" tabindex="75"><img src="/images/Database/coordinator%E7%BA%BF%E7%A8%8B.jpg" alt="coordinator线程" loading="lazy"></figure>
+<p>不过到MySQL 5.7才可称为真正的并行复制，这其中最为主要的原因就是slave服务器的回放与主机是一致的即master服务器上是怎么并行执行的slave上就怎样进行并行回放。不再有库的并行复制限制，对于二进制日志格式也无特殊的要求。为了兼容MySQL 5.6基于库的并行复制，5.7引入了新的变量<code>slave-parallel-type</code>，其可以配置的值有：</p>
+<ul>
+<li><strong>DATABASE</strong>：默认值，基于库的并行复制方式</li>
+<li><strong>LOGICAL_CLOCK</strong>：基于组提交的并行复制方式</li>
+</ul>
+<p><strong>按库并行</strong></p>
+<p>每个 worker 线程对应一个 hash 表，用于保存当前正在这个worker的执行队列里的事务所涉及到的库。其中hash表里的key是数据库名，用于决定分发策略。该策略的优点是构建hash值快，只需要库名，同时对于binlog的格式没有要求。但这个策略的效果，只有在主库上存在多个DB，且各个DB的压力均衡的情况下，这个策略效果好。因此，对于主库上的表都放在同一个DB或者不同DB的热点不同，则起不到多大效果：</p>
+<figure data-type="image" tabindex="76"><img src="/images/Database/%E6%8C%89%E5%BA%93%E5%B9%B6%E8%A1%8C.jpg" alt="按库并行" loading="lazy"></figure>
+<p><strong>组提交优化</strong></p>
+<p>该特性如下：</p>
+<ul>
+<li>能够同一组里提交的事务，定不会修改同一行</li>
+<li>主库上可以并行执行的事务，从库上也一定可以并行执行</li>
+</ul>
+<p>具体是如何实现的：</p>
+<ul>
+<li>在同一组里面一起提交的事务，会有一个相同的<code>commit_id</code>，下一组为<code>commit_id+1</code>，该<code>commit_id</code>会直接写到binlog中</li>
+<li>在从库使用时，相同<code>commit_id</code>的事务会被分发到多个worker并行执行，直到这一组相同的<code>commit_id</code>执行结束后，coordinator再取下一批</li>
+</ul>
+<h3 id="主从延迟-2">主从延迟</h3>
+<p>根据主从复制的原理可以看出，两者之间是存在一定时间的数据不一致，也就是所谓的主从延迟。导致主从延迟的时间点：</p>
+<ul>
+<li>主库 A 执行完成一个事务，写入 binlog，该时刻记为T1</li>
+<li>传给从库B，从库接受完这个binlog的时刻记为T2</li>
+<li>从库B执行完这个事务，该时刻记为T3</li>
+</ul>
+<p>那么所谓主从延迟，就是同一个事务，从库执行完成的时间和主库执行完成的时间之间的差值，即T3-T1。我们也可以通过在从库执行<code>show slave status</code>，返回结果会显示<code>seconds_behind_master</code>，表示当前从库延迟了多少秒。</p>
+<p><strong>seconds_behind_master如何计算的？</strong></p>
+<ul>
+<li>每一个事务的binlog都有一个时间字段，用于记录主库上写入的时间</li>
+<li>从库取出当前正在执行的事务的时间字段，跟当前系统的时间进行相减，得到的就是<code>seconds_behind_master</code>，也就是前面所描述的T3-T1</li>
+</ul>
+<p><strong>为什么会主从延迟？</strong></p>
+<p>正常情况下，如果网络不延迟，那么日志从主库传给从库的时间是相当短，所以T2-T1可以基本忽略。最直接的影响就是从库消费中转日志（relaylog）的时间段，而造成原因一般是以下几种：</p>
+<ul>
+<li>
+<p><strong>从库的机器性能比主库要差</strong></p>
+<p>比如将20台主库放在4台机器，把从库放在一台机器。这个时候进行更新操作，由于更新时会触发大量读操作，导致从库机器上的多个从库争夺资源，导致主从延迟。不过，目前大部分部署都是采取主从使用相同规格的机器部署</p>
+</li>
+<li>
+<p><strong>从库的压力大</strong></p>
+<p>按照正常的策略，读写分离，主库提供写能力，从库提供读能力。将进行大量查询放在从库上，结果导致从库上耗费了大量的CPU资源，进而影响了同步速度，造成主从延迟。对于这种情况，可以通过一主多从，分担读压力；也可以采取binlog输出到外部系统，比如Hadoop，让外部系统提供查询能力</p>
+</li>
+<li>
+<p><strong>大事务的执行</strong></p>
+<p>一旦执行大事务，那么主库必须要等到事务完成之后才会写入binlog。比如主库执行了一条insert … select非常大的插入操作，该操作产生了近几百G的binlog文件传输到只读节点，进而导致了只读节点出现应用binlog延迟。因此，DBA经常会提醒开发，不要一次性地试用delete语句删除大量数据，尽可能控制数量，分批进行</p>
+</li>
+<li>
+<p><strong>主库的DDL(alter、drop、create)</strong></p>
+<ul>
+<li>只读节点与主库的DDL同步是串行进行，如果DDL操作在主库执行时间很长，那么从库也会消耗同样的时间，比如在主库对一张500W的表添加一个字段耗费了10分钟，那么从节点上也会耗费10分钟</li>
+<li>从节点上有一个执行时间非常长的的查询正在执行，那么这个查询会堵塞来自主库的DDL，表被锁，直到查询结束为止，进而导致了从节点的数据延迟</li>
+</ul>
+</li>
+<li>
+<p><strong>锁冲突</strong></p>
+<p>锁冲突问题也可能导致从节点的SQL线程执行慢，比如从机上有一些select .... for update的SQL，或者使用了MyISAM引擎等</p>
+</li>
+<li>
+<p><strong>从库的复制能力</strong></p>
+<p>一般场景中，因偶然情况导致从库延迟了几分钟，都会在从库恢复之后追上主库。但若是从库执行速度低于主库，且主库持续具有压力，就会导致长时间主从延迟，很有可能就是从库复制能力的问题。</p>
+</li>
+</ul>
+<p>从库上的执行，即<code>sql_thread</code>更新逻辑，在5.6版本之前，是只支持单线程，那么在主库并发高、TPS高时，就会出现较大的主从延迟。因此，MySQL自5.7版本后就已经支持并行复制了。可以在从服务上设置 <code>slave_parallel_workers</code>为一个大于0的数，然后把<code>slave_parallel_type</code>参数设置为<code>LOGICAL_CLOCK</code>，这就可以了</p>
+<pre><code class="language-mysql">mysql&gt; show variables like 'slave_parallel%';
++------------------------+----------+
+| Variable_name          | Value    |
++------------------------+----------+
+| slave_parallel_type    | DATABASE |
+| slave_parallel_workers | 0        |
++------------------------+----------+
+</code></pre>
+<p><strong>怎么减少主从延迟？</strong></p>
+<p>主从同步问题永远都是一致性和性能的权衡，得看实际的应用场景，若想要减少主从延迟的时间，可以采取下面的办法：</p>
+<ul>
+<li>降低多线程大事务并发的概率，优化业务逻辑</li>
+<li>优化SQL，避免慢SQL，减少批量操作，建议写脚本以update-sleep这样的形式完成</li>
+<li>提高从库机器的配置，减少主库写binlog和从库读binlog的效率差</li>
+<li>尽量采用短的链路，也就是主库和从库服务器的距离尽量要短，提升端口带宽，减少binlog传输的网络延时</li>
+<li>实时性要求的业务读强制走主库，从库只做灾备，备份</li>
+</ul>
+<h1 id="clickhouse">ClickHouse</h1>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://www.lvtao.net/post/BigData/">
+              <h3 class="post-title">
+                下一篇：基础知识 `Redis`、`RocketMQ`、`Zookeeper`、`Netty`、`Tomcat` 等总结
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <table>
+    <tr><td><a href="https://www.ioncube.com/?xp=TQLLZT"><img src="/media/ioncube.jpg" width="100%"/></a></td></tr>
+    <tr><td><a href="https://app.cloudcone.com/?ref=9519"><img src="/media/cloudcone.gif" width="100%"/></a></td></tr>
+  </table>
+  <div class="slogan"></div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  Powered by <a href="https://lvtao.net" target="_blank">LVTAO</a> | <a class="rss" href="https://www.lvtao.net/atom.xml" target="_blank">RSS</a>
+</div>
+<script 
+async
+defer
+src="https://ask.lvtao.net/api/application/embed?protocol=https&host=ask.lvtao.net&token=e193b47f92f1b41e">
+</script>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

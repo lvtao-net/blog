@@ -1,0 +1,216 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    
+<meta charset="utf-8" >
+
+<title>nginx配置API跨域 | 吕滔博客</title>
+<meta name="description" content="">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://www.lvtao.net/favicon.ico?v=1714210602511">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://www.lvtao.net/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.5.1/build/highlight.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+      <div class="site-header-container">
+  <div class="site-header">
+    <div class="left">
+      <a href="https://www.lvtao.net">
+        <img class="avatar" src="https://www.lvtao.net/images/avatar.png?v=1714210602511" alt="" width="32px" height="32px">
+      </a>
+      <a href="https://www.lvtao.net">
+        <h1 class="site-title">吕滔博客</h1>
+      </a>
+    </div>
+    <div class="right">
+      <transition name="fade">
+        <i class="icon" :class="{ 'icon-close-outline': menuVisible, 'icon-menu-outline': !menuVisible }" @click="menuVisible = !menuVisible"></i>
+      </transition>
+    </div>
+  </div>
+</div>
+
+<transition name="fade">
+  <div class="menu-container" style="display: none;" v-show="menuVisible">
+    <div class="menu-list">
+      
+        
+          <a href="/" class="menu purple-link">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="menu purple-link">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="menu purple-link">
+            标签
+          </a>
+        
+      
+        
+          <a href="https://medoo.lvtao.net" class="menu purple-link">
+            MeDoo中文手册
+          </a>
+        
+      
+        
+          <a href="https://tool.lvtao.net" class="menu purple-link">
+            工具箱
+          </a>
+        
+      
+    </div>
+  </div>
+</transition>
+
+      <div class="content-container">
+        <div class="post-detail">
+          
+          <h2 class="post-title">nginx配置API跨域</h2>
+          <div class="post-info post-detail-info">
+            
+              <span>
+                <i class="icon-pricetags-outline"></i>
+                
+                  <a href="https://www.lvtao.net/tag/nginx/">
+                    nginx
+                    
+                  </a>
+                
+              </span>
+            
+             <div style="margin-top:5px;"><a href="https://app.cloudcone.com/?ref=9519" target="_blank">海外无需备案主机推荐，支持25端口邮件发送，无端口限制，支持支付宝、Paypal、信用卡等支付...</a></div>
+          </div>
+          <div class="post-content" v-pre>
+            <p>nginx配置</p>
+<pre><code>add_header 'Access-Control-Allow-Origin' '*';
+add_header 'Access-Control-Allow-Headers' '*';
+add_header 'Access-Control-Allow-Credentials' 'true';
+add_header 'Access-Control-Allow-Methods' '*'; // GET,POST,PUT,PATCH,DELETE,OPTIONS,HEAD,TRACE
+
+if ($request_method = 'OPTIONS') {
+    return 204;
+}
+</code></pre>
+<p>详细说明<br>
+GET<br>
+特点：安全、幂等。<br>
+说明：从服务器端获取数据，请求body在地址栏上。<br>
+作用：获取资源。</p>
+<p>HEAD<br>
+特点：安全、幂等。<br>
+说明：与get方法类似，但不返回message body内容，仅仅是获得获取资源的部分信息（content-type、content-length）。<br>
+作用：restful框架中较少使用。</p>
+<p>POST<br>
+特点：非安全、非幂等。<br>
+说明：向服务器端提交数据，请求数据在报文body里；<br>
+发送一个修改数据的请求，需求数据要重新新创建。<br>
+作用：用于创建子资源。创建、更新、删除、查询资源均可使用。</p>
+<p>PUT<br>
+特点：非安全、幂等。<br>
+说明：向服务器端提交数据，请求数据在报文body里；<br>
+发送一个修改数据的请求，需求数据更新（全部更新）。<br>
+作用：用于创建、更新资源。</p>
+<p>DELETE<br>
+特点：非安全、幂等。<br>
+说明：向服务器端提交数据，请求数据在报文body里；<br>
+发送一个删除数据的请求。<br>
+作用：删除资源。</p>
+<p>OPTIONS<br>
+特点：安全、幂等。<br>
+作用：用于url验证，验证接口服务是否正常。</p>
+<p>TRACE<br>
+特点：安全、幂等。<br>
+说明：维基百科“回显服务器收到的请求，这样客户端可以看到（如果有）哪一些改变或者添加已经被中间服务器实现。”<br>
+作用：restful框架中较少使用。</p>
+<p>PATCH<br>
+特点：非安全、幂等。<br>
+说明：向服务器端提交数据，请求数据在报文body里；<br>
+与PUT类似，发送一个修改数据的请求，区别在于PATCH代表部分更新；<br>
+后来提出的接口方法，使用时可能去要验证客户端和服务端是否支持；<br>
+作用：用于创建、更新资源。局部更新，比如：user对象，只更改了name属性，那么他的其他属性值是不会变的，如果用post，那么其他属性值会被设置为null（全局更新）</p>
+<p>幂等性<br>
+幂等性：用户对于同一操作发起的一次请求或者多次请求的结果是一致的，不会因为多次点击而产生了副作用。</p>
+
+          </div>
+        </div>
+
+        
+          <div class="next-post">
+            <a class="purple-link" href="https://www.lvtao.net/post/centos8-wireguard/">
+              <h3 class="post-title">
+                下一篇：如何在CentOS 8上设置WireGuard
+              </h3>
+            </a>
+          </div>
+          
+      </div>
+
+      
+
+      <div class="site-footer">
+  <table>
+    <tr><td><a href="https://www.ioncube.com/?xp=TQLLZT"><img src="/media/ioncube.jpg" width="100%"/></a></td></tr>
+    <tr><td><a href="https://app.cloudcone.com/?ref=9519"><img src="/media/cloudcone.gif" width="100%"/></a></td></tr>
+  </table>
+  <div class="slogan"></div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+  Powered by <a href="https://lvtao.net" target="_blank">LVTAO</a> | <a class="rss" href="https://www.lvtao.net/atom.xml" target="_blank">RSS</a>
+</div>
+<script 
+async
+defer
+src="https://ask.lvtao.net/api/application/embed?protocol=https&host=ask.lvtao.net&token=e193b47f92f1b41e">
+</script>
+
+
+    </div>
+    <script type="application/javascript">
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>
